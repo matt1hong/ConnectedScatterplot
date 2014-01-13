@@ -13,8 +13,6 @@ d3.shuffle(steps);
 
 var step = 0;
 
-var drawingMode = true;
-
 var svg, scatterLayer, drawingLayer, lineDrawn;
 
 var studyID = "pretest1";
@@ -73,7 +71,6 @@ function drawConnected() {
 	scatterLayer.style('visibility', 'visible');
 }
 
-var dragged = null;
 var lastPoint = null;
 
 function mousedown() {
@@ -88,17 +85,8 @@ function touchdown() {
 }
 
 function mtDown(mouse) {
-	if (drawingMode) {
-		points.unshift({x: mouse[0]/width, y: mouse[1]/height});
-		lastPoint = {x: mouse[0], y: mouse[1]};
-	} else {
-		var p = {
-			year: points[points.length-1].year+10,
-			value1: xScale.invert(mouse[0]),
-			value2: yScale.invert(mouse[1])
-		}
-		points.push(selected = dragged = p);
-	}
+	points.unshift({x: mouse[0]/width, y: mouse[1]/height});
+	lastPoint = {x: mouse[0], y: mouse[1]};
 	redraw();
 }
 
@@ -116,21 +104,14 @@ function touchmove() {
 }
 
 function mtMove(mouse) {
-	if (drawingMode) {
-		if (lastPoint === null) return;
-		distance = Math.sqrt((mouse[0]-lastPoint.x)*(mouse[0]-lastPoint.x)+(mouse[1]-lastPoint.y)*(mouse[1]-lastPoint.y));
-		if (distance > DISTANCE_THRESHOLD) {
-			points.unshift({x: mouse[0]/width, y: mouse[1]/height});
-			lastPoint.x = mouse[0];
-			lastPoint.y = mouse[1];
-		}
-		redraw();
-	} else {
-		if (!dragged) return;
-		dragged.value1 = xScale.invert(Math.max(0, Math.min(width, mouse[0])));
-		dragged.value2 = yScale.invert(Math.max(0, Math.min(height, mouse[1])));
-		redraw();
+	if (lastPoint === null) return;
+	distance = Math.sqrt((mouse[0]-lastPoint.x)*(mouse[0]-lastPoint.x)+(mouse[1]-lastPoint.y)*(mouse[1]-lastPoint.y));
+	if (distance > DISTANCE_THRESHOLD) {
+		points.unshift({x: mouse[0]/width, y: mouse[1]/height});
+		lastPoint.x = mouse[0];
+		lastPoint.y = mouse[1];
 	}
+	redraw();
 }
 
 function mouseup() {
@@ -145,16 +126,10 @@ function touchup() {
 }
 
 function mtUp(mouse) {
-	if (drawingMode) {
-		points.unshift({x: mouse[0]/width, y: mouse[1]/height});
-		drawingMode = false;
-		lastPoint = null;
-		redraw();
-	} else {
-		if (!dragged) return;
-		mtMove(mouse);
-		dragged = null;
-	}
+	points.unshift({x: mouse[0]/width, y: mouse[1]/height});
+	drawingMode = false;
+	lastPoint = null;
+	redraw();
 }
 
 function redraw() {
