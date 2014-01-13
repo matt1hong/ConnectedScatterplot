@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+	<title>Connected Scatterplot Experiment</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+	<style type="text/css">
+
+		body {
+			width: 1024px;
+			height: 720px;
+		}
+
+		path.line {
+			fill: none;
+			stroke: blue;
+			stroke-width: 1.5px;
+		}
+
+		#drawingarea {
+			float: left;
+			width: 700px;
+			height: 700px;
+			border: 1px solid;
+			margin: 10px;
+		}
+
+		path.drawn {
+			fill: none;
+			stroke: orange;
+			stroke-width: 3px;
+		}
+
+		#nav {
+			float: left;
+			margin: 10px;
+			position: relative;
+			height: 700px;
+			width: 200px;
+		}
+
+		#startbtn, #donebtn {
+			position: absolute;
+			bottom: 0;
+		}
+
+		#infolabel, #restartbtn {
+			width: 190px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+
+		#restartbtn {
+			margin-top: 20px;
+		}
+
+	</style>
+	<script type="text/javascript" src="army.js"></script>
+	<script type="text/javascript" src="drivingsafety.js"></script>
+	<script type="text/javascript" src="helium.js"></script>
+	<script type="text/javascript" src="scorpion.js"></script>
+	<script type="text/javascript" src="yellen.js"></script>
+	<script type="text/javascript" src="d3.v3.min.js"></script>
+	<script type="text/javascript" src="draw.js"></script>
+</head>
+<body>
+	<div id="drawingarea"></div>
+	<div id="nav">
+		<div id="info">
+			<h2>Connected Scatterplot Study</h2>
+			<p>In this study, you will be presented with a number of line drawings that we ask you to reproduce. Each drawing will consist of a single line and represent the comparison of two stock prices over time. Each stock is represented by one axis, with the line connecting the points in temporal order.
+			</p>
+			<p>After having been shown the line for one second, please trace it from memory as closely as you can. When you are finished, click the <em>Done</em> button that appears. When you are ready to go to the next step, click the <em>Next Step</em> button.
+			</p>
+		</div>
+		<h1 id="infolabel" style="visibility:hidden;"><span class="label label-info">Thank You!</span></h1>
+		<button id="startbtn" type="button" class="btn btn-primary btn-lg" onclick="start();">Start Experiment</button>
+		<button id="donebtn" type="button" class="btn btn-success btn-lg" onclick="done();" style="visibility:hidden;">Done</button>
+		<button id="restartbtn" type="button" class="btn btn-danger btn-lg" onclick="restart();" style="visibility:hidden;">Restart</button>
+	</div>
+	
+	<script type="text/javascript">
+		drawSetup();
+	</script>
+</body>
+</html>
