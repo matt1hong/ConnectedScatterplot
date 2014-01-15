@@ -3,9 +3,9 @@ var height = 700;
 
 var points = [];
 
-var datasets = [army, helium, drivingsafety, scorpion, yellen];
+var datasets = [army, helium, drivingsafety, scorpion, yellen, china, steamship, sofa, sofa2];
 
-var datanames = ['army', 'helium', 'drivingsafety', 'scorpion', 'yellen'];
+var datanames = ['army', 'helium', 'drivingsafety', 'scorpion', 'yellen', 'china', 'steamship', 'sofa', 'sofa2'];
 
 var steps = d3.range(datasets.length);
 
