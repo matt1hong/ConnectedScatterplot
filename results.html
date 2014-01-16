@@ -37,6 +37,7 @@
 	
 	<script type="text/javascript">
 		drawSetup();
+		drawingLayer.style('visibility', 'visible');
 
 		d3.select('#datasetselect').selectAll('option').data(datanames).enter()
 			.append('option')
@@ -45,9 +46,20 @@
 
 		var studydata;
 
+		var activedataset = -1;
 
 		function switchDataSet(selectElement) {
-			drawConnected(selectElement.value);
+			activedataset = selectElement.value;
+			drawConnected(activedataset);
+			drawingLayer.selectAll('path').remove();
+			studydata.forEach(function(trial) {
+				if (trial.dataset === datanames[activedataset]) {
+					drawingLayer.append('path')
+						.attr('class', 'drawn')
+						.datum(trial.points)
+						.attr('d', lineDrawn);
+				}
+			});
 		}
 
 		function loadStudyData(selectElement) {
