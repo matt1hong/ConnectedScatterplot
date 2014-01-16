@@ -40,8 +40,8 @@ function drawSetup() {
 	makeResultID();
 }
 
-function drawConnected() {
-	var data = datasets[steps[step]];
+function drawConnected(datasetnum) {
+	var data = datasets[datasetnum];
 
 	var xScale = d3.scale.linear()
 		.range([10, width-10])
@@ -162,7 +162,7 @@ function start() {
 	d3.select('#startbtn').style('visibility', 'hidden');
 	d3.select('#info').style('display', 'none');
 	disconnectMouseEvents();
-	drawConnected();
+	drawConnected(steps[step]);
 	clearDrawing();
 	startTime = new Date().getTime();
 	window.setTimeout(function() {

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+	<title>Connected Scatterplot Results</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="drawstyle.css">
+	<script type="text/javascript" src="army.js"></script>
+	<script type="text/javascript" src="drivingsafety.js"></script>
+	<script type="text/javascript" src="helium.js"></script>
+	<script type="text/javascript" src="scorpion.js"></script>
+	<script type="text/javascript" src="yellen.js"></script>
+	<script type="text/javascript" src="china.js"></script>
+	<script type="text/javascript" src="sofa.js"></script>
+	<script type="text/javascript" src="sofa2.js"></script>
+	<script type="text/javascript" src="steamship.js"></script>
+	<script type="text/javascript" src="d3.v3.min.js"></script>
+	<script type="text/javascript" src="draw.js"></script>
+</head>
+<body>
+	<div id="drawingarea"></div>
+	<div id="nav">
+		<div id="info">
+			<label>Study:</label>
+			<select name="study" id="studyselect" onchange="loadStudyData(this)">
+				<option value="" style="display:none;"></option>
+				<option value="pretest1">pretest1</option>
+			</select><br />
+
+			<label>Data set:</label>
+			<select name="dataset" id="datasetselect" onchange="switchDataSet(this)">
+			</select>
+		</div>
+	</div>
+	
+	<script type="text/javascript">
+		drawSetup();
+
+		d3.select('#datasetselect').selectAll('option').data(datanames).enter()
+			.append('option')
+			.attr('value', function(d, i) { return i; })
+			.text(function(d) { return d; });
+
+		var studydata;
+
+
+		function switchDataSet(selectElement) {
+			drawConnected(selectElement.value);
+		}
+
+		function loadStudyData(selectElement) {
+			d3.json('data/'+selectElement.value+'.json', function(data) {
+				studydata = data;
+			});
+
+		}
+
+	</script>
+</body>
+</html>
