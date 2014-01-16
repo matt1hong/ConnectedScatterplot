@@ -1,0 +1,47 @@
+body {
+	width: 1024px;
+	height: 720px;
+}
+
+path.line {
+	fill: none;
+	stroke: blue;
+	stroke-width: 1.5px;
+}
+
+#drawingarea {
+	float: left;
+	width: 700px;
+	height: 700px;
+	border: 1px solid;
+	margin: 10px;
+}
+
+path.drawn {
+	fill: none;
+	stroke: orange;
+	stroke-width: 3px;
+}
+
+#nav {
+	float: left;
+	margin: 10px;
+	position: relative;
+	height: 700px;
+	width: 200px;
+}
+
+#startbtn, #donebtn {
+	position: absolute;
+	bottom: 0;
+}
+
+#infolabel, #restartbtn {
+	width: 190px;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#restartbtn {
+	margin-top: 20px;
+}
