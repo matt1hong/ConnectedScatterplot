@@ -31,8 +31,10 @@
 			</select><br />
 
 			<label>Data set:</label>
-			<select name="dataset" id="datasetselect" onchange="switchDataSet(this)">
+			<select name="dataset" id="datasetselect" onchange="switchDataSet(this.value)">
 			</select>
+
+			<label><input name="colorlines" id="colorlines" value="colorlines" type="checkbox" onchange="switchDataSet(currentDataSet)" checked> Colorful Lines</input></label>
 		</div>
 	</div>
 	
@@ -49,16 +51,24 @@
 
 		var activedataset = -1;
 
-		function switchDataSet(selectElement) {
-			activedataset = selectElement.value;
+		var lineColor = d3.scale.category20().domain(d3.range(20));
+
+		var currentDataSet = 0;
+
+		function switchDataSet(activedataset) {
+			currentDataSet = activedataset;
 			drawConnected(activedataset);
 			drawingLayer.selectAll('path').remove();
+			var trialNum = 0;
 			studydata.forEach(function(trial) {
 				if (trial.dataset === datanames[activedataset]) {
-					drawingLayer.append('path')
-						.attr('class', 'drawn')
-						.datum(trial.points)
-						.attr('d', lineDrawn);
+					var path = drawingLayer.append('path')
+									.attr('class', 'drawn')
+									.datum(trial.points)
+									.attr('d', lineDrawn);
+						if (d3.select('#colorlines').node().checked)
+							path.style('stroke', lineColor(trialNum));
+					trialNum += 1;
 				}
 			});
 		}
@@ -66,8 +76,8 @@
 		function loadStudyData(selectElement) {
 			d3.json('data/'+selectElement.value+'.json', function(data) {
 				studydata = data;
+				switchDataSet(currentDataSet);
 			});
-
 		}
 
 	</script>
