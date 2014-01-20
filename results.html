@@ -77,6 +77,7 @@
 					var path = drawingLayer.append('path')
 									.attr('class', 'drawn')
 									.datum(trial.points)
+									.attr('marker-end', 'url(#arrow)')
 									.attr('d', lineDrawn);
 						if (d3.select('#colorlines').node().checked)
 							path.style('stroke', lineColor(trialNum));

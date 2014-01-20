@@ -29,6 +29,22 @@ function drawSetup() {
 			.attr('width', width)
 			.attr('height', height);
 
+	// marker triangle from http://www.w3.org/TR/SVG/painting.html#Markers
+	svg.append('defs')
+		.append('marker')
+		.attr('id', 'arrow')
+		.attr('viewBox', '0 0 10 6')
+		.attr('refX', 10)
+		.attr('refY', 3)
+		.attr('markerUnits', 'strokeWidth')
+		.attr('markerWidth', 4)
+		.attr('markerHeight', 2)
+		.attr('orient', 'auto')
+		.attr('stroke', 'none')
+		.attr('fill', 'black')
+		.append('polygon')
+			.attr('points', '0,0 10,3 0,6');
+
 	scatterLayer = svg.append('g').style('visibility', 'hidden');;
 
 	drawingLayer = svg.append('g').style('visibility', 'hidden');
