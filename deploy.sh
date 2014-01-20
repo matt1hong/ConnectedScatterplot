@@ -1,8 +1,8 @@
-#!/usr/bin/bash
+#!/bin/bash
 
-if [-e data/pullflag]
+if [ -e "data/pullflag" ]
 then
-	git pull
+	git pull > /dev/null
 	rm -f data/pullflag
 fi
 
