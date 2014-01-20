@@ -34,7 +34,17 @@
 			<select name="dataset" id="datasetselect" onchange="switchDataSet(this.value)">
 			</select><br />
 
-			<label><input name="colorlines" id="colorlines" value="colorlines" type="checkbox" onchange="switchDataSet(currentDataSet)" checked> Colorful Lines</input></label>
+			<label><input name="colorlines" id="colorlines" value="colorlines" type="checkbox" onchange="switchDataSet(currentDataSet)" checked> Colorful Lines</input></label><br />
+
+			<label>Ignore</label>
+			<select name="ignore" id="ignore" onchange="switchDataSet(currentDataSet)">
+				<option value="0">Nothing</option>
+				<option value="1">First trial</option>
+				<option value="2">First 2 trials</option>
+				<option value="3">First 3 trials</option>
+				<option value="4">First 4 trials</option>
+				<option value="5">First 5 trials</option>
+			</select>
 		</div>
 	</div>
 	
@@ -60,8 +70,10 @@
 			drawConnected(activedataset);
 			drawingLayer.selectAll('path').remove();
 			var trialNum = 0;
+			var ignore = +d3.select('#ignore').node().value;
 			studydata.forEach(function(trial) {
-				if (trial.dataset === datanames[activedataset]) {
+				if (trial.dataset === datanames[activedataset]
+					&& trial.step > ignore) {
 					var path = drawingLayer.append('path')
 									.attr('class', 'drawn')
 									.datum(trial.points)
