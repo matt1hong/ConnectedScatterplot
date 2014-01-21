@@ -208,26 +208,6 @@
 				.append('polygon')
 					.attr('points', '0,0 10,3 0,6');
 
-			// svgConnected.selectAll('line.grid1')
-			// 	.data(d3.range(-width, width, 50))
-			// 	.enter().append('line')
-			// 		.attr('class', 'grid1')
-			// 		.attr('x1', function(d) { return d; })
-			// 		.attr('y1', height)
-			// 		.attr('x2', function(d) { return d+height; })
-			// 		.attr('y2', 0);
-
-			// svgConnected.selectAll('line.grid2')
-			// 	.data(d3.range(-width, width, 50))
-			// 	.enter().append('line')
-			// 		.attr('class', 'grid2')
-			// 		.attr('x1', function(d) { return d; })
-			// 		.attr('y1', 0)
-			// 		.attr('x2', function(d) { return d+height; })
-			// 		.attr('y2', height);
-
-
-
 			svgConnected.append('line')
 				.attr('x1', 0)
 				.attr('x2', width)
@@ -244,10 +224,7 @@
 
 			svgConnected.append('rect')
 			    .attr('width', width)
-			    .attr('height', height)
-			    .on('mousedown', mousedown);
-
-			// refreshLines();
+			    .attr('height', height);
 
 			svgDualAxes.append('path')
 				.datum(points)
@@ -323,17 +300,6 @@
 		function redraw() {
 			redrawConnected();
 			redrawDualAxes();
-		}
-
-		function mousedown() {
-			var mouse = d3.mouse(svgConnected.node());
-			var p = {
-				year: points[points.length-1].year+10,
-				value1: xScale.invert(mouse[0]),
-				value2: yScale.invert(mouse[1])
-			}
-			points.push(selected = dragged = p);
-			redraw();
 		}
 
 		function mousemove() {
