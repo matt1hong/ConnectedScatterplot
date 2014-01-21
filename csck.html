@@ -87,7 +87,8 @@
 
 		var points = drivingsafety;
 
-		var arrows = true;
+		var showArrows = true;
+		var showDots = true;
 
 		var timeScale = d3.scale.linear()
 			.range([5, width-5]);
@@ -259,8 +260,8 @@
 			svgConnected.append('path')
 				.datum(points)
 				.attr('class', 'line')
-				.attr('marker-mid', arrows?'url(#arrow)':'none')
-				.attr('marker-end', arrows?'url(#arrow)':'none');
+				.attr('marker-mid', showArrows?'url(#arrow)':'none')
+				.attr('marker-end', showArrows?'url(#arrow)':'none');
 
 			d3.select(window)
 			    .on('mousemove', mousemove)
@@ -285,23 +286,28 @@
 		function redrawConnected() {
 			svgConnected.select('path').attr('d', lineConnected);
 
-			var circle = svgConnected.selectAll('circle')
-				.data(points);
+			if (showDots) {
 
-			circle.enter().append('circle')
-				.attr('r', 1e-6)
-				.on('mousedown', function(d) { selected = dragged = d; redraw(); })
-			.transition()
-				.duration(750)
-				.ease('elastic')
-				.attr('r', 3);
+				var circle = svgConnected.selectAll('circle')
+					.data(points);
 
-			circle
-				.classed('selected', function(d) { return d === selected; })
-				.attr('cx', function(d) { return xScale(d.value1); })
-				.attr('cy', function(d) { return yScale(d.value2); });
+				circle.enter().append('circle')
+					.attr('r', 1e-6)
+					.on('mousedown', function(d) { selected = dragged = d; redraw(); })
+				.transition()
+					.duration(750)
+					.ease('elastic')
+					.attr('r', 3);
 
-			circle.exit().remove();
+				circle
+					.classed('selected', function(d) { return d === selected; })
+					.attr('cx', function(d) { return xScale(d.value1); })
+					.attr('cy', function(d) { return yScale(d.value2); });
+
+				circle.exit().remove();
+			} else {
+				svgConnected.selectAll('circle').remove();
+			}
 
 			if (d3.event) {
 				d3.event.preventDefault();
@@ -373,8 +379,13 @@
 		}
 
 		function toggleArrows(checkbox) {
-			arrows = checkbox.checked;
+			showArrows = checkbox.checked;
 			refreshLines();
+		}
+
+		function toggleDots(checkbox) {
+			showDots = checkbox.checked;
+			redrawConnected();
 		}
 
 		function refreshLines() {
@@ -387,8 +398,8 @@
 
 			svgConnected.select('path.line')
 				.datum(points)
-				.attr('marker-mid', arrows?'url(#arrow)':'none')
-				.attr('marker-end', arrows?'url(#arrow)':'none');
+				.attr('marker-mid', showArrows?'url(#arrow)':'none')
+				.attr('marker-end', showArrows?'url(#arrow)':'none');
 
 			redraw();
 		}
@@ -497,7 +508,8 @@
   </div>
 <div style="float:left;">
 	<label><input type="checkbox" name="smooth" value="smooth" onclick="toggleSmooth(this);" checked /> Smooth</label>&nbsp;
-	<label><input type="checkbox" name="arrows" value="smooth" onclick="toggleArrows(this);" checked /> Arrows</label>
+	<label><input type="checkbox" name="arrows" value="arrows" onclick="toggleArrows(this);" checked /> Arrows</label>&nbsp;
+	<label><input type="checkbox" name="dots" value="dots" onclick="toggleDots(this);" checked /> Dots</label>
 </div>
 <div style="float:right;">
 	<button type="button" onclick="flipH();">Flip H</button>&nbsp;
