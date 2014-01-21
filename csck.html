@@ -87,7 +87,7 @@
 
 		var points = drivingsafety;
 
-		var showArrows = true;
+		var showArrows = false;
 		var showDots = true;
 
 		var timeScale = d3.scale.linear()
@@ -99,8 +99,8 @@
 		var yScale = d3.scale.linear()
 			.range([height-10, 10]);
 
-		var dragged = null,
-		    selected = points[0];
+		var draggedIndex = -1,
+		    selectedIndex = -1;
 
 		var lineConnected = d3.svg.line()
 		    .x(function(d) { return xScale(d.value1); })
@@ -279,10 +279,10 @@
 
 					circle.enter().append('circle')
 						.attr('r', 3)
-						.on('mousedown', function(d) { selected = dragged = d; redraw(false); });
+						.on('mousedown', function(d, i) { selectedIndex = draggedIndex = i; redraw(false); });
 
 					circle
-						.classed('selected', function(d) { return d === selected; })
+						.classed('selected', function(d, i) { return i === selectedIndex; })
 						.attr('cx', function(d) { return xScale(d.value1); })
 						.attr('cy', function(d) { return yScale(d.value2); });
 
@@ -293,6 +293,7 @@
 			} else {
 				svgConnected.selectAll('circle')
 					.data(points)
+					.classed('selected', function(d, i) { return i === selectedIndex; })
 					.attr('cx', function(d) { return xScale(d.value1); })
 					.attr('cy', function(d) { return yScale(d.value2); });
 			}
@@ -314,14 +315,12 @@
 					blueCircles.enter().append('circle')
 						.attr('r', 3)
 						.attr('class', 'line1')
-						.on('mousedown', function(d) { selected = dragged = d; redraw(false); });
+						.on('mousedown', function(d, i) { selectedIndex = draggedIndex = i; redraw(false); });
 
 					blueCircles
-						.classed('selected', function(d) { return d === selected; })
+						.classed('selected', function(d, i) { return i === selectedIndex; })
 						.attr('cx', function(d) { return timeScale(d.date); })
 						.attr('cy', function(d) { return height-xScale(d.value1); });
-
-					blueCircles.exit().remove();
 
 					greenCircles = svgDualAxes.selectAll('circle.line2')
 						.data(points);
@@ -329,14 +328,12 @@
 					greenCircles.enter().append('circle')
 						.attr('r', 3)
 						.attr('class', 'line2')
-						.on('mousedown', function(d) { selected = dragged = d; redraw(false); });
+						.on('mousedown', function(d, i) { selectedIndex = draggedIndex = i; redraw(false); });
 
 					greenCircles
-						.classed('selected', function(d) { return d === selected; })
+						.classed('selected', function(d, i) { return i === selectedIndex; })
 						.attr('cx', function(d) { return timeScale(d.date); })
 						.attr('cy', function(d) { return yScale(d.value2); });
-
-					greenCircles.exit().remove();
 				} else {
 					blueCircles.remove();
 					greenCircles.remove();
@@ -344,9 +341,11 @@
 			} else {
 				blueCircles
 					.data(points)
+					.classed('selected', function(d, i) { return i === selectedIndex; })
 					.attr('cy', function(d) { return height-xScale(d.value1); });
 				greenCircles
 					.data(points)
+					.classed('selected', function(d, i) { return i === selectedIndex; })
 					.attr('cy', function(d) { return yScale(d.value2); });
 			}
 		}
@@ -357,17 +356,17 @@
 		}
 
 		function mousemove() {
-			if (!dragged) return;
+			if (draggedIndex < 0) return;
 			var m = d3.mouse(svgConnected.node());
-			dragged.value1 = xScale.invert(Math.max(0, Math.min(width, m[0])));
-			dragged.value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
+			points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, m[0])));
+			points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 			redraw(false);
 		}
 
 		function mouseup() {
-			if (!dragged) return;
+			if (draggedIndex < 0) return;
 			mousemove();
-			dragged = null;
+			draggedIndex = -1;
 		}
 
 		function toggleSmooth(checkbox) {
@@ -514,7 +513,7 @@
   </div>
 <div style="float:left;">
 	<label><input type="checkbox" name="smooth" value="smooth" onclick="toggleSmooth(this);" checked /> Smooth</label>&nbsp;
-	<label><input type="checkbox" name="arrows" value="arrows" onclick="toggleArrows(this);" checked /> Arrows</label>&nbsp;
+	<label><input type="checkbox" name="arrows" value="arrows" onclick="toggleArrows(this);" /> Arrows</label>&nbsp;
 	<label><input type="checkbox" name="dots" value="dots" onclick="toggleDots(this);" checked /> Dots</label>
 </div>
 <div style="float:right;">
