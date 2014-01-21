@@ -33,17 +33,17 @@
 			stroke-width: 1.5px;
 		}
 
+		circle {
+			fill: white;
+			cursor: move;
+		}
+
 		.line1 {
 			stroke: blue;
 		}
 
 		.line2 {
 			stroke: green;
-		}
-
-		circle {
-			fill: white;
-			cursor: move;
 		}
 
 		.selected {
@@ -175,17 +175,33 @@
 		var svgConnected;
 		var svgDualAxes;
 
+		var blueCircles;
+		var greenCircles;
+
 		function initialSetup() {
 
 			makeDataSets();
 
 			scaleScales();
 
+			// Dual-Axes Line Chart
+
 			svgDualAxes = d3.select('#linechart').append('svg')
 				.attr('width', width)
 				.attr('height', height)
 				.attr('tabindex', 1);
 
+			svgDualAxes.append('path')
+				.datum(points)
+				.attr('class', 'line line1');
+
+			svgDualAxes.append('path')
+				.datum(points)
+				.attr('class', 'line line2');
+
+			redrawDualAxes(true);
+
+			// Connected Scatterplot
 
 			svgConnected = d3.select('#connectedscatter').append('svg')
 			    .attr('width', width)
@@ -226,14 +242,6 @@
 			    .attr('width', width)
 			    .attr('height', height);
 
-			svgDualAxes.append('path')
-				.datum(points)
-				.attr('class', 'line line1');
-
-			svgDualAxes.append('path')
-				.datum(points)
-				.attr('class', 'line line2');
-
 			svgConnected.append('path')
 				.datum(points)
 				.attr('class', 'line')
@@ -242,12 +250,11 @@
 
 			d3.select(window)
 			    .on('mousemove', mousemove)
-			    .on('mouseup', mouseup)
-			    .on('keydown', keydown);
+			    .on('mouseup', mouseup);
 
 			d3.select('#dataset').on('change', loadData);
 
-			redraw();
+			redraw(true);
 		}
 
 		function scaleScales() {
@@ -260,30 +267,34 @@
 			yScale.domain(d3.extent(points, function(d) { return d.value2; }));
 		}
 
-		function redrawConnected() {
+		function redrawConnected(recreate) {
 			svgConnected.select('path').attr('d', lineConnected);
 
-			if (showDots) {
+			if (recreate) {
 
-				var circle = svgConnected.selectAll('circle')
-					.data(points);
+				if (showDots) {
 
-				circle.enter().append('circle')
-					.attr('r', 1e-6)
-					.on('mousedown', function(d) { selected = dragged = d; redraw(); })
-				.transition()
-					.duration(750)
-					.ease('elastic')
-					.attr('r', 3);
+					var circle = svgConnected.selectAll('circle')
+						.data(points);
 
-				circle
-					.classed('selected', function(d) { return d === selected; })
+					circle.enter().append('circle')
+						.attr('r', 3)
+						.on('mousedown', function(d) { selected = dragged = d; redraw(false); });
+
+					circle
+						.classed('selected', function(d) { return d === selected; })
+						.attr('cx', function(d) { return xScale(d.value1); })
+						.attr('cy', function(d) { return yScale(d.value2); });
+
+					circle.exit().remove();
+				} else {
+					svgConnected.selectAll('circle').remove();
+				}
+			} else {
+				svgConnected.selectAll('circle')
+					.data(points)
 					.attr('cx', function(d) { return xScale(d.value1); })
 					.attr('cy', function(d) { return yScale(d.value2); });
-
-				circle.exit().remove();
-			} else {
-				svgConnected.selectAll('circle').remove();
 			}
 
 			if (d3.event) {
@@ -292,14 +303,57 @@
 			}
 		}
 
-		function redrawDualAxes() {
+		function redrawDualAxes(recreate) {
 			svgDualAxes.select('path.line1').attr('d', lineDA1);
 			svgDualAxes.select('path.line2').attr('d', lineDA2);
+			if (recreate) {
+				if (showDots) {
+					blueCircles = svgDualAxes.selectAll('circle.line1')
+						.data(points);
+
+					blueCircles.enter().append('circle')
+						.attr('r', 3)
+						.attr('class', 'line1')
+						.on('mousedown', function(d) { selected = dragged = d; redraw(false); });
+
+					blueCircles
+						.classed('selected', function(d) { return d === selected; })
+						.attr('cx', function(d) { return timeScale(d.date); })
+						.attr('cy', function(d) { return height-xScale(d.value1); });
+
+					blueCircles.exit().remove();
+
+					greenCircles = svgDualAxes.selectAll('circle.line2')
+						.data(points);
+
+					greenCircles.enter().append('circle')
+						.attr('r', 3)
+						.attr('class', 'line2')
+						.on('mousedown', function(d) { selected = dragged = d; redraw(false); });
+
+					greenCircles
+						.classed('selected', function(d) { return d === selected; })
+						.attr('cx', function(d) { return timeScale(d.date); })
+						.attr('cy', function(d) { return yScale(d.value2); });
+
+					greenCircles.exit().remove();
+				} else {
+					blueCircles.remove();
+					greenCircles.remove();
+				}
+			} else {
+				blueCircles
+					.data(points)
+					.attr('cy', function(d) { return height-xScale(d.value1); });
+				greenCircles
+					.data(points)
+					.attr('cy', function(d) { return yScale(d.value2); });
+			}
 		}
 
-		function redraw() {
-			redrawConnected();
-			redrawDualAxes();
+		function redraw(recreate) {
+			redrawConnected(recreate);
+			redrawDualAxes(recreate);
 		}
 
 		function mousemove() {
@@ -307,27 +361,13 @@
 			var m = d3.mouse(svgConnected.node());
 			dragged.value1 = xScale.invert(Math.max(0, Math.min(width, m[0])));
 			dragged.value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
-			redraw();
+			redraw(false);
 		}
 
 		function mouseup() {
 			if (!dragged) return;
 			mousemove();
 			dragged = null;
-		}
-
-		function keydown() {
-			if (!selected) return;
-			switch (d3.event.keyCode) {
-				case 8: // backspace
-				case 46: { // delete
-					var i = points.indexOf(selected);
-					points.splice(i, 1);
-					selected = points.length ? points[i > 0 ? i - 1 : 0] : null;
-					redraw();
-					break;
-				}
-			}
 		}
 
 		function toggleSmooth(checkbox) {
@@ -341,17 +381,17 @@
 				lineDA2.interpolate('linear');
 			}
 
-			redraw();
+			redraw(false);
 		}
 
 		function toggleArrows(checkbox) {
 			showArrows = checkbox.checked;
-			refreshLines();
+			refreshLines(true);
 		}
 
 		function toggleDots(checkbox) {
 			showDots = checkbox.checked;
-			redrawConnected();
+			redraw(true);
 		}
 
 		function refreshLines() {
@@ -367,7 +407,7 @@
 				.attr('marker-mid', showArrows?'url(#arrow)':'none')
 				.attr('marker-end', showArrows?'url(#arrow)':'none');
 
-			redraw();
+			redraw(false);
 		}
 
 		function flipH() {
