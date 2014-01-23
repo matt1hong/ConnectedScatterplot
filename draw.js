@@ -165,13 +165,15 @@ function clearDrawing() {
 function connectMouseEvents() {
 	svg.on('mousedown', mousedown).on('touchstart', touchdown)
 		.on('mousemove', mousemove).on('touchmove', touchmove)
-		.on('mouseup', mouseup).on('touchend', touchup);
+		.on('mouseup', mouseup).on('touchend', touchup)
+		.on('mouseleave', mouseup);
 }
 
 function disconnectMouseEvents() {
 	svg.on('mousedown', null).on('touchstart', null)
 		.on('mousemove', null).on('touchmove', null)
-		.on('mouseup', null).on('touchend', null);
+		.on('mouseup', null).on('touchend', null)
+		.on('mouseleave', null);
 }
 
 function start() {
