@@ -16,7 +16,7 @@ var step = 0;
 
 var svg, scatterLayer, drawingLayer, lineDrawn;
 
-var studyID = "study1";
+var studyID = "study2";
 
 var resultID;
 
