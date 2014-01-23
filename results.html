@@ -11,6 +11,10 @@
 		path.line {
 			stroke: black;
 		}
+
+		path.gray {
+			stroke: lightgray;
+		}
 	</style>
 	<script type="text/javascript" src="datasets/army.js"></script>
 	<script type="text/javascript" src="datasets/drivingsafety.js"></script>
@@ -82,9 +86,15 @@
 									.attr('class', 'drawn')
 									.datum(trial.points)
 									.attr('marker-end', 'url(#arrow)')
-									.attr('d', lineDrawn);
-						if (d3.select('#colorlines').node().checked)
-							path.style('stroke', lineColor(trialNum));
+									.attr('d', lineDrawn)
+									.on('mouseover', mouseOver)
+									.on('mouseout', mouseOut);
+						if (d3.select('#colorlines').node().checked) {
+							path.style('stroke', lineColor(trialNum))
+								.attr('base-color', lineColor(trialNum));
+						} else {
+							path.attr('base-color', 'orange');
+						}
 					trialNum += 1;
 				}
 			});
@@ -94,6 +104,19 @@
 			d3.json('data/'+dataset+'.json', function(data) {
 				studydata = data;
 				switchDataSet(currentDataSet);
+			});
+		}
+
+		function mouseOver(path) {
+			var d3this = d3.select(this);
+			drawingLayer.selectAll('path.drawn').style('stroke', function (d) {
+				return (d === path)?d3this.attr('base-color'):'lightgray';
+			});
+		}
+
+		function mouseOut(path) {
+			drawingLayer.selectAll('path.drawn').style('stroke', function (d) {
+				return d3.select(this).attr('base-color');
 			});
 		}
 
