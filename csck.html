@@ -13,6 +13,8 @@
 	<script type="text/javascript" src="datasets/sofa.js"></script>
 	<script type="text/javascript" src="datasets/sofa2.js"></script>
 	<script type="text/javascript" src="datasets/china.js"></script>
+	<script type="text/javascript" src="datasets/senate.js"></script>
+	<script type="text/javascript" src="datasets/house.js"></script>
 	<style>
 
 		body {
@@ -69,6 +71,7 @@
 
 		line.grid1, line.grid2, line.grid {
 			stroke: lightgray;
+			stroke-width: 1px;
 		}
 
 	</style>
@@ -228,6 +231,25 @@
 				.attr('fill', 'purple')
 				.append('polygon')
 					.attr('points', '0,0 10,3 0,6');
+
+			svgConnected.selectAll('line.grid1')
+				.data(d3.range(-width, width, 50))
+				.enter().append('line')
+					.attr('class', 'grid1')
+					.attr('x1', function(d) { return d; })
+					.attr('y1', height)
+					.attr('x2', function(d) { return d+height; })
+					.attr('y2', 0);
+
+			svgConnected.selectAll('line.grid2')
+				.data(d3.range(-width, width, 50))
+				.enter().append('line')
+					.attr('class', 'grid2')
+					.attr('x1', function(d) { return d; })
+					.attr('y1', 0)
+					.attr('x2', function(d) { return d+height; })
+					.attr('y2', height);
+
 
 			svgConnected.append('line')
 				.attr('x1', 0)
@@ -471,6 +493,7 @@
 			flipV();
 		}
 
+		// Yuck, this really needs to go away and be replaced with something sane
 		function loadData() {
 			switch(this.value) {
 				case 'army':
@@ -502,6 +525,12 @@
 					break;
 				case 'china':
 					points = china;
+					break;
+				case 'house':
+					points = house;
+					break;
+				case 'senate':
+					points = senate;
 					break;
 				case 'parallel':
 					points = parallelCurves;
@@ -562,6 +591,8 @@
 		<option value="sofa">Sofa vs. Couch</option>
 		<option value="sofa2">Sofa vs. Couch v.2</option>
 		<option value="china">China vs. Japan</option>
+		<option value="house">Congress - House</option>
+		<option value="senate">Congress - Senate</option>
 		<option value="parallel">Parallel Curves</option>
 		<option value="offset">Offset Curves</option>
 		<option value="outofphase">Out of Phase Curves</option>
