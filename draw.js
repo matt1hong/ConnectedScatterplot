@@ -1,5 +1,6 @@
 var width = 700;
 var height = 700;
+var padding = 50; // prevent the line from coming too close to the edges
 
 var points = [];
 
@@ -60,11 +61,11 @@ function drawConnected(datasetnum) {
 	var data = datasets[datasetnum];
 
 	var xScale = d3.scale.linear()
-		.range([10, width-10])
+		.range([padding, width-padding])
 		.domain(d3.extent(data, function(d) { return d.value1; }));
 
 	var yScale = d3.scale.linear()
-		.range([height-10, 10])
+		.range([height-padding, padding])
 		.domain(d3.extent(data, function(d) { return d.value2; }));
 
 	var lineConnected = d3.svg.line()
