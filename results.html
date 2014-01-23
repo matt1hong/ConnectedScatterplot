@@ -107,14 +107,13 @@
 			});
 		}
 
-		function mouseOver(path) {
-			var d3this = d3.select(this);
+		function mouseOver(datum) {
 			drawingLayer.selectAll('path.drawn').style('stroke', function (d) {
-				return (d === path)?d3this.attr('base-color'):'lightgray';
+				return (datum === d)?d3.select(this).attr('base-color'):'lightgray';
 			});
 		}
 
-		function mouseOut(path) {
+		function mouseOut(datum) {
 			drawingLayer.selectAll('path.drawn').style('stroke', function (d) {
 				return d3.select(this).attr('base-color');
 			});
