@@ -24,13 +24,12 @@
 	<script type="text/javascript" src="d3.v3.min.js"></script>
 	<script type="text/javascript" src="draw.js"></script>
 </head>
-<body>
+<body onload="loadStudyData('study2')">
 	<div id="drawingarea"></div>
 	<div id="nav">
 		<div id="info">
 			<label>Study:</label>
-			<select name="study" id="studyselect" onchange="loadStudyData(this)" onload="loadStudyData(this)">
-				<option value="" style="display:none;"></option>
+			<select name="study" id="studyselect" onchange="loadStudyData(this.value)">
 				<option value="pretest1">pretest1</option>
 				<option value="study2" selected="selected">study2</option>
 			</select><br />
@@ -91,8 +90,8 @@
 			});
 		}
 
-		function loadStudyData(selectElement) {
-			d3.json('data/'+selectElement.value+'.json', function(data) {
+		function loadStudyData(dataset) {
+			d3.json('data/'+dataset+'.json', function(data) {
 				studydata = data;
 				switchDataSet(currentDataSet);
 			});
