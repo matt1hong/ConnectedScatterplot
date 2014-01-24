@@ -3,18 +3,6 @@
 <html>
 <head>
 	<title>Connected Scatterplot Construction Kit</title>
-	<script type="text/javascript" src="datasets/army.js"></script>
-	<script type="text/javascript" src="datasets/drivingsafety.js"></script>
-	<script type="text/javascript" src="datasets/helium.js"></script>
-	<script type="text/javascript" src="datasets/scorpion.js"></script>
-	<script type="text/javascript" src="datasets/yellen.js"></script>
-	<script type="text/javascript" src="datasets/threepoints.js"></script>
-	<script type="text/javascript" src="datasets/steamship.js"></script>
-	<script type="text/javascript" src="datasets/sofa.js"></script>
-	<script type="text/javascript" src="datasets/sofa2.js"></script>
-	<script type="text/javascript" src="datasets/china.js"></script>
-	<script type="text/javascript" src="datasets/senate.js"></script>
-	<script type="text/javascript" src="datasets/house.js"></script>
 	<style>
 
 		body {
@@ -81,17 +69,18 @@
 		var width = 600,
 		    height = 600;
 
-		// var points = d3.range(1960, 2000, 10).map(function(i) {
-		// 	return { date: i,
-		// 			 value1: 50 + Math.random() * (height - 100),
-		// 			 value2: 50 + Math.random() * (height - 100)
-		// 			};
-		// });
-
-		var points = drivingsafety;
+		var points;
 
 		var showArrows = false;
 		var showDots = true;
+
+		var svgConnected;
+		var svgDualAxes;
+
+		var blueCircles;
+		var greenCircles;
+
+		var datasets;
 
 		var timeScale = d3.scale.linear()
 			.range([5, width-5]);
@@ -122,13 +111,14 @@
 			.interpolate('cardinal');
 
 
-		var parallelCurves = [];
-		var offsetCurves = [];
-		var outOfPhaseCurves = [];
-		var freqCurves = [];
-		var spiral = [];
-
 		function makeDataSets() {
+
+			var parallelCurves = [];
+			var offsetCurves = [];
+			var outOfPhaseCurves = [];
+			var freqCurves = [];
+			var spiral = [];
+
 			var d = new Date();
 			for (var i = 0; i < 13; i += .3) {
 				var p = {
@@ -173,18 +163,38 @@
 
 				d = new Date(d.getTime()+24*3600*1000);
 			}
+
+			datasets.push({"name":"parallel", "display":"Parallel Curves", "data": parallelCurves});
+			datasets.push({"name":"offset", "display":"Offset Curves", "data": offsetCurves});
+			datasets.push({"name":"outofphase", "display":"Out of Phase Curves", "data": outOfPhaseCurves});
+			datasets.push({"name":"spiral", "display":"Spiral", "data": spiral});
+			datasets.push({"name":"frequency", "display":"Different Frequency", "data": freqCurves});
 		}
 
 
-		var svgConnected;
-		var svgDualAxes;
+		function initialSetup(datasetinfo) {
 
-		var blueCircles;
-		var greenCircles;
+			datasets = datasetinfo;
 
-		function initialSetup() {
+			datasets.forEach(function(dataset) {
+				d3.json('datasets/'+dataset.name+'.json', function (data) {
+					dataset.data = data;
+				});
+			});
 
 			makeDataSets();
+
+
+			d3.select('#dataset').selectAll('option')
+				.data(datasets)
+				.enter().append('option')
+					.attr('value', function(d, i) { return i; })
+					.attr('class', function(d) { return 'data-'+d.name; })
+					.text(function(d) { return d.display; });
+
+			points = datasets[datasets.length-1].data;
+
+			d3.select('option.data-'+datasets[datasets.length-1].name).attr('selected', true);
 
 			scaleScales();
 
@@ -278,8 +288,6 @@
 			svgConnected
 			    .on('mousemove', mousemoveCS)
 			    .on('mouseup', mouseup);
-
-			d3.select('#dataset').on('change', loadData);
 
 			redraw(true);
 		}
@@ -493,64 +501,8 @@
 			flipV();
 		}
 
-		// Yuck, this really needs to go away and be replaced with something sane
-		function loadData() {
-			switch(this.value) {
-				case 'army':
-					points = army;
-					break;
-				case 'drivingsafety':
-					points = drivingsafety;
-					break;
-				case 'helium':
-					points = helium;
-					break;
-				case 'random':
-					// regenerate random numbers
-					break;
-				case 'scorpion':
-					points = scorpion;
-					break;
-				case 'yellen':
-					points = yellen;
-					break;
-				case 'steamship':
-					points = steamship;
-					break;
-				case 'sofa':
-					points = sofa;
-					break;
-				case 'sofa2':
-					points = sofa2;
-					break;
-				case 'china':
-					points = china;
-					break;
-				case 'house':
-					points = house;
-					break;
-				case 'senate':
-					points = senate;
-					break;
-				case 'parallel':
-					points = parallelCurves;
-					break;
-				case 'offset':
-					points = offsetCurves;
-					break;
-				case 'outofphase':
-					points = outOfPhaseCurves;
-					break;
-				case 'spiral':
-					points = spiral;
-					break;
-				case 'frequency':
-					points = freqCurves;
-					break;
-				case 'threepoints':
-					points = threepoints;
-					break;
-			}
+		function loadData(index) {
+			points = datasets[index].data;
 
 			scaleScales();
 
@@ -581,31 +533,16 @@
 
 <form>
 	<label for="dataset">Dataset:</label>
-	<select id="dataset">
-		<option value="army">Army</option>
-		<option value="drivingsafety" selected>Driving Safety</option>
-		<option value="helium">Helium</option>
-		<option value="scorpion">Unemployment/Scorpion</option>
-		<option value="yellen">Yellen (cropped)</option>
-		<option value="steamship">Steamship</option>
-		<option value="sofa">Sofa vs. Couch</option>
-		<option value="sofa2">Sofa vs. Couch v.2</option>
-		<option value="china">China vs. Japan</option>
-		<option value="house">Congress - House</option>
-		<option value="senate">Congress - Senate</option>
-		<option value="parallel">Parallel Curves</option>
-		<option value="offset">Offset Curves</option>
-		<option value="outofphase">Out of Phase Curves</option>
-		<option value="spiral">Spiral</option>
-		<option value="frequency">Different Frequency</option>
-		<option value="threepoints">Three Points</option>
+	<select id="dataset" onchange="loadData(+this.value)">
 	</select>
 </form>
 
 <!-- Based on <a href="http://bl.ocks.org/mbostock/4342190">Mike Bostock's Spline Editor example</a>. -->
 
 <script type="text/javascript">
-	initialSetup();
+	d3.json('datasets.json', function (datasetinfo) {
+		initialSetup(datasetinfo);
+	});
 </script>
 </body>
 </html>
