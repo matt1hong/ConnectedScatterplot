@@ -104,10 +104,10 @@ function touchdown() {
 }
 
 function mtDown(mouse) {
-  // prevent weirdness
-  if (isMouseDown)
-    return;
-  isMouseDown = true;
+	// prevent weirdness
+	if (isMouseDown)
+		return;
+	isMouseDown = true;
 
 	points.unshift({x: mouse[0]/width, y: mouse[1]/height});
 	lastPoint = {x: mouse[0], y: mouse[1]};
@@ -128,10 +128,10 @@ function touchmove() {
 }
 
 function mtMove(mouse) {
-  // if mouse isn't down, do nothing
-  if (! isMouseDown)
-    return;
-  if (lastPoint === null) return;
+	// if mouse isn't down, do nothing
+	if (! isMouseDown)
+		return;
+	if (lastPoint === null) return;
 
 	distance = Math.sqrt((mouse[0]-lastPoint.x)*(mouse[0]-lastPoint.x)+(mouse[1]-lastPoint.y)*(mouse[1]-lastPoint.y));
 	if (distance > DISTANCE_THRESHOLD) {
@@ -154,10 +154,10 @@ function touchup() {
 }
 
 function mtUp(mouse) {
-  // prevent weirdness
-  if (! isMouseDown)
-    return;
-  isMouseDown = false;
+	// prevent weirdness
+	if (!isMouseDown)
+		return;
+	isMouseDown = false;
 
 	points.unshift({x: mouse[0]/width, y: mouse[1]/height});
 	lastPoint = null;
