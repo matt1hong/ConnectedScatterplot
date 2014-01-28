@@ -434,14 +434,50 @@ function rotateCCW() {
 }
 
 function loadData(index) {
-	points = datasets[index].data;
+  points = datasets[index].data;
+  afterUpdatePoints();
+}
 
+function afterUpdatePoints() {
 	scaleScales();
 
 	$('#slider').slider('value', 0);
 	sliderValue = 0;
 	$('#slider').slider('option', 'max', points.length);
 
-
 	refreshLines(true);
+}
+
+// add a point in between each in the current dataset
+function addSamples() {
+  // linearly interpolate a pair of values
+  function lerp(a, b, proportion) { return a + (b-a)*proportion; }
+  function lerpDate(a, b, proportion) { return Math.min(a,b) + (Math.abs(a-b)*proportion); }
+  // interpolate a pair of points
+  function interpolatePair(a, b, proportion) {
+    return {
+      date: lerpDate(a.date, b.date, proportion),
+      value1: lerp(a.value1, b.value1, proportion),
+      value2: lerp(a.value2, b.value2, proportion)
+    }
+  }
+
+  // make the new samples
+  var steps = 2;
+  var newSamples = []
+  for (var p = 1; p < points.length; p++) {
+    for (var s = 1; s <= steps; s++) {
+      var proportion = s / (steps+1);
+      newSamples.push(interpolatePair(points[p-1], points[p], proportion));
+    }
+  }
+
+  // combine, sort, and update
+  points = points.concat(newSamples);
+  points = points.sort(function(a,b){
+    a = new Date(a.date);
+    b = new Date(b.date);
+    return a<b?-1:a>b?1:0;
+  });
+  afterUpdatePoints();
 }
