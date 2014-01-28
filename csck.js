@@ -58,28 +58,28 @@ function makeDataSets() {
 			value1: Math.sin(i),
 			value2: Math.sin(i)
 		}
-		parallelCurves.unshift(p);
+		parallelCurves.push(p);
 
 		p = {
 			date: d,
 			value1: Math.sin(i),
 			value2: Math.sin(i+1)
 		}
-		offsetCurves.unshift(p);
+		offsetCurves.push(p);
 
 		p = {
 			date: d,
 			value1: Math.sin(i),
 			value2: Math.cos(i)
 		}
-		outOfPhaseCurves.unshift(p);
+		outOfPhaseCurves.push(p);
 
 		p = {
 			date: d,
 			value1: Math.sin(i),
 			value2: Math.cos(i*1.5)
 		}
-		freqCurves.unshift(p);
+		freqCurves.push(p);
 
 		d = new Date(d.getTime()+24*3600*1000);
 	}
@@ -91,7 +91,7 @@ function makeDataSets() {
 			value1: Math.sin(i)*(Math.PI*15-i),
 			value2: Math.cos(i)*(Math.PI*15-i)
 		}
-		spiral.unshift(p);
+		spiral.push(p);
 
 		d = new Date(d.getTime()+24*3600*1000);
 	}
@@ -472,12 +472,16 @@ function addSamples() {
     }
   }
 
+  function sortPointsByDate(data) {
+    return data.sort(function (a, b) {
+      a = new Date(a.date);
+      b = new Date(b.date);
+      return a<b?-1 : a>b?1 : 0;
+    });
+  }
+
   // combine, sort, and update
   points = points.concat(newSamples);
-  points = points.sort(function(a,b){
-    a = new Date(a.date);
-    b = new Date(b.date);
-    return a<b?-1:a>b?1:0;
-  });
+  points = sortPointsByDate(points);
   afterUpdatePoints();
 }
