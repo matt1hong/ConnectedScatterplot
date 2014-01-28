@@ -109,7 +109,7 @@ function mtDown(mouse) {
 		return;
 	isMouseDown = true;
 
-	points.unshift({x: mouse[0]/width, y: mouse[1]/height});
+	points.push({x: mouse[0]/width, y: mouse[1]/height});
 	lastPoint = {x: mouse[0], y: mouse[1]};
 	redraw();
 }
@@ -135,7 +135,7 @@ function mtMove(mouse) {
 
 	distance = Math.sqrt((mouse[0]-lastPoint.x)*(mouse[0]-lastPoint.x)+(mouse[1]-lastPoint.y)*(mouse[1]-lastPoint.y));
 	if (distance > DISTANCE_THRESHOLD) {
-		points.unshift({x: mouse[0]/width, y: mouse[1]/height});
+		points.push({x: mouse[0]/width, y: mouse[1]/height});
 		lastPoint.x = mouse[0];
 		lastPoint.y = mouse[1];
 	}
@@ -159,7 +159,7 @@ function mtUp(mouse) {
 		return;
 	isMouseDown = false;
 
-	points.unshift({x: mouse[0]/width, y: mouse[1]/height});
+	points.push({x: mouse[0]/width, y: mouse[1]/height});
 	lastPoint = null;
 	redraw();
 }
