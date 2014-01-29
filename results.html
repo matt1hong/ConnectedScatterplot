@@ -16,16 +16,8 @@
 			stroke: lightgray;
 		}
 	</style>
-	<script type="text/javascript" src="datasets/army.js"></script>
-	<script type="text/javascript" src="datasets/drivingsafety.js"></script>
-	<script type="text/javascript" src="datasets/helium.js"></script>
-	<script type="text/javascript" src="datasets/scorpion.js"></script>
-	<script type="text/javascript" src="datasets/yellen.js"></script>
-	<script type="text/javascript" src="datasets/china.js"></script>
-	<script type="text/javascript" src="datasets/sofa.js"></script>
-	<script type="text/javascript" src="datasets/sofa2.js"></script>
-	<script type="text/javascript" src="datasets/steamship.js"></script>
 	<script type="text/javascript" src="d3.v3.min.js"></script>
+	<script type="text/javascript" src="common.js"></script>
 	<script type="text/javascript" src="draw.js"></script>
 </head>
 <body onload="loadStudyData('study2')">
@@ -57,13 +49,6 @@
 	</div>
 	
 	<script type="text/javascript">
-		drawSetup();
-		drawingLayer.style('visibility', 'visible');
-
-		d3.select('#datasetselect').selectAll('option').data(datanames).enter()
-			.append('option')
-			.attr('value', function(d, i) { return i; })
-			.text(function(d) { return d; });
 
 		var studydata;
 
@@ -73,6 +58,16 @@
 
 		var currentDataSet = 0;
 
+		function resultsSetup() {
+			drawSetup();
+			drawingLayer.style('visibility', 'visible');
+
+			d3.select('#datasetselect').selectAll('option').data(datasets).enter()
+				.append('option')
+				.attr('value', function(d, i) { return i; })
+				.text(function(d) { return d.name; });
+		}
+
 		function switchDataSet(activedataset) {
 			currentDataSet = activedataset;
 			drawConnected(activedataset);
@@ -80,7 +75,7 @@
 			var trialNum = 0;
 			var ignore = +d3.select('#ignore').node().value;
 			studydata.forEach(function(trial) {
-				if (trial.dataset === datanames[activedataset]
+				if (trial.dataset === datasets[activedataset].name
 					&& trial.step > ignore) {
 					var path = drawingLayer.append('path')
 									.attr('class', 'drawn')
@@ -118,6 +113,8 @@
 				return d3.select(this).attr('base-color');
 			});
 		}
+
+		loadDataSets(true, resultsSetup);
 
 	</script>
 </body>
