@@ -104,15 +104,7 @@ function makeDataSets() {
 }
 
 
-function initialSetup(datasetinfo) {
-
-	datasets = datasetinfo;
-
-	datasets.forEach(function(dataset) {
-		d3.json('datasets/'+dataset.name+'.json', function (data) {
-			dataset.data = data;
-		});
-	});
+function initialSetup() {
 
 	makeDataSets();
 

@@ -4,19 +4,13 @@ var padding = 50; // prevent the line from coming too close to the edges
 
 var points = [];
 
-var datasets = [army, helium, drivingsafety, scorpion, yellen, china, steamship, sofa, sofa2];
-
-var datanames = ['army', 'helium', 'drivingsafety', 'scorpion', 'yellen', 'china', 'steamship', 'sofa', 'sofa2'];
-
-var steps = d3.range(datasets.length);
-
-d3.shuffle(steps);
+var steps;
 
 var step = 0;
 
 var svg, scatterLayer, drawingLayer, lineDrawn;
 
-var studyID = "study2";
+var studyID = "study2-test";
 
 var resultID;
 
@@ -29,6 +23,10 @@ var isMouseDown = false;
 var lastPoint = null;
 
 function drawSetup() {
+
+	steps = d3.range(datasets.length);
+
+	d3.shuffle(steps);
 
 	svg = d3.select('#drawingarea').append('svg')
 			.attr('width', width)
@@ -62,7 +60,7 @@ function drawSetup() {
 }
 
 function drawConnected(datasetnum) {
-	var data = datasets[datasetnum];
+	var data = datasets[datasetnum].data;
 
 	var xScale = d3.scale.linear()
 		.range([padding, width-padding])
@@ -212,7 +210,7 @@ function done() {
 	scatterLayer.style('visibility', 'visible');
 	d3.select('#donebtn').style('visibility', 'hidden');
 	submitResponse();
-	if (step < datasets.length) {
+	if (step < steps.length) {
 		d3.select('#startbtn').style('visibility', 'visible').text('Next Step');
 	} else {
 		// done
@@ -236,10 +234,10 @@ function submitResponse() {
 	d3.xhr('http://draw.eagereyes.org/submit.php')
 		.header('content-type', 'application/x-www-form-urlencoded')
 		.post('study='+encodeURIComponent(studyID)+'&'+
-			'resultID='+encodeURIComponent(resultID+'-'+datanames[steps[step-1]])+'&'+
+			'resultID='+encodeURIComponent(resultID+'-'+datasets[steps[step-1]].name)+'&'+
 			'data='+encodeURIComponent(JSON.stringify({
 				step: step,
-				dataset: datanames[steps[step-1]],
+				dataset: datasets[steps[step-1]].name,
 				time: (new Date()).getTime()-startTime,
 				presentationTime: presentationTime,
 				platform: navigator.platform,
