@@ -209,6 +209,7 @@ function initialSetup() {
 	pointsToDraw = points.length;
 	$('.slider').slider('option', 'max', points.length);
 	$('#shiftSlider').slider('value', 0);
+	$('#drawSlider').slider('value', points.length);
 
 	redraw(true);
 }
