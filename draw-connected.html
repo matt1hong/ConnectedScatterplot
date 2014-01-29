@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+	<title>Connected Scatterplot Experiment</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes">
+	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="drawstyle.css">
+	<script type="text/javascript" src="d3.v3.min.js"></script>
+	<script type="text/javascript" src="common.js"></script>
+	<script type="text/javascript" src="draw.js"></script>
+</head>
+<body>
+	<div id="drawingarea"></div>
+	<div id="nav">
+		<div id="info">
+			<h2>Connected Scatterplot Study</h2>
+			<p>In this study, you will be presented with a number of line drawings that we ask you to reproduce. Each drawing will consist of a single line and represent the comparison of two stock prices over time. Each stock is represented by one axis, with the line connecting the points in temporal order.
+			</p>
+			<ol>
+				<li>The line will appear for one second.</li>
+				<li>After it disappears, trace it from memory as best as you can.</li>
+				<li>Click <strong>Done</strong> to see how you did.</li>
+				<li>Click <strong>Next</strong> to go to the next one.</li>
+			</ol>
+			<p>Thank you for participating!
+			</p>
+		</div>
+		<h1 id="infolabel" style="visibility:hidden;"><span class="label label-info">Thank You!</span></h1>
+		<button id="startbtn" type="button" class="btn btn-primary btn-lg" onclick="start();">Start Experiment</button>
+		<button id="donebtn" type="button" class="btn btn-success btn-lg" onclick="done();" style="visibility:hidden;">Done</button>
+		<button id="restartbtn" type="button" class="btn btn-danger btn-lg" onclick="restart();" style="visibility:hidden;">Restart</button>
+	</div>
+	
+	<script type="text/javascript">
+		loadDataSets(true, drawSetup);
+	</script>
+</body>
+</html>
