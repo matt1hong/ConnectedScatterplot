@@ -73,32 +73,37 @@
 	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 </head>
 <body>
-  <h1>Connected Scatterplot Construction Kit</h1>
-  <div id="charts">
-    <div id="linechart" class="chart"></div>
-    <div id="connectedscatter" class="chart"></div>
-    <div id="slider"></div>
-  </div>
-<div style="clear:left; float:left; margin-top: 10px;">
-	<label><input type="checkbox" name="smooth" value="smooth" onclick="toggleSmooth(this);" checked /> Smooth</label>&nbsp;
-	<label><input type="checkbox" name="arrows" value="arrows" onclick="toggleArrows(this);" /> Arrows</label>&nbsp;
-	<label><input type="checkbox" name="dots" value="dots" onclick="toggleDots(this);" checked /> Dots</label>
-	<button type="button" onclick="addSamples();">Add samples</button>&nbsp;
-</div>
-<div style="float:right;">
-	<button type="button" onclick="flipH();">Flip H</button>&nbsp;
-	<button type="button" onclick="flipV();">Flip V</button>&nbsp;
-	<button type="button" onclick="rotateCW();">Rotate CW</button>&nbsp;
-	<button type="button" onclick="rotateCCW();">Rotate CCW</button>
-</div>
-<div style="clear:both;"></div>
+	<h1>Connected Scatterplot Construction Kit</h1>
+	<div id="charts">
+		<div id="linechart" class="chart"></div>
+		<div id="connectedscatter" class="chart"></div>
+		<div id="slider"></div>
+	</div>
+	<div style="clear:left; float:left; margin-top: 10px;">
+		<label><input type="checkbox" name="smooth" value="smooth" onclick="toggleSmooth(this);" checked /> Smooth</label>&nbsp;
+		<label><input type="checkbox" name="arrows" value="arrows" onclick="toggleArrows(this);" /> Arrows</label>&nbsp;
+		<label><input type="checkbox" name="dots" value="dots" onclick="toggleDots(this);" checked /> Dots</label>
+		<button type="button" onclick="addSamples();">Add samples</button>&nbsp;
+		<button type="button" onclick="exportData();">Export Data</button>&nbsp;
+	</div>
+	<div style="float:right;">
+		<button type="button" onclick="flipH();">Flip H</button>&nbsp;
+		<button type="button" onclick="flipV();">Flip V</button>&nbsp;
+		<button type="button" onclick="rotateCW();">Rotate CW</button>&nbsp;
+		<button type="button" onclick="rotateCCW();">Rotate CCW</button>
+	</div>
+	<div style="clear:both;">
+		<form>
+			<label for="dataset">Dataset:</label>
+			<select id="dataset" onchange="loadData(+this.value)">
+			</select>
+		</form>
+	</div>
 
-
-<form>
-	<label for="dataset">Dataset:</label>
-	<select id="dataset" onchange="loadData(+this.value)">
-	</select>
-</form>
+	<div id="export">
+		<pre>
+		</pre>
+	</div>
 
 <!-- Based on <a href="http://bl.ocks.org/mbostock/4342190">Mike Bostock's Spline Editor example</a>. -->
 
@@ -122,6 +127,19 @@
 		sliderValue = ui.value;
 
 		redraw(false);
+    }
+
+    function exportData() {
+ 		var data = [];
+    	points.forEach(function(p) {
+    		var d = {
+    			date: (p.date.getMonth()+1)+'/'+p.date.getDate()+'/'+p.date.getFullYear(),
+    			value1: p.value1,
+    			value2: p.value2
+    		}
+    		data.unshift(d);
+    	});
+    	d3.select('#export pre').text(JSON.stringify(data));
     }
 
 	$('#slider').slider({
