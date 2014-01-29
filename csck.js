@@ -5,6 +5,7 @@ var points;
 
 var showArrows = false;
 var showDots = true;
+var showLabels = false;
 
 var svgConnected;
 var svgDualAxes;
@@ -226,6 +227,8 @@ function redrawConnected(recreate) {
 	if (recreate) {
 		svgConnected.select('path').datum(points.slice(0, pointsToDraw)).attr('d', lineConnected);
 
+		svgConnected.selectAll('text').remove();
+
 		if (showDots) {
 
 			var circle = svgConnected.selectAll('circle')
@@ -233,7 +236,7 @@ function redrawConnected(recreate) {
 
 			circle.enter().append('circle')
 				.attr('r', 3)
-				.on('mousedown', function(d, i) { selectedIndex = draggedIndex = i; redraw(false); });
+				.on('mousedown', function(d, i) { selectedIndex = draggedIndex = i; redraw(false); })
 
 			circle
 				.classed('selected', function(d, i) { return i === selectedIndex; })
@@ -241,8 +244,22 @@ function redrawConnected(recreate) {
 				.attr('cy', function(d) { return yScale(d.value2); });
 
 			circle.exit().remove();
+
+			if (showLabels) {
+				var text = svgConnected.selectAll('text')
+					.data(points.slice(0, pointsToDraw));
+
+				text.enter()
+					.append('text')
+						.text(function(d) { return (d.date.getFullYear()%5==0)?d.date.getFullYear():''; })
+						.attr('x', function(d) { return xScale(d.value1); })
+						.attr('y', function(d) { return yScale(d.value2) + 12; });
+
+				text.exit().remove();
+			}
 		} else {
 			svgConnected.selectAll('circle').remove();
+			svgConnected.selectAll('text').remove();
 		}
 	} else {
 		svgConnected.select('path').attr('d', lineConnected);
@@ -371,8 +388,14 @@ function toggleArrows(checkbox) {
 	redraw(true);
 }
 
+function toggleLabels(checkbox) {
+	showLabels = checkbox.checked;
+	redraw(true);
+}
+
 function toggleDots(checkbox) {
 	showDots = checkbox.checked;
+	d3.select('#labels').attr('disabled', showDots?null:true);
 	redraw(true);
 }
 

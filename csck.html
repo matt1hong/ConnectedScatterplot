@@ -66,6 +66,12 @@
 			stroke-width: 1px;
 		}
 
+		text {
+			font-size: 10px;
+			text-anchor: middle;
+			fill: rgb(199, 166, 199);
+		}
+
 	</style>
 	<script src="d3.v3.min.js"></script>
 	<script type="text/javascript" src="csck.js"></script>
@@ -83,9 +89,10 @@
 		<div id="shiftSlider" class="slider"></div>
 	</div>
 	<div style="clear:left; float:left; margin-top: 10px;">
-		<label><input type="checkbox" name="smooth" value="smooth" onclick="toggleSmooth(this);" checked /> Smooth</label>&nbsp;
-		<label><input type="checkbox" name="arrows" value="arrows" onclick="toggleArrows(this);" /> Arrows</label>&nbsp;
-		<label><input type="checkbox" name="dots" value="dots" onclick="toggleDots(this);" checked /> Dots</label>
+		<label><input type="checkbox" id="smooth" onclick="toggleSmooth(this);" checked /> Smooth</label>&nbsp;
+		<label><input type="checkbox" id="arrows" onclick="toggleArrows(this);" /> Arrows</label>&nbsp;
+		<label><input type="checkbox" id="dots" onclick="toggleDots(this);" checked /> Dots</label>
+		<label><input type="checkbox" id="labels" onclick="toggleLabels(this);" /> Labels</label>
 		<button type="button" onclick="addSamples();">Add samples</button>&nbsp;
 		<button type="button" onclick="exportData();">Export Data</button>&nbsp;
 	</div>
