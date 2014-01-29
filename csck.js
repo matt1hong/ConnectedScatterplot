@@ -269,6 +269,11 @@ function redrawConnected(recreate) {
 			.classed('selected', function(d, i) { return i === selectedIndex; })
 			.attr('cx', function(d) { return xScale(d.value1); })
 			.attr('cy', function(d) { return yScale(d.value2); });
+
+		svgConnected.selectAll('text')
+			.data(points.slice(0, pointsToDraw))
+			.attr('x', function(d) { return xScale(d.value1); })
+			.attr('y', function(d) { return yScale(d.value2) + 12; });
 	}
 
 	if (d3.event) {
