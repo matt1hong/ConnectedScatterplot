@@ -7,6 +7,8 @@
 	<meta name="apple-mobile-web-app-capable" content="yes">
 	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="drawstyle.css">
+	<script src="//code.jquery.com/jquery-1.11.0.js"></script>
+	<script type="text/javascript" src="bootstrap.min.js"></script>
 	<script type="text/javascript" src="d3.v3.min.js"></script>
 	<script type="text/javascript" src="common.js"></script>
 	<script type="text/javascript" src="draw.js"></script>
@@ -17,23 +19,62 @@
 	</style>
 </head>
 <body>
-	<h1>Connected Scatterplot Study</h1>
+	<div class="page-header">
+		<h1>Connected Scatterplot Study</h1>
+	</div>
+
 	<div class="container">
 		<div class="row">
 			<div class="col-sm-offset-4 col-sm-4">
-				<a href="draw-connected.html" role="button" class="btn btn-info btn-lg btn-block">Draw Connected Scatterplot</a>
+				<div class="btn-group" data-toggle="buttons">
+					<label class="btn btn-info active" onclick="switchHash('test');">
+						<input type="radio" name="options" id="test"> Test Run
+					</label>
+					<label class="btn btn-info" onclick="switchHash('real');">
+						<input type="radio" name="options" id="real"> Real Study
+					</label>
+				</div>
+			</div>
+		</div>
+
+		<div class="row" style="margin-top: 40px;">
+			<div class="col-sm-offset-4 col-sm-4">
+				<a href="draw-connected.html#test" role="button" class="btn btn-primary btn-lg btn-block study">Draw Connected Scatterplot</a>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-sm-offset-4 col-sm-4">
-				<a href="" role="button" class="btn btn-info btn-lg btn-block">Translate DALC to CS</a>
+				<a href="" role="button" class="btn btn-primary btn-lg btn-block study">Translate DALC to CS</a>
 			</div>
 		</div>
 		<div class="row">
 			<div class="col-sm-offset-4 col-sm-4">
-				<a href="" role="button" class="btn btn-info btn-lg btn-block">Translate CS to DALC</a>
+				<a href="" role="button" class="btn btn-primary btn-lg btn-block study">Translate CS to DALC</a>
+			</div>
+		</div>
+
+		<div class="row" style="margin-top: 100px;">
+			<div class="col-sm-offset-4 col-sm-2">
+				<a href="csck.html" role="button" class="btn btn-default btn-lg btn-block">CSCK</a>
+			</div>
+			<div class="col-sm-2">
+				<a href="results.html" role="button" class="btn btn-success btn-lg btn-block">Results</a>
 			</div>
 		</div>
 	</div>
+
+	<script type="text/javascript">
+
+		function switchHash(hashVal) {
+			$('a.study').each(function(i, d) {
+				var link = $(d).attr('href');
+				link = link.substr(0, link.lastIndexOf('#'))+'#'+hashVal;
+				$(d).attr('href', link);
+			});
+		}
+
+
+		$('.btn').button();
+	</script>
 </body>
 </html>

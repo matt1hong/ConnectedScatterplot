@@ -24,6 +24,10 @@ var lastPoint = null;
 
 function drawSetup() {
 
+	if (window.location.hash === '#test') {
+		studyID += '-test';
+	}
+
 	steps = d3.range(datasets.length);
 
 	d3.shuffle(steps);
