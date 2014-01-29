@@ -47,41 +47,33 @@ var lineDA2 = d3.svg.line()
 
 function makeDataSets() {
 
-	var parallelCurves = [];
-	var offsetCurves = [];
-	var outOfPhaseCurves = [];
-	var freqCurves = [];
+	var parallelSines = [];
+	var increasingSines = [];
+	var freqSines = [];
 	var spiral = [];
 
 	var d = new Date();
-	for (var i = 0; i < Math.PI*4; i += Math.PI/10) {
+	for (var i = 0; i < Math.PI*6; i += Math.PI/10) {
 		var p = {
 			date: d,
 			value1: Math.sin(i),
 			value2: Math.sin(i)
 		}
-		parallelCurves.push(p);
+		parallelSines.push(p);
 
 		p = {
 			date: d,
-			value1: Math.sin(i),
-			value2: Math.sin(i+1)
+			value1: Math.sin(i)+i/4,
+			value2: Math.sin(i)+i/3
 		}
-		offsetCurves.push(p);
-
-		p = {
-			date: d,
-			value1: Math.sin(i),
-			value2: Math.cos(i)
-		}
-		outOfPhaseCurves.push(p);
+		increasingSines.push(p);
 
 		p = {
 			date: d,
 			value1: Math.sin(i),
 			value2: Math.cos(i*1.5)
 		}
-		freqCurves.push(p);
+		freqSines.push(p);
 
 		d = new Date(d.getTime()+24*3600*1000);
 	}
@@ -90,19 +82,18 @@ function makeDataSets() {
 	for (var i = 0; i < Math.PI*15; i += Math.PI/10) {
 		var p = {
 			date: d,
-			value1: Math.sin(i)*(Math.PI*15-i),
-			value2: Math.cos(i)*(Math.PI*15-i)
+			value1: Math.sin(i)*i,
+			value2: Math.cos(i)*i
 		}
 		spiral.push(p);
 
 		d = new Date(d.getTime()+24*3600*1000);
 	}
 
-	datasets.push({"name":"parallel", "display":"Parallel Curves", "data": parallelCurves});
-	datasets.push({"name":"offset", "display":"Offset Curves", "data": offsetCurves});
-	datasets.push({"name":"outofphase", "display":"Out of Phase Curves", "data": outOfPhaseCurves});
+	datasets.push({"name":"parallel", "display":"Parallel Sines", "data": parallelSines});
+	datasets.push({"name":"increasing", "display":"Increasing Sines", "data": increasingSines});
 	datasets.push({"name":"spiral", "display":"Spiral", "data": spiral});
-	datasets.push({"name":"frequency", "display":"Different Frequency", "data": freqCurves});
+	datasets.push({"name":"frequency", "display":"Different Frequency", "data": freqSines});
 }
 
 
