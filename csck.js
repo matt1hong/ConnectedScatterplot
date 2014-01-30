@@ -7,6 +7,8 @@ var showArrows = false;
 var showDots = true;
 var showLabels = false;
 
+var commonScales = true;
+
 var svgConnected;
 var svgDualAxes;
 
@@ -57,7 +59,7 @@ function makeDataSets() {
 	for (var i = 0; i < Math.PI*6; i += Math.PI/10) {
 		var p = {
 			date: d,
-			value1: Math.sin(i),
+			value1: Math.sin(i)*2,
 			value2: Math.sin(i)
 		}
 		parallelSines.push(p);
@@ -91,10 +93,10 @@ function makeDataSets() {
 		d = new Date(d.getTime()+24*3600*1000);
 	}
 
-	datasets.push({"name":"parallel", "display":"Parallel Sines", "data": parallelSines});
-	datasets.push({"name":"increasing", "display":"Increasing Sines", "data": increasingSines});
-	datasets.push({"name":"spiral", "display":"Spiral", "data": spiral});
-	datasets.push({"name":"frequency", "display":"Different Frequency", "data": freqSines});
+	datasets.push({"name":"parallel", "display":"Parallel Sines", "data": parallelSines, "commonScales":true});
+	datasets.push({"name":"increasing", "display":"Increasing Sines", "data": increasingSines, "commonScales":true});
+	datasets.push({"name":"spiral", "display":"Spiral", "data": spiral, "commonScales":true});
+	datasets.push({"name":"frequency", "display":"Different Frequency", "data": freqSines, "commonScales":true});
 }
 
 
@@ -220,8 +222,16 @@ function scaleScales() {
 	});
 
 	timeScale.domain([points[0].date, points[points.length-1].date]);
-	xScale.domain(d3.extent(points, function(d) { return d.value1; }));
-	yScale.domain(d3.extent(points, function(d) { return d.value2; }));
+	if (commonScales) {
+		var e1 = d3.extent(points, function(d) { return d.value1; });
+		var e2 = d3.extent(points, function(d) { return d.value2; });
+		var extent = [Math.min(e1[0], e2[0]), Math.max(e1[1], e2[1])];
+		xScale.domain(extent);
+		yScale.domain(extent);
+	} else {
+		xScale.domain(d3.extent(points, function(d) { return d.value1; }));
+		yScale.domain(d3.extent(points, function(d) { return d.value2; }));
+	}
 }
 
 function redrawConnected(recreate) {
@@ -444,6 +454,7 @@ function rotateCCW() {
 
 function loadData(index) {
   points = datasets[index].data;
+  commonScales = !!datasets[index].commonScales;
   afterUpdatePoints();
 }
 
