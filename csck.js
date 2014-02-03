@@ -6,6 +6,9 @@ var points;
 var showArrows = false;
 var showDots = true;
 var showLabels = false;
+var showGrid = false;
+
+var DAGRIDSIZE = height/9;
 
 var commonScales = true;
 
@@ -160,25 +163,6 @@ function initialSetup() {
 		.attr('fill', 'purple')
 		.append('polygon')
 			.attr('points', '0,0 10,3 0,6');
-
-	// svgConnected.selectAll('line.grid1')
-	// 	.data(d3.range(-width, width, 50))
-	// 	.enter().append('line')
-	// 		.attr('class', 'grid1')
-	// 		.attr('x1', function(d) { return d; })
-	// 		.attr('y1', height)
-	// 		.attr('x2', function(d) { return d+height; })
-	// 		.attr('y2', 0);
-
-	// svgConnected.selectAll('line.grid2')
-	// 	.data(d3.range(-width, width, 50))
-	// 	.enter().append('line')
-	// 		.attr('class', 'grid2')
-	// 		.attr('x1', function(d) { return d; })
-	// 		.attr('y1', 0)
-	// 		.attr('x2', function(d) { return d+height; })
-	// 		.attr('y2', height);
-
 
 	svgConnected.append('line')
 		.attr('x1', 0)
@@ -361,6 +345,14 @@ function redraw(recreate) {
 function mousemoveCS() {
 	if (draggedIndex < 0) return;
 	var m = d3.mouse(svgConnected.node());
+	if (showGrid) {
+		m[0] = Math.round(m[0]/(DAGRIDSIZE/2));
+		m[1] = Math.round(m[1]/(DAGRIDSIZE/2));
+		m[1] = Math.floor(m[1]/2)*2+(m[0] & 1);
+		m[0] *= DAGRIDSIZE/2;
+		m[1] *= DAGRIDSIZE/2;
+	}
+
 	points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, m[0])));
 	points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 	redraw(false);
@@ -369,6 +361,11 @@ function mousemoveCS() {
 function mousemoveDALC() {
 	if (draggedIndex < 0) return;
 	var m = d3.mouse(svgDualAxes.node());
+	var value;
+	if (showGrid) {
+		m[1] = Math.round(m[1]/DAGRIDSIZE)*DAGRIDSIZE;
+	}
+
 	if (draggingBlue) {
 		points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.max(0, height-m[1])));
 	} else {
@@ -413,6 +410,44 @@ function toggleDots(checkbox) {
 	showDots = checkbox.checked;
 	d3.select('#labels').attr('disabled', showDots?null:true);
 	redraw(true);
+}
+
+function toggleGrid(checkbox) {
+	showGrid = checkbox.checked;
+	if (showGrid) {
+		svgDualAxes.selectAll('line.grid')
+			.data(d3.range(DAGRIDSIZE, height, DAGRIDSIZE))
+			.enter().append('line')
+				.attr('class', 'grid')
+				.attr('x1', 0)
+				.attr('y1', function(d) { return Math.round(d)+.5; })
+				.attr('x2', width)
+				.attr('y2', function(d) { return Math.round(d)+.5; });
+
+		svgConnected.selectAll('line.grid1')
+			.data(d3.range(-width, width, DAGRIDSIZE))
+			.enter().append('line')
+				.attr('class', 'grid1')
+				.attr('x1', function(d) { return d; })
+				.attr('y1', height)
+				.attr('x2', function(d) { return d+height; })
+				.attr('y2', 0);
+
+		svgConnected.selectAll('line.grid2')
+			.data(d3.range(-width, width, DAGRIDSIZE))
+			.enter().append('line')
+				.attr('class', 'grid2')
+				.attr('x1', function(d) { return d; })
+				.attr('y1', 0)
+				.attr('x2', function(d) { return d+height; })
+				.attr('y2', height);
+
+	} else {
+		svgConnected.selectAll('line.grid1').remove();
+		svgConnected.selectAll('line.grid2').remove();
+		svgDualAxes.selectAll('line.grid').remove();
+	}
+	redraw(false);
 }
 
 function flipH() {
