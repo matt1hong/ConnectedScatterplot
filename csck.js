@@ -135,7 +135,7 @@ function initialSetup() {
 	// Dual-Axes Line Chart
 
 	dualAxes.svg = d3.select('#linechart').append('svg')
-		.attr('width', width+1.5*PADX)
+		.attr('width', width+2*PADX)
 		.attr('height', height+2*PADY)
 		.attr('tabindex', 1);
 
@@ -330,6 +330,15 @@ function redrawDualAxes(recreate) {
 			.attr('class', 'axis1')
 			.attr('transform', 'translate('+PADX+' '+PADY+')')
 			.call(axis1);
+
+		var axis2 = d3.svg.axis()
+			.scale(yScale)
+			.orient('right');
+
+		dualAxes.background.append('g')
+			.attr('class', 'axis2')
+			.attr('transform', 'translate('+(PADX+width)+' '+PADY+')')
+			.call(axis2);
 
 		if (showDots) {
 			dualAxes.foreground.selectAll('circle').remove();
