@@ -35,26 +35,26 @@ var datasets;
 var pointsToDraw;
 
 var timeScale = d3.time.scale()
-	.range([5, width-5]);
+	.range([0, width]);
 
 var xScale = d3.scale.linear()
-	.range([10, width-10]);
+	.range([width, 0]);
 
 var yScale = d3.scale.linear()
-	.range([height-10, 10]);
+	.range([height, 0]);
 
 var draggedIndex = -1,
 	draggingBlue = true,
     selectedIndex = -1;
 
 var lineConnected = d3.svg.line()
-    .x(function(d) { return xScale(d.value1); })
+    .x(function(d) { return width-xScale(d.value1); })
     .y(function(d) { return yScale(d.value2); })
     .interpolate('cardinal');
 
 var lineDA1 = d3.svg.line()
 	.x(function(d) { return timeScale(d.date); })
-	.y(function(d) { return height-xScale(d.value1); })
+	.y(function(d) { return xScale(d.value1); })
 	.interpolate('cardinal');
 
 var lineDA2 = d3.svg.line()
@@ -263,7 +263,7 @@ function redrawConnected(recreate) {
 
 			circle
 				.classed('selected', function(d, i) { return i === selectedIndex; })
-				.attr('cx', function(d) { return xScale(d.value1); })
+				.attr('cx', function(d) { return width-xScale(d.value1); })
 				.attr('cy', function(d) { return yScale(d.value2); });
 
 			circle.exit().remove();
@@ -275,7 +275,7 @@ function redrawConnected(recreate) {
 				text.enter()
 					.append('text')
 						.text(function(d) { return (d.date.getFullYear()%5==0)?d.date.getFullYear():''; })
-						.attr('x', function(d) { return xScale(d.value1); })
+						.attr('x', function(d) { return width-xScale(d.value1); })
 						.attr('y', function(d) { return yScale(d.value2) + 12; });
 
 				text.exit().remove();
@@ -290,12 +290,12 @@ function redrawConnected(recreate) {
 		connected.foreground.selectAll('circle')
 			.data(points.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
-			.attr('cx', function(d) { return xScale(d.value1); })
+			.attr('cx', function(d) { return width-xScale(d.value1); })
 			.attr('cy', function(d) { return yScale(d.value2); });
 
 		connected.foreground.selectAll('text')
 			.data(points.slice(0, pointsToDraw))
-			.attr('x', function(d) { return xScale(d.value1); })
+			.attr('x', function(d) { return width-xScale(d.value1); })
 			.attr('y', function(d) { return yScale(d.value2) + 12; });
 	}
 
@@ -358,7 +358,7 @@ function redrawDualAxes(recreate) {
 			dualAxes.blueCircles
 				.classed('selected', function(d, i) { return i === selectedIndex; })
 				.attr('cx', function(d) { return timeScale(d.date); })
-				.attr('cy', function(d) { return height-xScale(d.value1); });
+				.attr('cy', function(d) { return xScale(d.value1); });
 
 			dualAxes.greenCircles = dualAxes.foreground.selectAll('circle.line2')
 				.data(points.slice(0, pointsToDraw));
@@ -387,7 +387,7 @@ function redrawDualAxes(recreate) {
 		dualAxes.blueCircles
 			.data(points.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
-			.attr('cy', function(d) { return height-xScale(d.value1); });
+			.attr('cy', function(d) { return xScale(d.value1); });
 		dualAxes.greenCircles
 			.data(points.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
@@ -411,7 +411,7 @@ function mousemoveCS() {
 		m[1] *= DAGRIDSIZE/2;
 	}
 
-	points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, m[0])));
+	points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, width-m[0])));
 	points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 
 	redraw(false);
