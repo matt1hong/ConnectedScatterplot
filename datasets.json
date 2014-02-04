@@ -1,4 +1,5 @@
-[{"name":"army", "display":"Army", "study":true},
+[
+{"name":"army", "display":"Army", "study":true},
 {"name":"drivingsafety", "display":"Driving Safety", "study":true},
 {"name":"drivingshifts", "display":"Driving Shifts Into Reverse", "study":true},
 {"name":"helium", "display":"Helium", "study":true},

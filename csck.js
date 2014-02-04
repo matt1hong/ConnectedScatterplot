@@ -10,19 +10,31 @@ var showGrid = false;
 
 var DAGRIDSIZE = height/9;
 
+var PADX = 40;
+var PADY = 20;
+
 var commonScales = true;
 
-var svgConnected;
-var svgDualAxes;
+var connected = {
+	svg: null,
+	background: null,
+	foreground: null
+};
 
-var blueCircles;
-var greenCircles;
+var dualAxes = {
+	svg: null,
+	background: null,
+	foreground: null,
+	blueCircles: null,
+	greenCircles: null
+}
+
 
 var datasets;
 
 var pointsToDraw;
 
-var timeScale = d3.scale.linear()
+var timeScale = d3.time.scale()
 	.range([5, width-5]);
 
 var xScale = d3.scale.linear()
@@ -122,34 +134,44 @@ function initialSetup() {
 
 	// Dual-Axes Line Chart
 
-	svgDualAxes = d3.select('#linechart').append('svg')
-		.attr('width', width)
-		.attr('height', height)
+	dualAxes.svg = d3.select('#linechart').append('svg')
+		.attr('width', width+1.5*PADX)
+		.attr('height', height+2*PADY)
 		.attr('tabindex', 1);
 
-	svgDualAxes.append('path')
+	dualAxes.background = dualAxes.svg.append('g');
+
+	dualAxes.foreground = dualAxes.svg.append('g')
+		.attr('transform', 'translate('+PADX+' '+PADY+')');
+
+	dualAxes.foreground.append('path')
 		.datum(points)
 		.attr('class', 'line line1');
 
-	svgDualAxes.append('path')
+	dualAxes.foreground.append('path')
 		.datum(points)
 		.attr('class', 'line line2');
 
 	redrawDualAxes(true);
 
-	svgDualAxes
+	dualAxes.foreground
 	    .on('mousemove', mousemoveDALC)
 	    .on('mouseup', mouseup);
 
 	// Connected Scatterplot
 
-	svgConnected = d3.select('#connectedscatter').append('svg')
-	    .attr('width', width)
-	    .attr('height', height)
+	connected.svg = d3.select('#connectedscatter').append('svg')
+	    .attr('width', width+1.5*PADX)
+	    .attr('height', height+2*PADY)
 	    .attr('tabindex', 2);
 
+	connected.background = connected.svg.append('g');
+
+	connected.foreground = connected.svg.append('g')
+		.attr('transform', 'translate('+PADX+' '+PADY+')');
+
 	// marker triangle from http://www.w3.org/TR/SVG/painting.html#Markers
-	svgConnected.append('defs')
+	connected.foreground.append('defs')
 		.append('marker')
 		.attr('id', 'arrow')
 		.attr('viewBox', '0 0 10 6')
@@ -164,31 +186,17 @@ function initialSetup() {
 		.append('polygon')
 			.attr('points', '0,0 10,3 0,6');
 
-	svgConnected.append('line')
-		.attr('x1', 0)
-		.attr('x2', width)
-		.attr('y1', height-1)
-		.attr('y2', height-1)
-		.attr('class', 'line1');
-
-	svgConnected.append('line')
-		.attr('x1', 1)
-		.attr('x2', 1)
-		.attr('y1', 0)
-		.attr('y2', height)
-		.attr('class', 'line2');
-
-	svgConnected.append('rect')
+	connected.foreground.append('rect')
 	    .attr('width', width)
 	    .attr('height', height);
 
-	svgConnected.append('path')
+	connected.foreground.append('path')
 		.datum(points)
 		.attr('class', 'line')
 		.attr('marker-mid', showArrows?'url(#arrow)':'none')
 		.attr('marker-end', showArrows?'url(#arrow)':'none');
 
-	svgConnected
+	connected.foreground
 	    .on('mousemove', mousemoveCS)
 	    .on('mouseup', mouseup);
 
@@ -220,13 +228,33 @@ function scaleScales() {
 
 function redrawConnected(recreate) {
 	if (recreate) {
-		svgConnected.select('path').datum(points.slice(0, pointsToDraw)).attr('d', lineConnected);
+		connected.foreground.select('path').datum(points.slice(0, pointsToDraw)).attr('d', lineConnected);
 
-		svgConnected.selectAll('text').remove();
+		connected.foreground.selectAll('text').remove();
+
+		connected.background.selectAll('g').remove();
+
+		var xAxis = d3.svg.axis()
+			.scale(xScale)
+			.orient('bottom');
+
+		connected.background.append('g')
+			.attr('class', 'axis1')
+			.attr('transform', 'translate('+PADX+' '+(PADY+height)+')')
+			.call(xAxis);
+
+		var yAxis = d3.svg.axis()
+			.scale(yScale)
+			.orient('left');
+
+		connected.background.append('g')
+			.attr('class', 'axis2')
+			.attr('transform', 'translate('+PADX+' '+PADY+')')
+			.call(yAxis);
 
 		if (showDots) {
 
-			var circle = svgConnected.selectAll('circle')
+			var circle = connected.foreground.selectAll('circle')
 				.data(points.slice(0, pointsToDraw));
 
 			circle.enter().append('circle')
@@ -241,7 +269,7 @@ function redrawConnected(recreate) {
 			circle.exit().remove();
 
 			if (showLabels) {
-				var text = svgConnected.selectAll('text')
+				var text = connected.foreground.selectAll('text')
 					.data(points.slice(0, pointsToDraw));
 
 				text.enter()
@@ -253,19 +281,19 @@ function redrawConnected(recreate) {
 				text.exit().remove();
 			}
 		} else {
-			svgConnected.selectAll('circle').remove();
-			svgConnected.selectAll('text').remove();
+			connected.foreground.selectAll('circle').remove();
+			connected.foreground.selectAll('text').remove();
 		}
 	} else {
-		svgConnected.select('path').attr('d', lineConnected);
+		connected.foreground.select('path').attr('d', lineConnected);
 
-		svgConnected.selectAll('circle')
+		connected.foreground.selectAll('circle')
 			.data(points.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
 			.attr('cx', function(d) { return xScale(d.value1); })
 			.attr('cy', function(d) { return yScale(d.value2); });
 
-		svgConnected.selectAll('text')
+		connected.foreground.selectAll('text')
 			.data(points.slice(0, pointsToDraw))
 			.attr('x', function(d) { return xScale(d.value1); })
 			.attr('y', function(d) { return yScale(d.value2) + 12; });
@@ -279,16 +307,37 @@ function redrawConnected(recreate) {
 
 function redrawDualAxes(recreate) {
 	if (recreate) {
-		svgDualAxes.select('path.line1').datum(points.slice(0, pointsToDraw)).attr('d', lineDA1);
-		svgDualAxes.select('path.line2').datum(points.slice(0, pointsToDraw)).attr('d', lineDA2);
+		dualAxes.foreground.select('path.line1').datum(points.slice(0, pointsToDraw)).attr('d', lineDA1);
+		dualAxes.foreground.select('path.line2').datum(points.slice(0, pointsToDraw)).attr('d', lineDA2);
+
+		dualAxes.background.selectAll('g').remove();
+
+		var timeAxis = d3.svg.axis()
+			.scale(timeScale)
+			.tickFormat(d3.time.format('%Y'))
+			.orient('bottom');
+
+		dualAxes.background.append('g')
+			.attr('class', 'axis')
+			.attr('transform', 'translate('+PADX+' '+(PADY+height)+')')
+			.call(timeAxis);
+
+		var axis1 = d3.svg.axis()
+			.scale(xScale)
+			.orient('left');
+
+		dualAxes.background.append('g')
+			.attr('class', 'axis1')
+			.attr('transform', 'translate('+PADX+' '+PADY+')')
+			.call(axis1);
 
 		if (showDots) {
-			svgDualAxes.selectAll('circle').remove();
+			dualAxes.foreground.selectAll('circle').remove();
 
-			blueCircles = svgDualAxes.selectAll('circle.line1')
+			dualAxes.blueCircles = dualAxes.foreground.selectAll('circle.line1')
 				.data(points.slice(0, pointsToDraw));
 
-			blueCircles.enter().append('circle')
+			dualAxes.blueCircles.enter().append('circle')
 				.attr('r', 3)
 				.attr('class', 'line1')
 				.on('mousedown', function(d, i) {
@@ -297,15 +346,15 @@ function redrawDualAxes(recreate) {
 					redraw(false);
 				});
 
-			blueCircles
+			dualAxes.blueCircles
 				.classed('selected', function(d, i) { return i === selectedIndex; })
 				.attr('cx', function(d) { return timeScale(d.date); })
 				.attr('cy', function(d) { return height-xScale(d.value1); });
 
-			greenCircles = svgDualAxes.selectAll('circle.line2')
+			dualAxes.greenCircles = dualAxes.foreground.selectAll('circle.line2')
 				.data(points.slice(0, pointsToDraw));
 
-			greenCircles.enter().append('circle')
+			dualAxes.greenCircles.enter().append('circle')
 				.attr('r', 3)
 				.attr('class', 'line2')
 				.on('mousedown', function(d, i) {
@@ -314,23 +363,23 @@ function redrawDualAxes(recreate) {
 					redraw(false);
 				});
 
-			greenCircles
+			dualAxes.greenCircles
 				.classed('selected', function(d, i) { return i === selectedIndex; })
 				.attr('cx', function(d) { return timeScale(d.date); })
 				.attr('cy', function(d) { return yScale(d.value2); });
 		} else {
-			blueCircles.remove();
-			greenCircles.remove();
+			dualAxes.blueCircles.remove();
+			dualAxes.greenCircles.remove();
 		}
 	} else {
-		svgDualAxes.select('path.line1').attr('d', lineDA1);
-		svgDualAxes.select('path.line2').attr('d', lineDA2);
+		dualAxes.foreground.select('path.line1').attr('d', lineDA1);
+		dualAxes.foreground.select('path.line2').attr('d', lineDA2);
 
-		blueCircles
+		dualAxes.blueCircles
 			.data(points.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
 			.attr('cy', function(d) { return height-xScale(d.value1); });
-		greenCircles
+		dualAxes.greenCircles
 			.data(points.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
 			.attr('cy', function(d) { return yScale(d.value2); });
@@ -344,7 +393,7 @@ function redraw(recreate) {
 
 function mousemoveCS() {
 	if (draggedIndex < 0) return;
-	var m = d3.mouse(svgConnected.node());
+	var m = d3.mouse(connected.foreground.node());
 	if (showGrid) {
 		m[0] = Math.round(m[0]/(DAGRIDSIZE/2));
 		m[1] = Math.round(m[1]/(DAGRIDSIZE/2));
@@ -355,12 +404,13 @@ function mousemoveCS() {
 
 	points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, m[0])));
 	points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
+
 	redraw(false);
 }
 
 function mousemoveDALC() {
 	if (draggedIndex < 0) return;
-	var m = d3.mouse(svgDualAxes.node());
+	var m = d3.mouse(dualAxes.foreground.node());
 	var value;
 	if (showGrid) {
 		m[1] = Math.round(m[1]/DAGRIDSIZE)*DAGRIDSIZE;
@@ -371,6 +421,7 @@ function mousemoveDALC() {
 	} else {
 		points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 	}
+
 	redraw(false);
 }
 
@@ -395,7 +446,7 @@ function toggleSmooth(checkbox) {
 
 function toggleArrows(checkbox) {
 	showArrows = checkbox.checked;
-	svgConnected.select('path.line')
+	connected.foreground.select('path.line')
 		.attr('marker-mid', showArrows?'url(#arrow)':'none')
 		.attr('marker-end', showArrows?'url(#arrow)':'none');
 	redraw(true);
@@ -415,37 +466,37 @@ function toggleDots(checkbox) {
 function toggleGrid(checkbox) {
 	showGrid = checkbox.checked;
 	if (showGrid) {
-		svgDualAxes.selectAll('line.grid')
+		dualAxes.background.selectAll('line.grid')
 			.data(d3.range(DAGRIDSIZE, height, DAGRIDSIZE))
 			.enter().append('line')
 				.attr('class', 'grid')
-				.attr('x1', 0)
-				.attr('y1', function(d) { return Math.round(d)+.5; })
-				.attr('x2', width)
-				.attr('y2', function(d) { return Math.round(d)+.5; });
+				.attr('x1', PADX)
+				.attr('y1', function(d) { return PADY+Math.round(d)+.5; })
+				.attr('x2', PADX+width)
+				.attr('y2', function(d) { return PADY+Math.round(d)+.5; });
 
-		svgConnected.selectAll('line.grid1')
+		connected.background.selectAll('line.grid1')
 			.data(d3.range(-width, width, DAGRIDSIZE))
 			.enter().append('line')
 				.attr('class', 'grid1')
-				.attr('x1', function(d) { return d; })
-				.attr('y1', height)
-				.attr('x2', function(d) { return d+height; })
-				.attr('y2', 0);
+				.attr('x1', function(d) { return d>0?PADX+width:PADX+width+d; })
+				.attr('y1', function(d) { return d>0?PADY+d:PADY; })
+				.attr('x2', function(d) { return d>0?PADX+d:PADX; })
+				.attr('y2', function(d) { return d>0?PADY+height:PADY+height+d; });
 
-		svgConnected.selectAll('line.grid2')
+		connected.background.selectAll('line.grid2')
 			.data(d3.range(-width, width, DAGRIDSIZE))
 			.enter().append('line')
 				.attr('class', 'grid2')
-				.attr('x1', function(d) { return d; })
-				.attr('y1', 0)
-				.attr('x2', function(d) { return d+height; })
-				.attr('y2', height);
+				.attr('x1', function(d) { return Math.max(PADX, PADX+d); })
+				.attr('y1', function(d) { return d<0?PADY-d:PADY; })
+				.attr('x2', function(d) { return Math.min(PADX+d+width, PADX+width); })
+				.attr('y2', function(d) { return d<0?PADY+height:PADY+height-d; });
 
 	} else {
-		svgConnected.selectAll('line.grid1').remove();
-		svgConnected.selectAll('line.grid2').remove();
-		svgDualAxes.selectAll('line.grid').remove();
+		connected.background.selectAll('line.grid1').remove();
+		connected.background.selectAll('line.grid2').remove();
+		dualAxes.background.selectAll('line.grid').remove();
 	}
 	redraw(false);
 }
