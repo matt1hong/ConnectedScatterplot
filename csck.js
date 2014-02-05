@@ -426,7 +426,7 @@ function mousemoveDALC() {
 	}
 
 	if (draggingBlue) {
-		points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.max(0, height-m[1])));
+		points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.max(0, m[1])));
 	} else {
 		points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 	}
