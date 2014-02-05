@@ -29,7 +29,6 @@ var dualAxes = {
 	greenCircles: null
 }
 
-
 var datasets;
 
 var pointsToDraw;
@@ -234,8 +233,12 @@ function redrawConnected(recreate) {
 
 		connected.background.selectAll('g').remove();
 
+		var xScaleInverse = d3.scale.linear()
+			.domain(xScale.domain())
+			.range([0, width]);
+
 		var xAxis = d3.svg.axis()
-			.scale(xScale)
+			.scale(xScaleInverse)
 			.orient('bottom');
 
 		connected.background.append('g')
