@@ -11,5 +11,6 @@
 {"name":"china", "display":"China vs. Japan", "study":true},
 {"name":"house", "display":"Congress - House", "study":true},
 {"name":"senate", "display":"Congress - Senate", "study":true},
-{"name":"threepoints", "display":"Three Points", "study":false}
+{"name":"threepoints", "display":"Three Points", "study":false},
+{"name":"fivepoints", "display":"Five Points", "study":false}
 ]
