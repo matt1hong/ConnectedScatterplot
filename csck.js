@@ -143,6 +143,10 @@ function initialSetup() {
 	dualAxes.foreground = dualAxes.svg.append('g')
 		.attr('transform', 'translate('+PADX+' '+PADY+')');
 
+	dualAxes.foreground.append('rect')
+		.attr('width', width)
+		.attr('height', height);
+
 	dualAxes.foreground.append('path')
 		.datum(points)
 		.attr('class', 'line line1');
@@ -154,15 +158,15 @@ function initialSetup() {
 	redrawDualAxes(true);
 
 	dualAxes.foreground
-	    .on('mousemove', mousemoveDALC)
-	    .on('mouseup', mouseup);
+		.on('mousemove', mousemoveDALC)
+		.on('mouseup', mouseup);
 
 	// Connected Scatterplot
 
 	connected.svg = d3.select('#connectedscatter').append('svg')
-	    .attr('width', width+1.5*PADX)
-	    .attr('height', height+2*PADY)
-	    .attr('tabindex', 2);
+		.attr('width', width+1.5*PADX)
+		.attr('height', height+2*PADY)
+		.attr('tabindex', 2);
 
 	connected.background = connected.svg.append('g');
 
@@ -186,8 +190,8 @@ function initialSetup() {
 			.attr('points', '0,0 10,3 0,6');
 
 	connected.foreground.append('rect')
-	    .attr('width', width)
-	    .attr('height', height);
+		.attr('width', width)
+		.attr('height', height);
 
 	connected.foreground.append('path')
 		.datum(points)
@@ -196,8 +200,8 @@ function initialSetup() {
 		.attr('marker-end', showArrows?'url(#arrow)':'none');
 
 	connected.foreground
-	    .on('mousemove', mousemoveCS)
-	    .on('mouseup', mouseup);
+		.on('mousemove', mousemoveCS)
+		.on('mouseup', mouseup);
 
 	pointsToDraw = points.length;
 	$('.slider').slider('option', 'max', points.length);
@@ -438,7 +442,6 @@ function mousemoveDALC() {
 }
 
 function mouseup() {
-	if (draggedIndex < 0) return;
 	draggedIndex = -1;
 }
 
