@@ -29,7 +29,7 @@ var dualAxes = {
 	greenCircles: null
 }
 
-var datasets;
+var currentDataSet;
 
 var pointsToDraw;
 
@@ -125,6 +125,7 @@ function initialSetup() {
 			.attr('class', function(d) { return 'data-'+d.name; })
 			.text(function(d) { return d.display; });
 
+	currentDataSet = datasets[datasets.length-1];
 	points = datasets[datasets.length-1].data;
 
 	d3.select('option.data-'+datasets[datasets.length-1].name).attr('selected', true);
@@ -250,6 +251,16 @@ function redrawConnected(recreate) {
 			.attr('transform', 'translate('+PADX+' '+(PADY+height)+')')
 			.call(xAxis);
 
+		connected.background.append('g')
+			.attr('class', 'axislabel')
+			.attr('transform', 'translate('+(PADX+width)+' '+(PADY+height-5)+')')
+			.append('text')
+				.attr('class', 'axis1')
+				.attr('x', 0)
+				.attr('y', 0)
+				.attr('text-anchor', 'end')
+				.text(currentDataSet.label1);
+
 		var yAxis = d3.svg.axis()
 			.scale(yScale)
 			.orient('left');
@@ -258,6 +269,16 @@ function redrawConnected(recreate) {
 			.attr('class', 'axis2')
 			.attr('transform', 'translate('+PADX+' '+PADY+')')
 			.call(yAxis);
+
+		connected.background.append('g')
+			.attr('class', 'axislabel')
+			.attr('transform', 'translate('+(PADX+11)+' '+PADY+') rotate(-90)')
+			.append('text')
+				.attr('class', 'axis2')
+				.attr('x', 0)
+				.attr('y', 0)
+				.attr('text-anchor', 'end')
+				.text(currentDataSet.label2);
 
 		if (showDots) {
 
@@ -338,6 +359,16 @@ function redrawDualAxes(recreate) {
 			.attr('transform', 'translate('+PADX+' '+PADY+')')
 			.call(axis1);
 
+		dualAxes.background.append('g')
+			.attr('class', 'axislabel')
+			.attr('transform', 'translate('+(PADX+11)+' '+PADY+') rotate(-90)')
+			.append('text')
+				.attr('class', 'axis1')
+				.attr('x', 0)
+				.attr('y', 0)
+				.attr('text-anchor', 'end')
+				.text(currentDataSet.label1);
+
 		var axis2 = d3.svg.axis()
 			.scale(yScale)
 			.orient('right');
@@ -346,6 +377,16 @@ function redrawDualAxes(recreate) {
 			.attr('class', 'axis2')
 			.attr('transform', 'translate('+(PADX+width)+' '+PADY+')')
 			.call(axis2);
+
+		dualAxes.background.append('g')
+			.attr('class', 'axislabel')
+			.attr('transform', 'translate('+(PADX+width-5)+' '+PADY+') rotate(-90)')
+			.append('text')
+				.attr('class', 'axis2')
+				.attr('x', 0)
+				.attr('y', 0)
+				.attr('text-anchor', 'end')
+				.text(currentDataSet.label2);
 
 		if (showDots) {
 			dualAxes.foreground.selectAll('circle').remove();
@@ -554,6 +595,7 @@ function rotateCCW() {
 }
 
 function loadData(index) {
+  currentDataSet = datasets[index];
   points = datasets[index].data;
   commonScales = !!datasets[index].commonScales;
   afterUpdatePoints();
