@@ -1,7 +1,8 @@
 var width = 600,
     height = 600;
 
-var points;
+var pointsConnected;
+var pointsDualAxes;
 
 var showArrows = false;
 var showDots = true;
@@ -126,7 +127,7 @@ function initialSetup() {
 			.text(function(d) { return d.display; });
 
 	currentDataSet = datasets[datasets.length-1];
-	points = datasets[datasets.length-1].data;
+	pointsDualAxes = pointsConnected = datasets[datasets.length-1].data;
 
 	d3.select('option.data-'+datasets[datasets.length-1].name).attr('selected', true);
 
@@ -149,11 +150,11 @@ function initialSetup() {
 		.attr('height', height);
 
 	dualAxes.foreground.append('path')
-		.datum(points)
+		.datum(pointsDualAxes)
 		.attr('class', 'line line1');
 
 	dualAxes.foreground.append('path')
-		.datum(points)
+		.datum(pointsDualAxes)
 		.attr('class', 'line line2');
 
 	redrawDualAxes(true);
@@ -195,7 +196,7 @@ function initialSetup() {
 		.attr('height', height);
 
 	connected.foreground.append('path')
-		.datum(points)
+		.datum(pointsConnected)
 		.attr('class', 'line')
 		.attr('marker-mid', showArrows?'url(#arrow)':'none')
 		.attr('marker-end', showArrows?'url(#arrow)':'none');
@@ -204,35 +205,37 @@ function initialSetup() {
 		.on('mousemove', mousemoveCS)
 		.on('mouseup', mouseup);
 
-	pointsToDraw = points.length;
-	$('.slider').slider('option', 'max', points.length);
+	pointsToDraw = pointsDualAxes.length;
+	$('.slider').slider('option', 'max', pointsDualAxes.length);
 	$('#shiftSlider').slider('value', 0);
-	$('#drawSlider').slider('value', points.length);
+	$('#drawSlider').slider('value', pointsDualAxes.length);
 
 	redraw(true);
 }
 
 function scaleScales() {
-	points.forEach(function (d) {
+	pointsDualAxes.forEach(function (d) {
 		d.date = new Date(d.date);
 	});
 
-	timeScale.domain([points[0].date, points[points.length-1].date]);
+	timeScale.domain([pointsDualAxes[0].date, pointsDualAxes[pointsDualAxes.length-1].date]);
 	if (commonScales) {
-		var e1 = d3.extent(points, function(d) { return d.value1; });
-		var e2 = d3.extent(points, function(d) { return d.value2; });
+		var e1 = d3.extent(pointsDualAxes, function(d) { return d.value1; });
+		var e2 = d3.extent(pointsDualAxes, function(d) { return d.value2; });
 		var extent = [Math.min(e1[0], e2[0]), Math.max(e1[1], e2[1])];
 		xScale.domain(extent);
 		yScale.domain(extent);
 	} else {
-		xScale.domain(d3.extent(points, function(d) { return d.value1; }));
-		yScale.domain(d3.extent(points, function(d) { return d.value2; }));
+		xScale.domain(d3.extent(pointsDualAxes, function(d) { return d.value1; }));
+		yScale.domain(d3.extent(pointsDualAxes, function(d) { return d.value2; }));
 	}
+
+	pointsConnected = pointsDualAxes.slice(0);
 }
 
 function redrawConnected(recreate) {
 	if (recreate) {
-		connected.foreground.select('path').datum(points.slice(0, pointsToDraw)).attr('d', lineConnected);
+		connected.foreground.select('path').datum(pointsConnected.slice(0, pointsToDraw)).attr('d', lineConnected);
 
 		connected.foreground.selectAll('text').remove();
 
@@ -283,7 +286,7 @@ function redrawConnected(recreate) {
 		if (showDots) {
 
 			var circle = connected.foreground.selectAll('circle')
-				.data(points.slice(0, pointsToDraw));
+				.data(pointsConnected.slice(0, pointsToDraw));
 
 			circle.enter().append('circle')
 				.attr('r', 3)
@@ -298,7 +301,7 @@ function redrawConnected(recreate) {
 
 			if (showLabels) {
 				var text = connected.foreground.selectAll('text')
-					.data(points.slice(0, pointsToDraw));
+					.data(pointsConnected.slice(0, pointsToDraw));
 
 				text.enter()
 					.append('text')
@@ -316,13 +319,13 @@ function redrawConnected(recreate) {
 		connected.foreground.select('path').attr('d', lineConnected);
 
 		connected.foreground.selectAll('circle')
-			.data(points.slice(0, pointsToDraw))
+			.data(pointsConnected.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
 			.attr('cx', function(d) { return width-xScale(d.value1); })
 			.attr('cy', function(d) { return yScale(d.value2); });
 
 		connected.foreground.selectAll('text')
-			.data(points.slice(0, pointsToDraw))
+			.data(pointsConnected.slice(0, pointsToDraw))
 			.attr('x', function(d) { return width-xScale(d.value1); })
 			.attr('y', function(d) { return yScale(d.value2) + 12; });
 	}
@@ -335,8 +338,8 @@ function redrawConnected(recreate) {
 
 function redrawDualAxes(recreate) {
 	if (recreate) {
-		dualAxes.foreground.select('path.line1').datum(points.slice(0, pointsToDraw)).attr('d', lineDA1);
-		dualAxes.foreground.select('path.line2').datum(points.slice(0, pointsToDraw)).attr('d', lineDA2);
+		dualAxes.foreground.select('path.line1').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', lineDA1);
+		dualAxes.foreground.select('path.line2').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', lineDA2);
 
 		dualAxes.background.selectAll('g').remove();
 
@@ -392,7 +395,7 @@ function redrawDualAxes(recreate) {
 			dualAxes.foreground.selectAll('circle').remove();
 
 			dualAxes.blueCircles = dualAxes.foreground.selectAll('circle.line1')
-				.data(points.slice(0, pointsToDraw));
+				.data(pointsDualAxes.slice(0, pointsToDraw));
 
 			dualAxes.blueCircles.enter().append('circle')
 				.attr('r', 3)
@@ -409,7 +412,7 @@ function redrawDualAxes(recreate) {
 				.attr('cy', function(d) { return xScale(d.value1); });
 
 			dualAxes.greenCircles = dualAxes.foreground.selectAll('circle.line2')
-				.data(points.slice(0, pointsToDraw));
+				.data(pointsDualAxes.slice(0, pointsToDraw));
 
 			dualAxes.greenCircles.enter().append('circle')
 				.attr('r', 3)
@@ -433,11 +436,11 @@ function redrawDualAxes(recreate) {
 		dualAxes.foreground.select('path.line2').attr('d', lineDA2);
 
 		dualAxes.blueCircles
-			.data(points.slice(0, pointsToDraw))
+			.data(pointsDualAxes.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
 			.attr('cy', function(d) { return xScale(d.value1); });
 		dualAxes.greenCircles
-			.data(points.slice(0, pointsToDraw))
+			.data(pointsDualAxes.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
 			.attr('cy', function(d) { return yScale(d.value2); });
 	}
@@ -560,28 +563,31 @@ function toggleGrid(checkbox) {
 function flipH() {
 	var min = xScale.domain()[0];
 	var max = xScale.domain()[1];
-	points.forEach(function(d) {
+	pointsDualAxes.forEach(function(d) {
 		d.value1 = max-(d.value1-min);
 	});
+	pointsConnected = pointsDualAxes.slice(0);
 	redraw(true);
 }
 
 function flipV() {
 	var min = yScale.domain()[0];
 	var max = yScale.domain()[1];
-	points.forEach(function(d) {
+	pointsDualAxes.forEach(function(d) {
 		d.value2 = max-(d.value2-min);
 	});
+	pointsConnected = pointsDualAxes.slice(0);
 	redraw(true);
 }
 
 
 function exchangeAxes() {
-	points.forEach(function(d) {
+	pointsDualAxes.forEach(function(d) {
 		var temp = d.value1;
 		d.value1 = xScale.invert(yScale(d.value2));
 		d.value2 = yScale.invert(xScale(temp));
 	});
+	pointsConnected = pointsDualAxes.slice(0);
 }
 
 function rotateCW() {
@@ -596,7 +602,7 @@ function rotateCCW() {
 
 function loadData(index) {
   currentDataSet = datasets[index];
-  points = datasets[index].data;
+  pointsConnected = pointsDualAxes = datasets[index].data;
   commonScales = !!datasets[index].commonScales;
   afterUpdatePoints();
 }
@@ -605,48 +611,49 @@ function afterUpdatePoints() {
 	scaleScales();
 
 	sliderValue = 0;
-	pointsToDraw = points.length;
-	$('.slider').slider('option', 'max', points.length);
+	pointsToDraw = pointsDualAxes.length;
+	$('.slider').slider('option', 'max', pointsDualAxes.length);
 	$('#shiftSlider').slider('value', 0);
-	$('#drawSlider').slider('value', points.length);
+	$('#drawSlider').slider('value', pointsDualAxes.length);
 
 	redraw(true);
 }
 
 // add a point in between each in the current dataset
 function addSamples() {
-  // linearly interpolate a pair of values
-  function lerp(a, b, proportion) { return a + (b-a)*proportion; }
-  function lerpDate(a, b, proportion) { return Math.min(a,b) + (Math.abs(a-b)*proportion); }
-  // interpolate a pair of points
-  function interpolatePair(a, b, proportion) {
-    return {
-      date: lerpDate(a.date, b.date, proportion),
-      value1: lerp(a.value1, b.value1, proportion),
-      value2: lerp(a.value2, b.value2, proportion)
-    }
-  }
+	// linearly interpolate a pair of values
+	function lerp(a, b, proportion) { return a + (b-a)*proportion; }
+	function lerpDate(a, b, proportion) { return Math.min(a,b) + (Math.abs(a-b)*proportion); }
+	// interpolate a pair of points
+	function interpolatePair(a, b, proportion) {
+		return {
+			date: lerpDate(a.date, b.date, proportion),
+			value1: lerp(a.value1, b.value1, proportion),
+			value2: lerp(a.value2, b.value2, proportion)
+		}
+	}
 
-  // make the new samples
-  var steps = 2;
-  var newSamples = []
-  for (var p = 1; p < points.length; p++) {
-    for (var s = 1; s <= steps; s++) {
-      var proportion = s / (steps+1);
-      newSamples.push(interpolatePair(points[p-1], points[p], proportion));
-    }
-  }
+	// make the new samples
+	var steps = 2;
+	var newSamples = []
+	for (var p = 1; p < pointsDualAxes.length; p++) {
+		for (var s = 1; s <= steps; s++) {
+			var proportion = s / (steps+1);
+			newSamples.push(interpolatePair(pointsDualAxes[p-1], pointsDualAxes[p], proportion));
+		}
+	}
 
-  function sortPointsByDate(data) {
-    return data.sort(function (a, b) {
-      a = new Date(a.date);
-      b = new Date(b.date);
-      return a<b?-1 : a>b?1 : 0;
-    });
-  }
+	function sortPointsByDate(data) {
+		return data.sort(function (a, b) {
+			a = new Date(a.date);
+			b = new Date(b.date);
+			return a<b?-1 : a>b?1 : 0;
+		});
+	}
 
-  // combine, sort, and update
-  points = points.concat(newSamples);
-  points = sortPointsByDate(points);
-  afterUpdatePoints();
+	// combine, sort, and update
+	pointsDualAxes = pointsDualAxes.concat(newSamples);
+	pointsDualAxes = sortPointsByDate(pointsDualAxes);
+	pointsConnected = pointsDualAxes.slice(0);
+	afterUpdatePoints();
 }

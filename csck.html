@@ -157,16 +157,18 @@
 	function shift(event, ui) {
 		var step = ui.value-sliderValue;
 		
-		for (var i = points.length - 1; i >= 0; i--) {
-			var nextIndex = (i - step) % points.length;
+		for (var i = pointsDualAxes.length - 1; i >= 0; i--) {
+			var nextIndex = (i - step) % pointsDualAxes.length;
 			if (nextIndex < 0)
-				nextIndex += points.length;
-			points[i].value3 = points[nextIndex].value2;
+				nextIndex += pointsDualAxes.length;
+			pointsDualAxes[i].value3 = pointsDualAxes[nextIndex].value2;
 		}
 		
-		for (var i = points.length - 1; i >= 0; i--) {
-			points[i].value2 = points[i].value3;
+		for (var i = pointsDualAxes.length - 1; i >= 0; i--) {
+			pointsDualAxes[i].value2 = pointsDualAxes[i].value3;
 		};
+
+		pointsConnected = pointsDualAxes.slice(0);
 
 		sliderValue = ui.value;
 
@@ -175,7 +177,7 @@
 
     function exportData() {
  		var data = [];
-    	points.forEach(function(p) {
+    	pointsDualAxes.forEach(function(p) {
     		var d = {
     			date: (p.date.getMonth()+1)+'/'+p.date.getDate()+'/'+p.date.getFullYear(),
     			value1: p.value1,
