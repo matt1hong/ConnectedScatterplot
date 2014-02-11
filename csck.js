@@ -108,10 +108,10 @@ function makeDataSets() {
 		d = new Date(d.getTime()+24*3600*1000);
 	}
 
-	datasets.push({"name":"parallel", "display":"Parallel Sines", "data": parallelSines, "commonScales":true});
-	datasets.push({"name":"increasing", "display":"Increasing Sines", "data": increasingSines, "commonScales":true});
-	datasets.push({"name":"spiral", "display":"Spiral", "data": spiral, "commonScales":true});
-	datasets.push({"name":"frequency", "display":"Different Frequency", "data": freqSines, "commonScales":true});
+	datasets.push({"name":"parallel", "display":"Parallel Sines", "data":parallelSines, "commonScales":true});
+	datasets.push({"name":"increasing", "display":"Increasing Sines", "data":increasingSines, "commonScales":true});
+	datasets.push({"name":"spiral", "display":"Spiral", "data":spiral, "commonScales":true});
+	datasets.push({"name":"frequency", "display":"Different Frequency", "data":freqSines, "commonScales":true});
 }
 
 
@@ -230,7 +230,7 @@ function scaleScales() {
 		yScale.domain(d3.extent(pointsDualAxes, function(d) { return d.value2; }));
 	}
 
-	pointsConnected = pointsDualAxes.slice(0);
+	copyDALCtoConnected();
 }
 
 function redrawConnected(recreate) {
@@ -462,8 +462,11 @@ function mousemoveCS() {
 		m[1] *= DAGRIDSIZE/2;
 	}
 
-	points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, width-m[0])));
-	points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
+	pointsConnected[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, width-m[0])));
+	pointsConnected[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
+
+	pointsDualAxes[draggedIndex].value1 = pointsConnected[draggedIndex].value1;
+	pointsDualAxes[draggedIndex].value2 = pointsConnected[draggedIndex].value2;
 
 	redraw(false);
 }
@@ -477,10 +480,13 @@ function mousemoveDALC() {
 	}
 
 	if (draggingBlue) {
-		points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.max(0, m[1])));
+		pointsDualAxes[draggedIndex].value1 = xScale.invert(Math.max(0, Math.max(0, m[1])));
 	} else {
-		points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
+		pointsDualAxes[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 	}
+
+	pointsConnected[draggedIndex].value1 = pointsDualAxes[draggedIndex].value1;
+	pointsConnected[draggedIndex].value2 = pointsDualAxes[draggedIndex].value2;
 
 	redraw(false);
 }
@@ -566,7 +572,7 @@ function flipH() {
 	pointsDualAxes.forEach(function(d) {
 		d.value1 = max-(d.value1-min);
 	});
-	pointsConnected = pointsDualAxes.slice(0);
+	copyDALCtoConnected();
 	redraw(true);
 }
 
@@ -576,10 +582,9 @@ function flipV() {
 	pointsDualAxes.forEach(function(d) {
 		d.value2 = max-(d.value2-min);
 	});
-	pointsConnected = pointsDualAxes.slice(0);
+	copyDALCtoConnected();
 	redraw(true);
 }
-
 
 function exchangeAxes() {
 	pointsDualAxes.forEach(function(d) {
@@ -587,7 +592,7 @@ function exchangeAxes() {
 		d.value1 = xScale.invert(yScale(d.value2));
 		d.value2 = yScale.invert(xScale(temp));
 	});
-	pointsConnected = pointsDualAxes.slice(0);
+	copyDALCtoConnected();
 }
 
 function rotateCW() {
@@ -605,6 +610,28 @@ function loadData(index) {
   pointsConnected = pointsDualAxes = datasets[index].data;
   commonScales = !!datasets[index].commonScales;
   afterUpdatePoints();
+}
+
+function copyDALCtoConnected() {
+	pointsConnected = [];
+	pointsDualAxes.forEach(function(d) {
+		pointsConnected.push({
+			date:d.date,
+			value1:d.value1,
+			value2:d.value2
+		});
+	});
+}
+
+function copyConnectedtoDALC() {
+	pointsDualAxes = [];
+	pointsConnected.forEach(function(d) {
+		pointsDualAxes.push({
+			date:d.date,
+			value1:d.value1,
+			value2:d.value2
+		});
+	});
 }
 
 function afterUpdatePoints() {
@@ -654,6 +681,6 @@ function addSamples() {
 	// combine, sort, and update
 	pointsDualAxes = pointsDualAxes.concat(newSamples);
 	pointsDualAxes = sortPointsByDate(pointsDualAxes);
-	pointsConnected = pointsDualAxes.slice(0);
+	copyDALCtoConnected();
 	afterUpdatePoints();
 }

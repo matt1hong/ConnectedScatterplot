@@ -162,13 +162,13 @@
 			if (nextIndex < 0)
 				nextIndex += pointsDualAxes.length;
 			pointsDualAxes[i].value3 = pointsDualAxes[nextIndex].value2;
+			pointsConnected[i].value3 = pointsConnected[nextIndex].value2;
 		}
 		
 		for (var i = pointsDualAxes.length - 1; i >= 0; i--) {
 			pointsDualAxes[i].value2 = pointsDualAxes[i].value3;
+			pointsConnected[i].value2 = pointsConnected[i].value3;
 		};
-
-		pointsConnected = pointsDualAxes.slice(0);
 
 		sliderValue = ui.value;
 
