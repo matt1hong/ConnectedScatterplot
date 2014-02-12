@@ -14,10 +14,12 @@ var cheatMode = true;
 
 var DAGRIDSIZE = height/9;
 
+var GENERATEDATASETS = true;
+
 var PADX = 40;
 var PADY = 20;
 
-var commonScales = true;
+var commonScales = false;
 
 var connected = {
 	svg: null,
@@ -120,7 +122,8 @@ function makeDataSets() {
 
 function initialSetup() {
 
-	makeDataSets();
+	if (GENERATEDATASETS)
+		makeDataSets();
 
 	d3.select('#dataset').selectAll('option')
 		.data(datasets)
@@ -129,10 +132,10 @@ function initialSetup() {
 			.attr('class', function(d) { return 'data-'+d.name; })
 			.text(function(d) { return d.display; });
 
-	currentDataSet = datasets[datasets.length-1];
-	pointsDualAxes = pointsConnected = datasets[datasets.length-1].data;
+	currentDataSet = datasets[0];
+	pointsDualAxes = pointsConnected = datasets[0].data;
 
-	d3.select('option.data-'+datasets[datasets.length-1].name).attr('selected', true);
+	d3.select('option.data-'+datasets[0].name).attr('selected', true);
 
 	scaleScales();
 

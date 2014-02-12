@@ -1,24 +1,39 @@
 
 var datasets;
 
-function loadDataSets(studyOnly, callback) {
+function jsonGet(dataset, filename, callback) {
+	d3.json(filename, function (data) {
+				dataset.data = data;
+				callback();
+			});
+}
 
-	d3.json('datasets.json', function (datasetinfo) {
+function loadDataSets(studyOnly, callback, subdirectory) {
+
+	if (subdirectory === undefined)
+		subdirectory = 'datasets/';
+	else
+		subdirectory = 'datasets/'+subdirectory+'/';
+
+	d3.json(subdirectory+'datasets.json', function (datasetinfo) {
 
 		datasets = datasetinfo;
-
-		datasets.forEach(function(dataset) {
-			d3.json('datasets/'+dataset.name+'.json', function (data) {
-				dataset.data = data;
-			});
-		});
 
 		if (studyOnly) {
 			datasets = datasets.filter(function (d) { return d.study; });
 		}
 
-		if (callback) {
-			callback();
-		}
+		var q = queue();
+
+		datasets.forEach(function(dataset) {
+			q.defer(jsonGet, dataset, subdirectory+dataset.name+'.json');
+		});
+
+		q.awaitAll(function() {
+			if (callback) {
+				callback();
+			}
+		});
+
 	});
 }
