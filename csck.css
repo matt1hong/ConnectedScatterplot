@@ -1,0 +1,103 @@
+body {
+	font: 13px sans-serif;
+	width: 1360px;
+}
+
+rect {
+	fill: none;
+	pointer-events: all;
+}
+
+circle,
+line,
+.line {
+	fill: none;
+	stroke: purple;
+	stroke-width: 1.5px;
+}
+
+circle {
+	fill: white;
+	cursor: move;
+}
+
+.axis1 text, .axis2 text, .axis text {
+	font: 10px sans-serif;
+	fill: gray;
+}
+
+.axis1 line, .axis1 path, .axis2 line, .axis2 path, .axis line, .axis path {
+	fill: none;
+	stroke-width: 1px;
+	stroke: gray;
+	shape-rendering: crispEdges;
+}
+
+
+.axis1 line, .axis1 path, .line1 {
+	stroke: blue;
+}
+
+.axis2 line, .axis2 path, .line2 {
+	stroke: green;
+}
+
+.cheat, .cheat1, .cheat2 {
+	stroke: lightgray;
+	fill: none;
+}
+
+.selected {
+	fill: #ff7f0e;
+	stroke: #ff7f0e;
+}
+
+div#charts {
+	width: 1360px;
+	height: 600px;
+	margin-bottom: 10px;
+}
+
+div.chart {
+	width: 660px;
+	height: 640px;
+	float: left;
+}
+
+#linechart {
+	width: 680px;
+}
+
+div.spacer {
+	float: left;
+	width: 20px;
+	height: 600px;
+}
+
+div.slider {
+	width: 600px;
+	clear: left;
+	float: left;
+	margin-left: 40px;
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+line.grid1, line.grid2, line.grid {
+	stroke: lightgray;
+	stroke-width: 1px;
+}
+
+text {
+	font-size: 10px;
+	fill: rgb(199, 166, 199);
+}
+
+
+text.axis1 {
+	fill: blue;
+}
+
+text.axis2 {
+	fill: green;
+}
