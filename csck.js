@@ -24,7 +24,11 @@ var commonScales = false;
 var connected = {
 	svg: null,
 	background: null,
-	foreground: null
+	foreground: null,
+	lineDA: d3.svg.line()
+		.x(function(d) { return width-xScale(d.value1); })
+		.y(function(d) { return yScale(d.value2); })
+		.interpolate('cardinal')
 };
 
 var dualAxes = {
@@ -32,7 +36,15 @@ var dualAxes = {
 	background: null,
 	foreground: null,
 	blueCircles: null,
-	greenCircles: null
+	greenCircles: null,
+	lineDA1: d3.svg.line()
+		.x(function(d) { return timeScale(d.date); })
+		.y(function(d) { return xScale(d.value1); })
+		.interpolate('cardinal'),
+	lineDA2: d3.svg.line()
+		.x(function(d) { return timeScale(d.date); })
+		.y(function(d) { return yScale(d.value2); })
+		.interpolate('cardinal')
 }
 
 var currentDataSet;
@@ -51,22 +63,6 @@ var yScale = d3.scale.linear()
 var draggedIndex = -1,
 	draggingBlue = true,
     selectedIndex = -1;
-
-var lineConnected = d3.svg.line()
-    .x(function(d) { return width-xScale(d.value1); })
-    .y(function(d) { return yScale(d.value2); })
-    .interpolate('cardinal');
-
-var lineDA1 = d3.svg.line()
-	.x(function(d) { return timeScale(d.date); })
-	.y(function(d) { return xScale(d.value1); })
-	.interpolate('cardinal');
-
-var lineDA2 = d3.svg.line()
-	.x(function(d) { return timeScale(d.date); })
-	.y(function(d) { return yScale(d.value2); })
-	.interpolate('cardinal');
-
 
 function makeDataSets() {
 
@@ -256,14 +252,14 @@ function scaleScales() {
 
 function redrawConnected(recreate) {
 	if (recreate) {
-		connected.foreground.select('path').datum(pointsConnected.slice(0, pointsToDraw)).attr('d', lineConnected);
+		connected.foreground.select('path').datum(pointsConnected.slice(0, pointsToDraw)).attr('d', connected.lineDA);
 
 		connected.foreground.selectAll('text').remove();
 
 		if (cheatMode)
 			connected.background.selectAll('g').remove();
 
-		connected.background.select('path').datum(pointsDualAxes).attr('d', lineConnected);
+		connected.background.select('path').datum(pointsDualAxes).attr('d', connected.lineDA);
 
 		var xScaleInverse = d3.scale.linear()
 			.domain(xScale.domain())
@@ -340,10 +336,10 @@ function redrawConnected(recreate) {
 			connected.foreground.selectAll('text').remove();
 		}
 	} else {
-		connected.foreground.select('path').attr('d', lineConnected);
+		connected.foreground.select('path').attr('d', connected.lineDA);
 
 		if (cheatMode)
-			connected.background.select('path').attr('d', lineConnected);
+			connected.background.select('path').attr('d', connected.lineDA);
 
 		connected.foreground.selectAll('circle')
 			.data(pointsConnected.slice(0, pointsToDraw))
@@ -365,12 +361,12 @@ function redrawConnected(recreate) {
 
 function redrawDualAxes(recreate) {
 	if (recreate) {
-		dualAxes.foreground.select('path.line1').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', lineDA1);
-		dualAxes.foreground.select('path.line2').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', lineDA2);
+		dualAxes.foreground.select('path.line1').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', dualAxes.lineDA1);
+		dualAxes.foreground.select('path.line2').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', dualAxes.lineDA2);
 
 		if (cheatMode) {
-			dualAxes.background.select('path.cheat1').datum(pointsConnected).attr('d', lineDA1);
-			dualAxes.background.select('path.cheat2').datum(pointsConnected).attr('d', lineDA2);
+			dualAxes.background.select('path.cheat1').datum(pointsConnected).attr('d', dualAxes.lineDA1);
+			dualAxes.background.select('path.cheat2').datum(pointsConnected).attr('d', dualAxes.lineDA2);
 		}
 
 		dualAxes.background.selectAll('g').remove();
@@ -464,12 +460,12 @@ function redrawDualAxes(recreate) {
 			dualAxes.greenCircles.remove();
 		}
 	} else {
-		dualAxes.foreground.select('path.line1').attr('d', lineDA1);
-		dualAxes.foreground.select('path.line2').attr('d', lineDA2);
+		dualAxes.foreground.select('path.line1').attr('d', dualAxes.lineDA1);
+		dualAxes.foreground.select('path.line2').attr('d', dualAxes.lineDA2);
 
 		if (cheatMode) {
-			dualAxes.background.select('path.cheat1').attr('d', lineDA1);
-			dualAxes.background.select('path.cheat2').attr('d', lineDA2);
+			dualAxes.background.select('path.cheat1').attr('d', dualAxes.lineDA1);
+			dualAxes.background.select('path.cheat2').attr('d', dualAxes.lineDA2);
 		}
 
 		dualAxes.blueCircles
@@ -538,13 +534,13 @@ function mouseup() {
 
 function toggleSmooth(checkbox) {
 	if (checkbox.checked) {
-		lineConnected.interpolate('cardinal');
-		lineDA1.interpolate('cardinal');
-		lineDA2.interpolate('cardinal');
+		connected.lineDA.interpolate('cardinal');
+		dualAxes.lineDA1.interpolate('cardinal');
+		dualAxes.lineDA2.interpolate('cardinal');
 	} else {
-		lineConnected.interpolate('linear');
-		lineDA1.interpolate('linear');
-		lineDA2.interpolate('linear');
+		connected.lineDA.interpolate('linear');
+		dualAxes.lineDA1.interpolate('linear');
+		dualAxes.lineDA2.interpolate('linear');
 	}
 
 	redraw(false);
