@@ -49,6 +49,11 @@
 			stroke: green;
 		}
 
+		.cheat, .cheat1, .cheat2 {
+			stroke: lightgray;
+			fill: none;
+		}
+
 		.selected {
 			fill: #ff7f0e;
 			stroke: #ff7f0e;
@@ -127,6 +132,8 @@
 		<label><input type="checkbox" id="arrows" onclick="toggleArrows(this);" /> Arrows</label>&nbsp;
 		<label><input type="checkbox" id="labels" onclick="toggleLabels(this);" /> Labels</label>
 		<label><input type="checkbox" id="grid" onclick="toggleGrid(this);" /> Grid</label>
+		<label><input type="checkbox" id="disconnect" onclick="toggleDisconnect(this);" /> Disconnect</label>
+		<label><input type="checkbox" id="cheatMode" onclick="toggleCheatMode(this);" checked disabled /> Cheat</label>
 		<button type="button" onclick="addSamples();">Add samples</button>&nbsp;
 		<button type="button" onclick="exportData();">Export Data</button>&nbsp;
 	</div>

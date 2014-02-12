@@ -9,6 +9,9 @@ var showDots = true;
 var showLabels = false;
 var showGrid = false;
 
+var disconnected = false;
+var cheatMode = true;
+
 var DAGRIDSIZE = height/9;
 
 var PADX = 40;
@@ -142,6 +145,16 @@ function initialSetup() {
 
 	dualAxes.background = dualAxes.svg.append('g');
 
+	dualAxes.background.append('path')
+		.attr('class', 'cheat1')
+		.attr('transform', 'translate('+PADX+' '+PADY+')')
+		.datum(pointsConnected);
+
+	dualAxes.background.append('path')
+		.attr('class', 'cheat2')
+		.attr('transform', 'translate('+PADX+' '+PADY+')')
+		.datum(pointsConnected);
+
 	dualAxes.foreground = dualAxes.svg.append('g')
 		.attr('transform', 'translate('+PADX+' '+PADY+')');
 
@@ -171,6 +184,11 @@ function initialSetup() {
 		.attr('tabindex', 2);
 
 	connected.background = connected.svg.append('g');
+
+	connected.background.append('path')
+		.attr('class', 'cheat')
+		.attr('transform', 'translate('+PADX+' '+PADY+')')
+		.datum(pointsDualAxes);
 
 	connected.foreground = connected.svg.append('g')
 		.attr('transform', 'translate('+PADX+' '+PADY+')');
@@ -239,7 +257,10 @@ function redrawConnected(recreate) {
 
 		connected.foreground.selectAll('text').remove();
 
-		connected.background.selectAll('g').remove();
+		if (cheatMode)
+			connected.background.selectAll('g').remove();
+
+		connected.background.select('path').datum(pointsDualAxes).attr('d', lineConnected);
 
 		var xScaleInverse = d3.scale.linear()
 			.domain(xScale.domain())
@@ -318,6 +339,9 @@ function redrawConnected(recreate) {
 	} else {
 		connected.foreground.select('path').attr('d', lineConnected);
 
+		if (cheatMode)
+			connected.background.select('path').attr('d', lineConnected);
+
 		connected.foreground.selectAll('circle')
 			.data(pointsConnected.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
@@ -340,6 +364,11 @@ function redrawDualAxes(recreate) {
 	if (recreate) {
 		dualAxes.foreground.select('path.line1').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', lineDA1);
 		dualAxes.foreground.select('path.line2').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', lineDA2);
+
+		if (cheatMode) {
+			dualAxes.background.select('path.cheat1').datum(pointsConnected).attr('d', lineDA1);
+			dualAxes.background.select('path.cheat2').datum(pointsConnected).attr('d', lineDA2);
+		}
 
 		dualAxes.background.selectAll('g').remove();
 
@@ -435,6 +464,11 @@ function redrawDualAxes(recreate) {
 		dualAxes.foreground.select('path.line1').attr('d', lineDA1);
 		dualAxes.foreground.select('path.line2').attr('d', lineDA2);
 
+		if (cheatMode) {
+			dualAxes.background.select('path.cheat1').attr('d', lineDA1);
+			dualAxes.background.select('path.cheat2').attr('d', lineDA2);
+		}
+
 		dualAxes.blueCircles
 			.data(pointsDualAxes.slice(0, pointsToDraw))
 			.classed('selected', function(d, i) { return i === selectedIndex; })
@@ -465,8 +499,10 @@ function mousemoveCS() {
 	pointsConnected[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, width-m[0])));
 	pointsConnected[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 
-	pointsDualAxes[draggedIndex].value1 = pointsConnected[draggedIndex].value1;
-	pointsDualAxes[draggedIndex].value2 = pointsConnected[draggedIndex].value2;
+	if (!disconnected) {
+		pointsDualAxes[draggedIndex].value1 = pointsConnected[draggedIndex].value1;
+		pointsDualAxes[draggedIndex].value2 = pointsConnected[draggedIndex].value2;
+	}
 
 	redraw(false);
 }
@@ -485,8 +521,10 @@ function mousemoveDALC() {
 		pointsDualAxes[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 	}
 
-	pointsConnected[draggedIndex].value1 = pointsDualAxes[draggedIndex].value1;
-	pointsConnected[draggedIndex].value2 = pointsDualAxes[draggedIndex].value2;
+	if (!disconnected) {
+		pointsConnected[draggedIndex].value1 = pointsDualAxes[draggedIndex].value1;
+		pointsConnected[draggedIndex].value2 = pointsDualAxes[draggedIndex].value2;
+	}
 
 	redraw(false);
 }
@@ -564,6 +602,28 @@ function toggleGrid(checkbox) {
 		dualAxes.background.selectAll('line.grid').remove();
 	}
 	redraw(false);
+}
+
+function toggleDisconnect(checkbox) {
+	disconnected = checkbox.checked;
+	if (!disconnected)
+		copyDALCtoConnected();
+	d3.select('#cheatMode').attr('disabled', disconnected?null:true);
+	redraw(true);
+}
+
+function toggleCheatMode(checkbox) {
+	cheatMode = checkbox.checked;
+	if (cheatMode) {
+		connected.background.select('path.cheat').style('display', 'inline');
+		dualAxes.background.select('path.cheat1').style('display', 'inline');
+		dualAxes.background.select('path.cheat2').style('display', 'inline');
+	} else {
+		connected.background.select('path.cheat').style('display', 'none');
+		dualAxes.background.select('path.cheat1').style('display', 'none');
+		dualAxes.background.select('path.cheat2').style('display', 'none');
+	}
+	redraw(true);
 }
 
 function flipH() {
