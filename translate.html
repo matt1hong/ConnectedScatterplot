@@ -24,7 +24,7 @@
 		<div class="row" style="margin-top:30px;">
 			<div class="row">
 			<div class="col-sm-offset-10 col-sm-2">
-				<a href="#" role="button" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">Submit</a>
+				<a href="#" role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">Submit</a>
 			</div>
 		</div>
 	</div>
@@ -33,9 +33,20 @@
 
 	var step = 0;
 
+	var next = false;
+
 	function nextStep() {
-		step += 1;
-		loadData(step);
+		if (next) {
+			step += 1;
+			toggleCheatMode(false);
+			next = false;
+			loadData(step);
+			$('#submit').text('Submit');
+		} else {
+			$('#submit').text('Next');
+			toggleCheatMode(true);
+			next = true;
+		}
 	}
 
 	loadDataSets(true, function() {
@@ -44,6 +55,9 @@
 		disconnected = true;
 		randomizeConnected = true;
 		showArrows = true;
+		smoothLines = false;
+		commonScales = true;
+		cheatMode = false;
 
 		d3.shuffle(datasets);
 

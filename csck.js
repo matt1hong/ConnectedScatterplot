@@ -28,11 +28,7 @@ var commonScales = false;
 var connected = {
 	svg: null,
 	background: null,
-	foreground: null,
-	lineDA: d3.svg.line()
-		.x(function(d) { return width-xScale(d.value1); })
-		.y(function(d) { return yScale(d.value2); })
-		.interpolate('cardinal')
+	foreground: null
 };
 
 var dualAxes = {
@@ -40,15 +36,7 @@ var dualAxes = {
 	background: null,
 	foreground: null,
 	blueCircles: null,
-	greenCircles: null,
-	lineDA1: d3.svg.line()
-		.x(function(d) { return timeScale(d.date); })
-		.y(function(d) { return xScale(d.value1); })
-		.interpolate('cardinal'),
-	lineDA2: d3.svg.line()
-		.x(function(d) { return timeScale(d.date); })
-		.y(function(d) { return yScale(d.value2); })
-		.interpolate('cardinal')
+	greenCircles: null
 }
 
 var currentDataSet;
@@ -141,6 +129,16 @@ function initialSetup() {
 
 	// Dual-Axes Line Chart
 
+	dualAxes.lineDA1 = d3.svg.line()
+		.x(function(d) { return timeScale(d.date); })
+		.y(function(d) { return xScale(d.value1); })
+		.interpolate(smoothLines?'cardinal':'linear');
+
+	dualAxes.lineDA2 = d3.svg.line()
+		.x(function(d) { return timeScale(d.date); })
+		.y(function(d) { return yScale(d.value2); })
+		.interpolate(smoothLines?'cardinal':'linear');
+
 	dualAxes.svg = d3.select('#linechart').append('svg')
 		.attr('width', width+2*PADX)
 		.attr('height', height+2*PADY)
@@ -151,11 +149,13 @@ function initialSetup() {
 	dualAxes.background.append('path')
 		.attr('class', 'cheat1')
 		.attr('transform', 'translate('+PADX+' '+PADY+')')
+		.style('display', cheatMode?'inline':'none')
 		.datum(pointsConnected);
 
 	dualAxes.background.append('path')
 		.attr('class', 'cheat2')
 		.attr('transform', 'translate('+PADX+' '+PADY+')')
+		.style('display', cheatMode?'inline':'none')
 		.datum(pointsConnected);
 
 	dualAxes.foreground = dualAxes.svg.append('g')
@@ -181,6 +181,11 @@ function initialSetup() {
 
 	// Connected Scatterplot
 
+	connected.lineDA = d3.svg.line()
+		.x(function(d) { return width-xScale(d.value1); })
+		.y(function(d) { return yScale(d.value2); })
+		.interpolate(smoothLines?'cardinal':'linear');
+
 	connected.svg = d3.select('#connectedscatter').append('svg')
 		.attr('width', width+1.5*PADX)
 		.attr('height', height+2*PADY)
@@ -191,6 +196,7 @@ function initialSetup() {
 	connected.background.append('path')
 		.attr('class', 'cheat')
 		.attr('transform', 'translate('+PADX+' '+PADY+')')
+		.style('display', cheatMode?'inline':'none')
 		.datum(pointsDualAxes);
 
 	connected.foreground = connected.svg.append('g')
@@ -266,8 +272,7 @@ function redrawConnected(recreate) {
 
 		connected.foreground.selectAll('text').remove();
 
-		if (cheatMode)
-			connected.background.selectAll('g').remove();
+		connected.background.selectAll('g').remove();
 
 		connected.background.select('path').datum(pointsDualAxes).attr('d', connected.lineDA);
 
