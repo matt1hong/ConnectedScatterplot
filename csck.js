@@ -8,9 +8,13 @@ var showArrows = false;
 var showDots = true;
 var showLabels = false;
 var showGrid = false;
+var smoothLines = true;
 
 var disconnected = false;
 var cheatMode = true;
+
+var randomizeConnected = false;
+var randomizeDALC = false;
 
 var DAGRIDSIZE = height/9;
 
@@ -226,6 +230,12 @@ function initialSetup() {
 	$('.slider').slider('option', 'max', pointsDualAxes.length);
 	$('#shiftSlider').slider('value', 0);
 	$('#drawSlider').slider('value', pointsDualAxes.length);
+
+	if (randomizeConnected)
+		randomize(pointsConnected);
+
+	if (randomizeDALC)
+		randomize(pointsDualAxes);
 
 	redraw(true);
 }
@@ -532,8 +542,9 @@ function mouseup() {
 	draggedIndex = -1;
 }
 
-function toggleSmooth(checkbox) {
-	if (checkbox.checked) {
+function toggleSmooth(checked) {
+	smoothLines = checked;
+	if (smoothLines) {
 		connected.lineDA.interpolate('cardinal');
 		dualAxes.lineDA1.interpolate('cardinal');
 		dualAxes.lineDA2.interpolate('cardinal');
@@ -546,27 +557,27 @@ function toggleSmooth(checkbox) {
 	redraw(false);
 }
 
-function toggleArrows(checkbox) {
-	showArrows = checkbox.checked;
+function toggleArrows(checked) {
+	showArrows = checked;
 	connected.foreground.select('path.line')
 		.attr('marker-mid', showArrows?'url(#arrow)':'none')
 		.attr('marker-end', showArrows?'url(#arrow)':'none');
 	redraw(true);
 }
 
-function toggleLabels(checkbox) {
-	showLabels = checkbox.checked;
+function toggleLabels(checked) {
+	showLabels = checked;
 	redraw(true);
 }
 
-function toggleDots(checkbox) {
-	showDots = checkbox.checked;
+function toggleDots(checked) {
+	showDots = checked;
 	d3.select('#labels').attr('disabled', showDots?null:true);
 	redraw(true);
 }
 
-function toggleGrid(checkbox) {
-	showGrid = checkbox.checked;
+function toggleGrid(checked) {
+	showGrid = checked;
 	if (showGrid) {
 		dualAxes.background.selectAll('line.grid')
 			.data(d3.range(DAGRIDSIZE, height, DAGRIDSIZE))
@@ -603,16 +614,16 @@ function toggleGrid(checkbox) {
 	redraw(false);
 }
 
-function toggleDisconnect(checkbox) {
-	disconnected = checkbox.checked;
+function toggleDisconnect(checked) {
+	disconnected = checked;
 	if (!disconnected)
 		copyDALCtoConnected();
 	d3.select('#cheatMode').attr('disabled', disconnected?null:true);
 	redraw(true);
 }
 
-function toggleCheatMode(checkbox) {
-	cheatMode = checkbox.checked;
+function toggleCheatMode(checked) {
+	cheatMode = checked;
 	if (cheatMode) {
 		connected.background.select('path.cheat').style('display', 'inline');
 		dualAxes.background.select('path.cheat1').style('display', 'inline');
@@ -693,8 +704,38 @@ function copyConnectedtoDALC() {
 	});
 }
 
+function randomize(points) {
+	var domain1 = xScale.domain();
+	var domain2 = yScale.domain();
+	var range1 = domain1[1]-domain1[0];
+	var range2 = domain2[1]-domain2[0];
+
+	var v1 = Math.random()*range1+domain1[0];
+	var v2 = Math.random()*range2+domain2[0];
+	for (var i = 0; i < points.length; i++) {
+		points[i].value1 = v1;
+		points[i].value2 = v2;
+
+		var newV1, newV2;
+
+		do {
+			newV1 = v1+Math.random()*2*range1/3-range1/3;
+			newV2 = v2+Math.random()*2*range2/3-range2/3;
+		} while (newV1 < domain1[0] || newV1 > domain1[1] || newV2 < domain2[0] || newV2 > domain2[1]);
+
+		v1 = newV1;
+		v2 = newV2;
+	}
+}
+
 function afterUpdatePoints() {
 	scaleScales();
+
+	if (randomizeConnected)
+		randomize(pointsConnected);
+
+	if (randomizeDALC)
+		randomize(pointsDualAxes);
 
 	sliderValue = 0;
 	pointsToDraw = pointsDualAxes.length;
