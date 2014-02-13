@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+<head>
+	<title>Translate Between Charts</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+	<link rel="stylesheet" href="csck.css">
+	<script src="d3.v3.min.js"></script>
+	<script type="text/javascript" src="csck.js"></script>
+	<script type="text/javascript" src="queue.min.js"></script>
+	<script type="text/javascript" src="common.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+	<script src="//code.jquery.com/jquery-1.11.0.js"></script>
+	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+</head>
+<body>
+	<div id="charts">
+		<div id="linechart" class="chart" style="clear:left;"></div>
+		<div class="spacer"></div>
+		<div id="connectedscatter" class="chart"></div>
+	</div>
+
+	<div class="container">
+		<div class="row" style="margin-top:30px;">
+			<div class="row">
+			<div class="col-sm-offset-10 col-sm-2">
+				<a href="#" role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">Submit</a>
+			</div>
+		</div>
+	</div>
+
+<script type="text/javascript">
+
+	var step = 0;
+
+	var next = false;
+
+	function nextStep() {
+		if (next) {
+			step += 1;
+			toggleCheatMode(false);
+			next = false;
+			loadData(step);
+			$('#submit').text('Submit');
+		} else {
+			$('#submit').text('Next');
+			toggleCheatMode(true);
+			next = true;
+		}
+	}
+
+	loadDataSets(true, function() {
+		GENERATEDATASETS = false;
+
+		disconnected = true;
+		randomizeConnected = true;
+		showArrows = true;
+		smoothLines = false;
+		commonScales = true;
+		cheatMode = false;
+		interactDALC = false;
+
+		d3.shuffle(datasets);
+
+		initialSetup();
+	}, 'translate');
+
+
+
+</script>
+</body>
+</html>
