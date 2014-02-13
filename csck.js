@@ -16,6 +16,9 @@ var cheatMode = true;
 var randomizeConnected = false;
 var randomizeDALC = false;
 
+var interactDALC = true;
+var interactConnected = true;
+
 var DAGRIDSIZE = height/9;
 
 var GENERATEDATASETS = true;
@@ -173,11 +176,11 @@ function initialSetup() {
 		.datum(pointsDualAxes)
 		.attr('class', 'line line2');
 
-	redrawDualAxes(true);
-
-	dualAxes.foreground
-		.on('mousemove', mousemoveDALC)
-		.on('mouseup', mouseup);
+	if (interactDALC) {	
+		dualAxes.foreground
+			.on('mousemove', mousemoveDALC)
+			.on('mouseup', mouseup);
+	}
 
 	// Connected Scatterplot
 
@@ -228,9 +231,11 @@ function initialSetup() {
 		.attr('marker-mid', showArrows?'url(#arrow)':'none')
 		.attr('marker-end', showArrows?'url(#arrow)':'none');
 
-	connected.foreground
-		.on('mousemove', mousemoveCS)
-		.on('mouseup', mouseup);
+	if (interactConnected) {
+		connected.foreground
+			.on('mousemove', mousemoveCS)
+			.on('mouseup', mouseup);
+	}
 
 	pointsToDraw = pointsDualAxes.length;
 	$('.slider').slider('option', 'max', pointsDualAxes.length);
@@ -325,7 +330,12 @@ function redrawConnected(recreate) {
 
 			circle.enter().append('circle')
 				.attr('r', 3)
-				.on('mousedown', function(d, i) { selectedIndex = draggedIndex = i; redraw(false); })
+				.on('mousedown', function(d, i) {
+					if (interactConnected) {
+						selectedIndex = draggedIndex = i;
+						redraw(false);
+					}
+				});
 
 			circle
 				.classed('selected', function(d, i) { return i === selectedIndex; })
@@ -444,9 +454,11 @@ function redrawDualAxes(recreate) {
 				.attr('r', 3)
 				.attr('class', 'line1')
 				.on('mousedown', function(d, i) {
-					selectedIndex = draggedIndex = i;
-					draggingBlue = true;
-					redraw(false);
+					if (interactDALC) {
+						selectedIndex = draggedIndex = i;
+						draggingBlue = true;
+						redraw(false);
+					}
 				});
 
 			dualAxes.blueCircles
@@ -461,9 +473,11 @@ function redrawDualAxes(recreate) {
 				.attr('r', 3)
 				.attr('class', 'line2')
 				.on('mousedown', function(d, i) {
-					selectedIndex = draggedIndex = i;
-					draggingBlue = false;
-					redraw(false);
+					if (interactDALC) {
+						selectedIndex = draggedIndex = i;
+						draggingBlue = false;
+						redraw(false);
+					}
 				});
 
 			dualAxes.greenCircles
