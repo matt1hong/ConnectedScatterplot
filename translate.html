@@ -3,9 +3,11 @@
 <html>
 <head>
 	<title>Translate Between Charts</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
 	<link rel="stylesheet" href="csck.css">
 	<script src="d3.v3.min.js"></script>
 	<script type="text/javascript" src="csck.js"></script>
+	<script type="text/javascript" src="queue.min.js"></script>
 	<script type="text/javascript" src="common.js"></script>
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 	<script src="//code.jquery.com/jquery-1.11.0.js"></script>
@@ -18,10 +20,36 @@
 		<div id="connectedscatter" class="chart"></div>
 	</div>
 
-<!-- Based on <a href="http://bl.ocks.org/mbostock/4342190">Mike Bostock's Spline Editor example</a>. -->
+	<div class="container">
+		<div class="row" style="margin-top:30px;">
+			<div class="row">
+			<div class="col-sm-offset-10 col-sm-2">
+				<a href="#" role="button" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">Submit</a>
+			</div>
+		</div>
+	</div>
 
 <script type="text/javascript">
-	loadDataSets(false, initialSetup);
+
+	var step = 0;
+
+	function nextStep() {
+		step += 1;
+		loadData(step);
+	}
+
+	loadDataSets(true, function() {
+		GENERATEDATASETS = false;
+
+		disconnected = true;
+		randomizeConnected = true;
+		showArrows = true;
+
+		d3.shuffle(datasets);
+
+		initialSetup();
+	}, 'translate');
+
 
 
 </script>

@@ -1,0 +1,7 @@
+[
+{"name":"maindiagonal", "label1":"A", "label2":"B", "study":true},
+{"name":"maindiagonal-reverse", "label1":"A", "label2":"B", "study":true},
+{"name":"oppositediagonal", "label1":"A", "label2":"B", "study":true},
+{"name":"oppositediagonal-reverse", "label1":"A", "label2":"B", "study":true},
+{"name":"loop1", "label1":"A", "label2":"B", "study":true}
+]
