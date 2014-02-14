@@ -58,37 +58,27 @@
 
 	function shift(event, ui) {
 		var step = ui.value-sliderValue;
-		
-		for (var i = pointsDualAxes.length - 1; i >= 0; i--) {
-			var nextIndex = (i - step) % pointsDualAxes.length;
-			if (nextIndex < 0)
-				nextIndex += pointsDualAxes.length;
-			pointsDualAxes[i].value3 = pointsDualAxes[nextIndex].value2;
-			pointsConnected[i].value3 = pointsConnected[nextIndex].value2;
-		}
-		
-		for (var i = pointsDualAxes.length - 1; i >= 0; i--) {
-			pointsDualAxes[i].value2 = pointsDualAxes[i].value3;
-			pointsConnected[i].value2 = pointsConnected[i].value3;
-		};
+
+		rotateArray(pointsDualAxes, step);
+		rotateArray(pointsConnected, step);		
 
 		sliderValue = ui.value;
 
 		redraw(false);
-    }
+	}
 
-    function exportData() {
- 		var data = [];
-    	pointsDualAxes.forEach(function(p) {
-    		var d = {
-    			date: (p.date.getMonth()+1)+'/'+p.date.getDate()+'/'+p.date.getFullYear(),
-    			value1: p.value1,
-    			value2: p.value2
-    		}
-    		data.unshift(d);
-    	});
-    	d3.select('#export pre').text(JSON.stringify(data));
-    }
+	function exportData() {
+			var data = [];
+		pointsDualAxes.forEach(function(p) {
+			var d = {
+				date: (p.date.getMonth()+1)+'/'+p.date.getDate()+'/'+p.date.getFullYear(),
+				value1: p.value1,
+				value2: p.value2
+			}
+			data.unshift(d);
+		});
+		d3.select('#export pre').text(JSON.stringify(data));
+	}
 
 	$('#shiftSlider').slider({
 		value: 0,

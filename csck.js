@@ -16,6 +16,8 @@ var cheatMode = true;
 var randomizeConnected = false;
 var randomizeDALC = false;
 
+var initialDiamond = [{"date":"9/1/1980","value1":0.5,"value2":0.5},{"date":"1/1/1981","value1":0.5,"value2":0.611111111111111},{"date":"5/2/1981","value1":0.38888888888888895,"value2":0.5},{"date":"9/1/1981","value1":0.5,"value2":0.3888888888888889},{"date":"1/1/1982","value1":0.6111111111111112,"value2":0.5}];
+
 var interactDALC = true;
 var interactConnected = true;
 
@@ -724,27 +726,20 @@ function copyConnectedtoDALC() {
 }
 
 function randomize(points) {
-	var domain1 = xScale.domain();
-	var domain2 = yScale.domain();
-	var range1 = domain1[1]-domain1[0];
-	var range2 = domain2[1]-domain2[0];
+	initialDiamond.unshift.apply(initialDiamond, initialDiamond.splice(Math.random()*initialDiamond.length, initialDiamond.length));
 
-	var v1 = Math.random()*range1+domain1[0];
-	var v2 = Math.random()*range2+domain2[0];
+	var switchValues = Math.random() >= .5;
+
 	for (var i = 0; i < points.length; i++) {
-		points[i].value1 = v1;
-		points[i].value2 = v2;
-
-		var newV1, newV2;
-
-		do {
-			newV1 = v1+Math.random()*2*range1/3-range1/3;
-			newV2 = v2+Math.random()*2*range2/3-range2/3;
-		} while (newV1 < domain1[0] || newV1 > domain1[1] || newV2 < domain2[0] || newV2 > domain2[1]);
-
-		v1 = newV1;
-		v2 = newV2;
+		if (switchValues) {
+			points[i].value1 = initialDiamond[i].value2;
+			points[i].value2 = initialDiamond[i].value1;
+		} else {
+			points[i].value1 = initialDiamond[i].value1;
+			points[i].value2 = initialDiamond[i].value2;
+		}
 	}
+
 }
 
 function afterUpdatePoints() {

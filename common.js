@@ -37,3 +37,16 @@ function loadDataSets(studyOnly, callback, subdirectory) {
 
 	});
 }
+
+function rotateArray(points, amount) {
+	for (var i = points.length - 1; i >= 0; i--) {
+		var nextIndex = (i - amount) % points.length;
+		if (nextIndex < 0)
+			nextIndex += points.length;
+		points[i].value3 = points[nextIndex].value2;
+	}
+	
+	for (var i = points.length - 1; i >= 0; i--) {
+		points[i].value2 = points[i].value3;
+	};
+}
