@@ -1,6 +1,5 @@
 body {
 	font: 13px sans-serif;
-	width: 1360px;
 }
 
 rect {
@@ -53,7 +52,7 @@ circle {
 }
 
 div#charts {
-	width: 1360px;
+	width: 1450px;
 	height: 600px;
 	margin-bottom: 10px;
 }
@@ -70,8 +69,8 @@ div.chart {
 
 div.spacer {
 	float: left;
-	width: 20px;
-	height: 600px;
+	margin-top: 257px;
+	width: 95px;
 }
 
 div.slider {
