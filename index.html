@@ -27,10 +27,10 @@
 		<div class="row">
 			<div class="col-sm-offset-4 col-sm-4">
 				<div class="btn-group" data-toggle="buttons">
-					<label class="btn btn-info active" onclick="switchHash('test');">
+					<label class="switch btn btn-info active" onclick="switchHash('test');">
 						<input type="radio" name="options" id="test"> Test Run
 					</label>
-					<label class="btn btn-info" onclick="switchHash('real');">
+					<label class="switch btn btn-info" onclick="switchHash('real');">
 						<input type="radio" name="options" id="real"> Real Study
 					</label>
 				</div>
@@ -71,6 +71,11 @@
 				link = link.substr(0, link.lastIndexOf('#'))+'#'+hashVal;
 				$(d).attr('href', link);
 			});
+			if (hashVal === 'test') {
+				d3.selectAll('label.switch').classed('btn-info', true).classed('btn-warning', false);
+			} else {
+				d3.selectAll('label.switch').classed('btn-info', false).classed('btn-warning', true);
+			}
 		}
 
 
