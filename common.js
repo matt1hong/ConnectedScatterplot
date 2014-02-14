@@ -50,3 +50,20 @@ function rotateArray(points, amount) {
 		points[i].value2 = points[i].value3;
 	};
 }
+
+function submitResponse(studyID, resultID, data) {
+	d3.xhr('http://draw.eagereyes.org/submit.php')
+		.header('content-type', 'application/x-www-form-urlencoded')
+		.post('study='+encodeURIComponent(studyID)+'&'+
+			'resultID='+encodeURIComponent(resultID)+'&'+
+			'data='+encodeURIComponent(JSON.stringify(data)))
+		.on('error', function(error) {
+			console.log('ERROR: '+error);
+		});
+}
+
+function makeResultID() {
+	var d = ''+(new Date()).getTime();
+	var s = '000000' + Math.floor(Math.random()*1000000);
+	return d + '-' + s.substr(s.length-6);
+}

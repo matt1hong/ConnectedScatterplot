@@ -213,7 +213,14 @@ function start() {
 function done() {
 	scatterLayer.style('visibility', 'visible');
 	d3.select('#donebtn').style('visibility', 'hidden');
-	submitResponse();
+	submitResponse(studyID, resultID+'-'+datasets[steps[step-1]].name, {
+		step: step,
+		dataset: datasets[steps[step-1]].name,
+		time: (new Date()).getTime()-startTime,
+		presentationTime: presentationTime,
+		platform: navigator.platform,
+		points: points
+	});
 	if (step < steps.length) {
 		d3.select('#startbtn').style('visibility', 'visible').text('Next Step');
 	} else {
@@ -231,29 +238,5 @@ function restart() {
 	scatterLayer.style('visibility', 'hidden');
 	step = 0;
 	d3.shuffle(steps);
-	makeResultID();
-}
-
-function submitResponse() {
-	d3.xhr('http://draw.eagereyes.org/submit.php')
-		.header('content-type', 'application/x-www-form-urlencoded')
-		.post('study='+encodeURIComponent(studyID)+'&'+
-			'resultID='+encodeURIComponent(resultID+'-'+datasets[steps[step-1]].name)+'&'+
-			'data='+encodeURIComponent(JSON.stringify({
-				step: step,
-				dataset: datasets[steps[step-1]].name,
-				time: (new Date()).getTime()-startTime,
-				presentationTime: presentationTime,
-				platform: navigator.platform,
-				points: points
-			})))
-		.on('error', function(error) {
-			console.log('ERROR: '+error);
-		});
-}
-
-function makeResultID() {
-	var d = ''+(new Date()).getTime();
-	var s = '000000' + Math.floor(Math.random()*1000000);
-	resultID = d + '-' + s.substr(s.length-6);
+	resultID = makeResultID();
 }

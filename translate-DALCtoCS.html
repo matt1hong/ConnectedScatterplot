@@ -24,29 +24,50 @@
 		<div class="row" style="margin-top:30px;">
 			<div class="row">
 			<div class="col-sm-offset-10 col-sm-2">
-				<a href="#" role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">Submit</a>
+				<button role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">Submit</button>
 			</div>
 		</div>
 	</div>
 
 <script type="text/javascript">
 
+	var studyID = 'dalc2cs';
+	var resultID = makeResultID();
+
 	var step = 0;
 
 	var next = false;
 
+	var startTime;
+
 	function nextStep() {
 		if (next) {
 			step += 1;
-			toggleCheatMode(false);
-			next = false;
-			loadData(step);
-			$('#submit').text('Submit');
+			if (step < datasets.length) {
+				toggleCheatMode(false);
+				next = false;
+				loadData(step);
+				d3.select('#submit').text('Submit').classed('btn-primary', true).classed('btn-success', false);
+				startTime = new Date().getTime();
+			} else {
+				d3.select('#submit').text('Thank You!').classed('btn-danger', true).classed('btn-success', false).on('click', null).attr('disabled', 'disabled');
+			}
 		} else {
-			$('#submit').text('Next');
+			submitResponse(studyID, resultID+'-'+datasets[step].name, {
+				step: step,
+				dataset: datasets[step].name,
+				time: (new Date()).getTime()-startTime,
+				platform: navigator.platform,
+				points: pointsConnected
+			});
+			d3.select('#submit').text('Next').classed('btn-primary', false).classed('btn-success', true);
 			toggleCheatMode(true);
 			next = true;
 		}
+	}
+
+	if (window.location.hash === '#test') {
+		studyID += '-test';
 	}
 
 	loadDataSets(true, function() {
