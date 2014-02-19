@@ -24,7 +24,10 @@
 		<div class="row" style="margin-top:30px;">
 			<div class="row">
 			<div class="col-sm-offset-10 col-sm-2">
-				<button role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">Submit</button>
+				<button role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">
+					<span id="submitText">Submit</span>
+					<div id="progressOutline"><div id="progressBar"></div></div>
+				</button>
 			</div>
 		</div>
 	</div>
@@ -47,10 +50,12 @@
 				toggleCheatMode(false);
 				next = false;
 				loadData(step);
-				d3.select('#submit').text('Submit').classed('btn-primary', true).classed('btn-success', false);
+				d3.select('#submitText').text('Submit');
+				d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
 				startTime = new Date().getTime();
 			} else {
-				d3.select('#submit').text('Thank You!').classed('btn-danger', true).classed('btn-success', false).on('click', null).attr('disabled', 'disabled');
+			    d3.select('#submitText').text('Thank You!');
+			    d3.select('#submit').classed('btn-danger', true).classed('btn-success', false).on('click', null).attr('disabled', 'disabled');
 			}
 		} else {
 			submitResponse(studyID, resultID+'-'+datasets[step].name, {
@@ -60,7 +65,9 @@
 				platform: navigator.platform,
 				points: pointsDualAxes
 			});
-			d3.select('#submit').text('Next').classed('btn-primary', false).classed('btn-success', true);
+			d3.select('#submitText').text('Next');
+			d3.select('#submit').classed('btn-primary', false).classed('btn-success', true);
+			$('#progressBar').width('' + (step + 1) / datasets.length * 100 + '%');
 			toggleCheatMode(true);
 			next = true;
 		}
