@@ -75,7 +75,7 @@
 				value1: p.value1,
 				value2: p.value2
 			}
-			data.unshift(d);
+			data.push(d);
 		});
 		d3.select('#export pre').text(JSON.stringify(data));
 	}
