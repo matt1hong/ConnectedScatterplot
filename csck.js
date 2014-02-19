@@ -210,18 +210,18 @@ function initialSetup() {
 	// marker triangle from http://www.w3.org/TR/SVG/painting.html#Markers
 	connected.foreground.append('defs')
 		.append('marker')
-		.attr('id', 'arrow')
-		.attr('viewBox', '0 0 10 6')
-		.attr('refX', 10)
-		.attr('refY', 3)
-		.attr('markerUnits', 'strokeWidth')
-		.attr('markerWidth', 8)
-		.attr('markerHeight', 5)
-		.attr('orient', 'auto')
-		.attr('stroke', 'none')
-		.attr('fill', 'purple')
-		.append('polygon')
-			.attr('points', '0,0 10,3 0,6');
+			.attr('id', 'arrow')
+			.attr('viewBox', '0 0 10 6')
+			.attr('refX', 10)
+			.attr('refY', 3)
+			.attr('markerUnits', 'strokeWidth')
+			.attr('markerWidth', 8)
+			.attr('markerHeight', 5)
+			.attr('orient', 'auto')
+			.attr('stroke', 'white')
+			.attr('fill', 'purple')
+			.append('polygon')
+				.attr('points', '0,0 10,3 0,6');
 
 	connected.foreground.append('rect')
 		.attr('width', width)
@@ -275,7 +275,51 @@ function scaleScales() {
 
 function redrawConnected(recreate) {
 	if (recreate) {
-		connected.foreground.select('path').datum(pointsConnected.slice(0, pointsToDraw)).attr('d', connected.lineDA);
+		connected.foreground.selectAll('line').remove();
+
+		var path = connected.foreground.select('path');
+		path.datum(pointsConnected.slice(0, pointsToDraw)).attr('d', connected.lineDA);
+
+		if (showArrows) {
+			var segments = [];
+			var pathSegments = path.node().pathSegList;
+			for (var i = 1; i < pathSegments.numberOfItems; i += 1) {
+				var lastX = pathSegments.getItem(i-1).x;
+				var lastY = pathSegments.getItem(i-1).y;
+				var x = pathSegments.getItem(i).x;
+				var y = pathSegments.getItem(i).y;
+				segments.push({
+					index: i,
+					length: (x-lastX)*(x-lastX)+(y-lastY)*(y-lastY),
+					x: x,
+					y: y,
+					lastX: lastX,
+					lastY: lastY
+				});
+			}
+
+			segments.sort(function(a, b) { return b.length-a.length; });
+
+			var indices = [];
+			connected.arrows = [];
+
+			var i = 0;
+			while (indices.length < segments.length/5) {
+				if (indices.indexOf(segments[i].index+1) == -1 && indices.indexOf(segments[i].index-1) == -1) {
+					var x = (segments[i].x+segments[i].lastX)/2;
+					var y = (segments[i].y+segments[i].lastY)/2;
+					connected.arrows.push(segments[i]);
+					segments[i].line = connected.foreground.append('line')
+						.attr('x1', segments[i].lastX)
+						.attr('y1', segments[i].lastY)
+						.attr('x2', x)
+						.attr('y2', y)
+						.style('marker-end', 'url(#arrow)');
+					indices.push(segments[i].index);
+				}
+				i += 1;
+			}
+		}
 
 		connected.foreground.selectAll('text').remove();
 
@@ -324,6 +368,8 @@ function redrawConnected(recreate) {
 				.attr('y', 0)
 				.attr('text-anchor', 'end')
 				.text(currentDataSet.label2);
+
+		connected.foreground.selectAll('circle').remove();
 
 		if (showDots) {
 
@@ -575,15 +621,16 @@ function toggleSmooth(checked) {
 		dualAxes.lineDA2.interpolate('linear');
 	}
 
-	redraw(false);
+	redraw(true);
 }
 
 function toggleArrows(checked) {
 	showArrows = checked;
-	connected.foreground.select('path.line')
-		.attr('marker-mid', showArrows?'url(#arrow)':'none')
-		.attr('marker-end', showArrows?'url(#arrow)':'none');
-	redraw(true);
+	if (showArrows) {
+		d3.select('#smooth').attr('checked', null);
+		toggleSmooth(false);
+	} else
+		redraw(true);
 }
 
 function toggleLabels(checked) {
