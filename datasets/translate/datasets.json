@@ -1,7 +1,13 @@
 [
-{"name":"maindiagonal", "label1":"A", "label2":"B", "study":true},
-{"name":"maindiagonal-reverse", "label1":"A", "label2":"B", "study":true},
-{"name":"oppositediagonal", "label1":"A", "label2":"B", "study":true},
-{"name":"oppositediagonal-reverse", "label1":"A", "label2":"B", "study":true},
-{"name":"loop1", "label1":"A", "label2":"B", "study":true, "commonScales":true}
+{"name":"maindiagonal", "label1":"A", "label2":"B", "study":false},
+{"name":"maindiagonal-reverse", "label1":"A", "label2":"B", "study":false},
+{"name":"oppositediagonal", "label1":"A", "label2":"B", "study":false},
+{"name":"oppositediagonal-reverse", "label1":"A", "label2":"B", "study":false},
+{"name":"loop1", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"army-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"drivingsafety-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"reverse-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"scorpion-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"steamship-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"loop2", "label1":"A", "label2":"B", "study":true, "commonScales":true}
 ]
