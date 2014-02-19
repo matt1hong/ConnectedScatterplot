@@ -280,6 +280,8 @@ function redrawConnected(recreate) {
 		var path = connected.foreground.select('path');
 		path.datum(pointsConnected.slice(0, pointsToDraw)).attr('d', connected.lineDA);
 
+		connected.arrows = [];
+
 		if (showArrows) {
 			var segments = [];
 			var pathSegments = path.node().pathSegList;
@@ -301,7 +303,6 @@ function redrawConnected(recreate) {
 			segments.sort(function(a, b) { return b.length-a.length; });
 
 			var indices = [];
-			connected.arrows = [];
 
 			var i = 0;
 			while (indices.length < segments.length/5) {
@@ -409,7 +410,23 @@ function redrawConnected(recreate) {
 			connected.foreground.selectAll('text').remove();
 		}
 	} else {
-		connected.foreground.select('path').attr('d', connected.lineDA);
+
+		var path = connected.foreground.select('path');
+		
+		path.attr('d', connected.lineDA);
+
+		connected.arrows.forEach(function(arrow) {
+			var seg = path.node().pathSegList.getItem(arrow.index);
+			var prevSeg = path.node().pathSegList.getItem(arrow.index-1);
+			var x = (seg.x+prevSeg.x)/2;
+			var y = (seg.y+prevSeg.y)/2;
+			arrow.line
+				.attr('x1', prevSeg.x)
+				.attr('y1', prevSeg.y)
+				.attr('x2', x)
+				.attr('y2', y);
+		});
+
 
 		if (cheatMode)
 			connected.background.select('path').attr('d', connected.lineDA);
