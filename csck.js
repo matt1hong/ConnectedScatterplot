@@ -229,9 +229,7 @@ function initialSetup() {
 
 	connected.foreground.append('path')
 		.datum(pointsConnected)
-		.attr('class', 'line')
-		.attr('marker-mid', showArrows?'url(#arrow)':'none')
-		.attr('marker-end', showArrows?'url(#arrow)':'none');
+		.attr('class', 'line');
 
 	if (interactConnected) {
 		connected.foreground
