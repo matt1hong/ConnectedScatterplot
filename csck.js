@@ -262,7 +262,10 @@ function scaleScales() {
 	});
 
 	timeScale.domain([pointsDualAxes[0].date, pointsDualAxes[pointsDualAxes.length-1].date]);
-	if (commonScales) {
+	if (study) {
+		xScale.domain([0, 1]);
+		yScale.domain([0, 1]);
+	} else if (commonScales) {
 		var e1 = d3.extent(pointsDualAxes, function(d) { return d.value1; });
 		var e2 = d3.extent(pointsDualAxes, function(d) { return d.value2; });
 		var extent = [Math.min(e1[0], e2[0]), Math.max(e1[1], e2[1])];
