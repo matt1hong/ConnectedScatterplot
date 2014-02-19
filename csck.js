@@ -13,6 +13,11 @@ var smoothLines = true;
 var disconnected = false;
 var cheatMode = true;
 
+var study = false;
+
+// fraction of lines with arrows
+var ARROW_FRACTION = .2;
+
 var randomizeConnected = false;
 var randomizeDALC = false;
 
@@ -298,12 +303,13 @@ function redrawConnected(recreate) {
 				});
 			}
 
-			segments.sort(function(a, b) { return b.length-a.length; });
+			if (!study)
+				segments.sort(function(a, b) { return b.length-a.length; });
 
 			var indices = [];
 
 			var i = 0;
-			while (indices.length < segments.length/5) {
+			while (indices.length < segments.length*ARROW_FRACTION) {
 				if (indices.indexOf(segments[i].index+1) == -1 && indices.indexOf(segments[i].index-1) == -1) {
 					var x = (segments[i].x+segments[i].lastX)/2;
 					var y = (segments[i].y+segments[i].lastY)/2;
