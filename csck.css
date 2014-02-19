@@ -41,6 +41,10 @@ circle {
 	stroke: green;
 }
 
+.axis1 path, .axis2 path {
+	stroke-width: 2px;
+}
+
 .cheat, .cheat1, .cheat2 {
 	stroke: lightgray;
 	fill: none;
