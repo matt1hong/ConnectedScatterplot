@@ -41,7 +41,7 @@ circle {
 	stroke: green;
 }
 
-.axis1 path, .axis2 path {
+.axis1 path, .axis2 path, .axis path {
 	stroke-width: 2px;
 }
 
