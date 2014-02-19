@@ -100,3 +100,17 @@ text.axis1 {
 text.axis2 {
 	fill: green;
 }
+
+.btn-success #progressOutline {
+	border: 1px solid white;
+	border-radius: 2px;
+	height: 15px;
+	margin: 0 auto;
+	width: 3em;
+}
+
+.btn-success #progressBar {
+	background: white;
+	height: 100%;
+	width: 0%;
+}
