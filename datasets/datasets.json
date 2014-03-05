@@ -3,6 +3,7 @@
 {"name":"drivingsafety", "display":"Driving Safety", "label1":"Vehicle miles driven per capita", "label2":"Auto fatalities per 100,000 people", "study":true},
 {"name":"drivingshifts", "display":"Driving Shifts Into Reverse", "label1":"Miles driven per capita each year", "label2":"Price of a gallon of gas (US$)", "study":true},
 {"name":"helium", "display":"Helium", "label1":"Production of refined helium worldwide, in billions of cubic feet", "label2":"Price per thousand cubic feet of refined helium, adjusted for inflation", "study":true},
+{"name":"dow-gold", "display":"Dow vs. Gold", "label1":"Price of Gold", "label2":"Dow-Jones Industrial Index", "study":true},
 {"name":"scorpion", "display":"Unemployment/Scorpion", "label1":"Long-term Unemployment Rate (%)", "label2":"Job Openings Rate (%)", "study":true},
 {"name":"yellen", "display":"Yellen (cropped)", "label1":"Unemployment Rate (%)", "label2":"Inflation Rate (%)", "study":true},
 {"name":"steamship", "display":"Steamship", "label1":"", "label2":"", "study":true},

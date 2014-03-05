@@ -4,7 +4,7 @@
 {"name":"oppositediagonal", "label1":"A", "label2":"B", "study":false},
 {"name":"oppositediagonal-reverse", "label1":"A", "label2":"B", "study":false},
 {"name":"loop1", "label1":"A", "label2":"B", "study":true, "commonScales":true},
-{"name":"army-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"army-simplified", "label1":"Size of the Army (thousands)", "label2":"Military Budget", "study":true, "commonScales":true},
 {"name":"drivingsafety-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
 {"name":"reverse-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
 {"name":"scorpion-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
