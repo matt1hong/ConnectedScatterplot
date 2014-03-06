@@ -3,11 +3,11 @@
 {"name":"maindiagonal-reverse", "label1":"A", "label2":"B", "study":false},
 {"name":"oppositediagonal", "label1":"A", "label2":"B", "study":false},
 {"name":"oppositediagonal-reverse", "label1":"A", "label2":"B", "study":false},
-{"name":"loop1", "label1":"A", "label2":"B", "study":true, "commonScales":true},
-{"name":"army-simplified", "label1":"Size of the Army (millions)", "label2":"Military Budget", "study":true, "commonScales":true},
-{"name":"drivingsafety-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
-{"name":"reverse-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"loop1", "label1":"Price of Gold (x100)", "label2":"Dow-Jones Industrial Index (x1000)", "study":true, "commonScales":true},
+{"name":"army-simplified", "label1":"Size of the Army (millions)", "label2":"Military Budget (billions)", "study":true, "commonScales":true},
+{"name":"drivingsafety-simplified", "label1":"Vehicle miles driven per capita (thousands)", "label2":"Auto fatalities per 1,000 people", "study":true, "commonScales":true},
+{"name":"reverse-simplified", "label1":"Miles driven per capita each year (thousands)", "label2":"Price of a gallon of gas (US$)", "study":true, "commonScales":true},
 {"name":"scorpion-simplified", "label1":"Long-term Unemployment Rate (%)", "label2":"Job Openings Rate (%)", "study":true, "commonScales":true},
 {"name":"steamship-simplified", "label1":"China's Growth (%)", "label2":"Japan's Growth (%)", "study":true, "commonScales":true},
-{"name":"loop2", "label1":"A", "label2":"B", "study":true, "commonScales":true}
+{"name":"loop2", "label1":"Production of refined helium worldwide (billion cubic feet)", "label2":"Price per thousand cubic feet of refined helium", "study":true, "commonScales":true}
 ]
