@@ -473,6 +473,9 @@ function redrawDualAxes(recreate) {
 			.tickFormat(d3.time.format('%Y'))
 			.orient('bottom');
 
+		if (study)
+			timeAxis.ticks(5);
+
 		dualAxes.background.append('g')
 			.attr('class', 'axis')
 			.attr('transform', 'translate('+PADX+' '+(PADY+height)+')')
