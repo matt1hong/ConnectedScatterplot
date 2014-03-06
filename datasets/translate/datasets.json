@@ -4,10 +4,10 @@
 {"name":"oppositediagonal", "label1":"A", "label2":"B", "study":false},
 {"name":"oppositediagonal-reverse", "label1":"A", "label2":"B", "study":false},
 {"name":"loop1", "label1":"A", "label2":"B", "study":true, "commonScales":true},
-{"name":"army-simplified", "label1":"Size of the Army (thousands)", "label2":"Military Budget", "study":true, "commonScales":true},
+{"name":"army-simplified", "label1":"Size of the Army (millions)", "label2":"Military Budget", "study":true, "commonScales":true},
 {"name":"drivingsafety-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
 {"name":"reverse-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
-{"name":"scorpion-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
-{"name":"steamship-simplified", "label1":"A", "label2":"B", "study":true, "commonScales":true},
+{"name":"scorpion-simplified", "label1":"Long-term Unemployment Rate (%)", "label2":"Job Openings Rate (%)", "study":true, "commonScales":true},
+{"name":"steamship-simplified", "label1":"China's Growth (%)", "label2":"Japan's Growth (%)", "study":true, "commonScales":true},
 {"name":"loop2", "label1":"A", "label2":"B", "study":true, "commonScales":true}
 ]

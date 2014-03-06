@@ -21,7 +21,7 @@ var ARROW_FRACTION = .2;
 var randomizeConnected = false;
 var randomizeDALC = false;
 
-var initialDiamond = [{"date":"9/1/1980","value1":0.5,"value2":0.5},{"date":"1/1/1981","value1":0.5,"value2":0.611111111111111},{"date":"5/2/1981","value1":0.38888888888888895,"value2":0.5},{"date":"9/1/1981","value1":0.5,"value2":0.3888888888888889},{"date":"1/1/1982","value1":0.6111111111111112,"value2":0.5}];
+var initialDiamond = [{"date":"9/1/1980","value1":5,"value2":5},{"date":"1/1/1981","value1":5,"value2":6.11111111111111},{"date":"5/2/1981","value1":3.8888888888888895,"value2":5},{"date":"9/1/1981","value1":5,"value2":3.888888888888889},{"date":"1/1/1982","value1":6.111111111111112,"value2":5}];
 
 var interactDALC = true;
 var interactConnected = true;
@@ -263,8 +263,8 @@ function scaleScales() {
 
 	timeScale.domain([pointsDualAxes[0].date, pointsDualAxes[pointsDualAxes.length-1].date]);
 	if (study) {
-		xScale.domain([0, 1]);
-		yScale.domain([0, 1]);
+		xScale.domain([0, 10]);
+		yScale.domain([0, 10]);
 	} else if (commonScales) {
 		var e1 = d3.extent(pointsDualAxes, function(d) { return d.value1; });
 		var e2 = d3.extent(pointsDualAxes, function(d) { return d.value2; });
