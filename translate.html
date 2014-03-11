@@ -15,9 +15,9 @@
 </head>
 <body>
 	<div id="charts">
-		<div id="linechart" class="chart" style="clear:left;"></div>
+		<div id="leftChart" class="chart" style="clear:left;"></div>
 		<div class="spacer"><img src="arrow.png" width="95" height="90"></div>
-		<div id="connectedscatter" class="chart"></div>
+		<div id="rightChart" class="chart"></div>
 	</div>
 
 	<div class="container">
@@ -89,11 +89,12 @@
 		smoothLines = false;
 		commonScales = true;
 		cheatMode = false;
-		interactDALC = false;
+		interactDALC = true;
+		interactConnected = false;
 
 		d3.shuffle(datasets);
 
-		initialSetup();
+		initialSetup('#rightChart', '#leftChart');
 	}, 'translate');
 
 

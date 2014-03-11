@@ -35,19 +35,8 @@ var PADY = 20;
 
 var commonScales = false;
 
-var connected = {
-	svg: null,
-	background: null,
-	foreground: null
-};
-
-var dualAxes = {
-	svg: null,
-	background: null,
-	foreground: null,
-	blueCircles: null,
-	greenCircles: null
-}
+var leftChart;
+var rightChart;
 
 var currentDataSet;
 
@@ -117,27 +106,16 @@ function makeDataSets() {
 	datasets.push({"name":"frequency", "display":"Different Frequency", "data":freqSines, "commonScales":true});
 }
 
+function makeDALC(lineChartSelector, interactive) {
 
-function initialSetup() {
-
-	if (GENERATEDATASETS)
-		makeDataSets();
-
-	d3.select('#dataset').selectAll('option')
-		.data(datasets)
-		.enter().append('option')
-			.attr('value', function(d, i) { return i; })
-			.attr('class', function(d) { return 'data-'+d.name; })
-			.text(function(d) { return d.display; });
-
-	currentDataSet = datasets[0];
-	pointsDualAxes = pointsConnected = datasets[0].data;
-
-	d3.select('option.data-'+datasets[0].name).attr('selected', true);
-
-	scaleScales();
-
-	// Dual-Axes Line Chart
+	var dualAxes = {
+		svg: null,
+		background: null,
+		foreground: null,
+		blueCircles: null,
+		greenCircles: null,
+		isConnected: false
+	}
 
 	dualAxes.lineDA1 = d3.svg.line()
 		.x(function(d) { return timeScale(d.date); })
@@ -149,7 +127,7 @@ function initialSetup() {
 		.y(function(d) { return yScale(d.value2); })
 		.interpolate(smoothLines?'cardinal':'linear');
 
-	dualAxes.svg = d3.select('#linechart').append('svg')
+	dualAxes.svg = d3.select(lineChartSelector).append('svg')
 		.attr('width', width+2*PADX)
 		.attr('height', height+2*PADY)
 		.attr('tabindex', 1);
@@ -183,20 +161,71 @@ function initialSetup() {
 		.datum(pointsDualAxes)
 		.attr('class', 'line line2');
 
-	if (interactDALC) {	
+	if (interactive) {	
 		dualAxes.foreground
-			.on('mousemove', mousemoveDALC)
+			.on('mousemove', function() {
+				mousemoveDALC(dualAxes);
+			})
 			.on('mouseup', mouseup);
 	}
 
-	// Connected Scatterplot
+	dualAxes.redraw = function(recreate) {
+		redrawDualAxes(dualAxes, recreate);
+	}
+
+	dualAxes.toggleSmooth = function() {
+		if (smoothLines) {
+			dualAxes.lineDA1.interpolate('cardinal');
+			dualAxes.lineDA2.interpolate('cardinal');
+		} else {
+			dualAxes.lineDA1.interpolate('linear');
+			dualAxes.lineDA2.interpolate('linear');
+		}
+	}
+
+	dualAxes.toggleCheatMode = function() {
+		if (cheatMode) {
+			dualAxes.background.select('path.cheat1').style('display', 'inline');
+			dualAxes.background.select('path.cheat2').style('display', 'inline');
+		} else {
+			dualAxes.background.select('path.cheat1').style('display', 'none');
+			dualAxes.background.select('path.cheat2').style('display', 'none');
+		}
+	}
+
+	dualAxes.toggleGrid = function() {
+		if (showGrid) {
+			dualAxes.background.selectAll('line.grid')
+				.data(d3.range(DAGRIDSIZE, height, DAGRIDSIZE))
+				.enter().append('line')
+					.attr('class', 'grid')
+					.attr('x1', PADX)
+					.attr('y1', function(d) { return PADY+Math.round(d)+.5; })
+					.attr('x2', PADX+width)
+					.attr('y2', function(d) { return PADY+Math.round(d)+.5; });
+		} else {
+			dualAxes.background.selectAll('line.grid').remove();
+		}
+	}
+
+	return dualAxes;
+}
+
+function makeConnected(connectedScatterSelector, interactive) {
+
+	var connected = {
+		svg: null,
+		background: null,
+		foreground: null,
+		isConnected: true
+	};
 
 	connected.lineDA = d3.svg.line()
 		.x(function(d) { return width-xScale(d.value1); })
 		.y(function(d) { return yScale(d.value2); })
 		.interpolate(smoothLines?'cardinal':'linear');
 
-	connected.svg = d3.select('#connectedscatter').append('svg')
+	connected.svg = d3.select(connectedScatterSelector).append('svg')
 		.attr('width', width+1.5*PADX)
 		.attr('height', height+2*PADY)
 		.attr('tabindex', 2);
@@ -234,13 +263,88 @@ function initialSetup() {
 
 	connected.foreground.append('path')
 		.datum(pointsConnected)
+		.attr('d', connected.lineDA)
 		.attr('class', 'line');
 
-	if (interactConnected) {
+	if (interactive) {
 		connected.foreground
-			.on('mousemove', mousemoveCS)
+			.on('mousemove', function() {
+				mousemoveCS(connected);
+			})
 			.on('mouseup', mouseup);
 	}
+
+	connected.redraw = function(recreate) {
+		redrawConnected(connected, recreate);
+	}
+
+	connected.toggleSmooth = function() {
+		if (smoothLines) {
+			connected.lineDA.interpolate('cardinal');
+		} else {
+			connected.lineDA.interpolate('linear');
+		}
+	}
+
+	connected.toggleCheatMode = function() {
+		if (cheatMode) {
+			connected.background.select('path.cheat').style('display', 'inline');
+		} else {
+			connected.background.select('path.cheat').style('display', 'none');
+		}
+	}
+
+	connected.toggleGrid = function() {
+		if (showGrid) {
+			connected.background.selectAll('line.grid1')
+				.data(d3.range(-width, width, DAGRIDSIZE))
+				.enter().append('line')
+					.attr('class', 'grid1')
+					.attr('x1', function(d) { return d>0?PADX+width:PADX+width+d; })
+					.attr('y1', function(d) { return d>0?PADY+d:PADY; })
+					.attr('x2', function(d) { return d>0?PADX+d:PADX; })
+					.attr('y2', function(d) { return d>0?PADY+height:PADY+height+d; });
+
+			connected.background.selectAll('line.grid2')
+				.data(d3.range(-width, width, DAGRIDSIZE))
+				.enter().append('line')
+					.attr('class', 'grid2')
+					.attr('x1', function(d) { return Math.max(PADX, PADX+d); })
+					.attr('y1', function(d) { return d<0?PADY-d:PADY; })
+					.attr('x2', function(d) { return Math.min(PADX+d+width, PADX+width); })
+					.attr('y2', function(d) { return d<0?PADY+height:PADY+height-d; });
+		} else {
+			connected.background.selectAll('line.grid1').remove();
+			connected.background.selectAll('line.grid2').remove();
+		}
+	}
+
+	return connected;
+}
+
+
+function initialSetup(lineChartSelector, connectedScatterSelector) {
+
+	if (GENERATEDATASETS)
+		makeDataSets();
+
+	d3.select('#dataset').selectAll('option')
+		.data(datasets)
+		.enter().append('option')
+			.attr('value', function(d, i) { return i; })
+			.attr('class', function(d) { return 'data-'+d.name; })
+			.text(function(d) { return d.display; });
+
+	currentDataSet = datasets[0];
+	pointsDualAxes = pointsConnected = datasets[0].data;
+
+	d3.select('option.data-'+datasets[0].name).attr('selected', true);
+
+	scaleScales();
+
+	leftChart = makeDALC(lineChartSelector, interactDALC);
+
+	rightChart = makeConnected(connectedScatterSelector, interactConnected);
 
 	pointsToDraw = pointsDualAxes.length;
 	$('.slider').slider('option', 'max', pointsDualAxes.length);
@@ -279,7 +383,7 @@ function scaleScales() {
 	copyDALCtoConnected();
 }
 
-function redrawConnected(recreate) {
+function redrawConnected(connected, recreate) {
 	if (recreate) {
 		connected.foreground.selectAll('line').remove();
 
@@ -434,7 +538,6 @@ function redrawConnected(recreate) {
 				.attr('y2', y);
 		});
 
-
 		if (cheatMode)
 			connected.background.select('path').attr('d', connected.lineDA);
 
@@ -456,7 +559,7 @@ function redrawConnected(recreate) {
 	}
 }
 
-function redrawDualAxes(recreate) {
+function redrawDualAxes(dualAxes, recreate) {
 	if (recreate) {
 		dualAxes.foreground.select('path.line1').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', dualAxes.lineDA1);
 		dualAxes.foreground.select('path.line2').datum(pointsDualAxes.slice(0, pointsToDraw)).attr('d', dualAxes.lineDA2);
@@ -584,11 +687,11 @@ function redrawDualAxes(recreate) {
 }
 
 function redraw(recreate) {
-	redrawConnected(recreate);
-	redrawDualAxes(recreate);
+	leftChart.redraw(recreate);
+	rightChart.redraw(recreate);
 }
 
-function mousemoveCS() {
+function mousemoveCS(connected) {
 	if (draggedIndex < 0) return;
 	var m = d3.mouse(connected.foreground.node());
 	if (showGrid) {
@@ -610,7 +713,7 @@ function mousemoveCS() {
 	redraw(false);
 }
 
-function mousemoveDALC() {
+function mousemoveDALC(dualAxes) {
 	if (draggedIndex < 0) return;
 	var m = d3.mouse(dualAxes.foreground.node());
 	var value;
@@ -638,15 +741,9 @@ function mouseup() {
 
 function toggleSmooth(checked) {
 	smoothLines = checked;
-	if (smoothLines) {
-		connected.lineDA.interpolate('cardinal');
-		dualAxes.lineDA1.interpolate('cardinal');
-		dualAxes.lineDA2.interpolate('cardinal');
-	} else {
-		connected.lineDA.interpolate('linear');
-		dualAxes.lineDA1.interpolate('linear');
-		dualAxes.lineDA2.interpolate('linear');
-	}
+
+	leftChart.toggleSmooth();
+	rightChart.toggleSmooth();
 
 	redraw(true);
 }
@@ -673,39 +770,10 @@ function toggleDots(checked) {
 
 function toggleGrid(checked) {
 	showGrid = checked;
-	if (showGrid) {
-		dualAxes.background.selectAll('line.grid')
-			.data(d3.range(DAGRIDSIZE, height, DAGRIDSIZE))
-			.enter().append('line')
-				.attr('class', 'grid')
-				.attr('x1', PADX)
-				.attr('y1', function(d) { return PADY+Math.round(d)+.5; })
-				.attr('x2', PADX+width)
-				.attr('y2', function(d) { return PADY+Math.round(d)+.5; });
 
-		connected.background.selectAll('line.grid1')
-			.data(d3.range(-width, width, DAGRIDSIZE))
-			.enter().append('line')
-				.attr('class', 'grid1')
-				.attr('x1', function(d) { return d>0?PADX+width:PADX+width+d; })
-				.attr('y1', function(d) { return d>0?PADY+d:PADY; })
-				.attr('x2', function(d) { return d>0?PADX+d:PADX; })
-				.attr('y2', function(d) { return d>0?PADY+height:PADY+height+d; });
+	leftChart.toggleGrid();
+	rightChart.toggleGrid();
 
-		connected.background.selectAll('line.grid2')
-			.data(d3.range(-width, width, DAGRIDSIZE))
-			.enter().append('line')
-				.attr('class', 'grid2')
-				.attr('x1', function(d) { return Math.max(PADX, PADX+d); })
-				.attr('y1', function(d) { return d<0?PADY-d:PADY; })
-				.attr('x2', function(d) { return Math.min(PADX+d+width, PADX+width); })
-				.attr('y2', function(d) { return d<0?PADY+height:PADY+height-d; });
-
-	} else {
-		connected.background.selectAll('line.grid1').remove();
-		connected.background.selectAll('line.grid2').remove();
-		dualAxes.background.selectAll('line.grid').remove();
-	}
 	redraw(false);
 }
 
@@ -719,15 +787,10 @@ function toggleDisconnect(checked) {
 
 function toggleCheatMode(checked) {
 	cheatMode = checked;
-	if (cheatMode) {
-		connected.background.select('path.cheat').style('display', 'inline');
-		dualAxes.background.select('path.cheat1').style('display', 'inline');
-		dualAxes.background.select('path.cheat2').style('display', 'inline');
-	} else {
-		connected.background.select('path.cheat').style('display', 'none');
-		dualAxes.background.select('path.cheat1').style('display', 'none');
-		dualAxes.background.select('path.cheat2').style('display', 'none');
-	}
+
+	leftChart.toggleCheatMode();
+	rightChart.toggleCheatMode();
+
 	redraw(true);
 }
 

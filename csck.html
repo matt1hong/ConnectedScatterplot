@@ -101,7 +101,9 @@
 	});
 
 
-	loadDataSets(false, initialSetup);
+	loadDataSets(false, function() {
+		initialSetup('#linechart', '#connectedscatter');
+	});
 </script>
 </body>
 </html>
