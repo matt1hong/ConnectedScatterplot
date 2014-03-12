@@ -59,8 +59,8 @@
 	function shift(event, ui) {
 		var step = ui.value-sliderValue;
 
-		rotateArray(pointsDualAxes, step);
-		rotateArray(pointsConnected, step);		
+		rotateArray(leftChart.points, step);
+		rotateArray(rightChart.points, step);		
 
 		sliderValue = ui.value;
 
@@ -68,8 +68,8 @@
 	}
 
 	function exportData() {
-			var data = [];
-		pointsDualAxes.forEach(function(p) {
+		var data = [];
+		leftChart.points.forEach(function(p) {
 			var d = {
 				date: (p.date.getMonth()+1)+'/'+p.date.getDate()+'/'+p.date.getFullYear(),
 				value1: p.value1,
