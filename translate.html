@@ -63,7 +63,7 @@
 				dataset: datasets[step].name,
 				time: (new Date()).getTime()-startTime,
 				platform: navigator.platform,
-				points: pointsConnected
+				points: rightChart.points
 			});
 			d3.select('#submitText').text('Next');
 			d3.select('#submit').classed('btn-primary', false).classed('btn-success', true);
