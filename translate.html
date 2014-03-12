@@ -14,6 +14,7 @@
 	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 </head>
 <body>
+	<p id="mode"></p>
 	<div id="charts">
 		<div id="leftChart" class="chart" style="clear:left;"></div>
 		<div class="spacer"><img src="arrow.png" width="95" height="90"></div>
@@ -34,7 +35,7 @@
 
 <script type="text/javascript">
 
-	var studyID = 'dalc2cs';
+	var studyID = 'translate';
 	var resultID = makeResultID();
 
 	var step = 0;
@@ -43,9 +44,20 @@
 
 	var startTime = new Date().getTime();
 
+	var modes = ['dalc2cs', 'cs2dalc', 'cs2cs', 'dalc2dalc'];
+
+	var currentMode = 0;
+
+	var stepsPerMode;
+
 	function nextStep() {
 		if (next) {
 			step += 1;
+			if (step == stepsPerMode*(currentMode+1)) {
+				currentMode += 1;
+				d3.select('#mode').text(modes[currentMode]);
+				initialSetup(modes[currentMode][0] === 'd', modes[currentMode][modes[currentMode].length-1] === 'c');
+			}
 			if (step < datasets.length) {
 				toggleCheatMode(false);
 				next = false;
@@ -59,7 +71,9 @@
 			}
 		} else {
 			submitResponse(studyID, resultID+'-'+datasets[step].name, {
+				mode: modes[currentMode],
 				step: step,
+				stepInMode: step % stepsPerMode,
 				dataset: datasets[step].name,
 				time: (new Date()).getTime()-startTime,
 				platform: navigator.platform,
@@ -84,20 +98,20 @@
 		study = true;
 
 		disconnected = true;
-		randomizeConnected = true;
+		randomizeRightChart = true;
 		showArrows = true;
 		smoothLines = false;
 		commonScales = true;
 		cheatMode = false;
-		interactDALC = true;
-		interactConnected = false;
 
 		d3.shuffle(datasets);
+		d3.shuffle(modes);
 
-		initialSetup('#rightChart', '#leftChart');
+		stepsPerMode = datasets.length/modes.length;
+		d3.select('#mode').text(modes[currentMode]);
+
+		initialSetup(modes[currentMode][0] === 'd', modes[currentMode][modes[currentMode].length-1] === 'c');
 	}, 'translate');
-
-
 
 </script>
 </body>

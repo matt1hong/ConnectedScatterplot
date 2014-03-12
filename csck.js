@@ -15,8 +15,7 @@ var study = false;
 // fraction of lines with arrows
 var ARROW_FRACTION = .2;
 
-var randomizeConnected = false;
-var randomizeDALC = false;
+var randomizeRightChart = false;
 
 var initialDiamond = [{"date":"9/1/1980","value1":5,"value2":5},{"date":"1/1/1981","value1":5,"value2":6.11111111111111},{"date":"5/2/1981","value1":3.8888888888888895,"value2":5},{"date":"9/1/1981","value1":5,"value2":3.888888888888889},{"date":"1/1/1982","value1":6.111111111111112,"value2":5}];
 
@@ -320,7 +319,7 @@ function makeConnected(connectedScatterSelector, interactive, dataPoints) {
 }
 
 
-function initialSetup(lineChartSelector, connectedScatterSelector) {
+function initialSetup(leftChartDALC, rightChartDALC) {
 
 	if (GENERATEDATASETS)
 		makeDataSets();
@@ -336,9 +335,15 @@ function initialSetup(lineChartSelector, connectedScatterSelector) {
 
 	d3.select('option.data-'+datasets[0].name).attr('selected', true);
 
-	leftChart = makeDALC(lineChartSelector, interactDALC, datasets[0].data);
+	if (leftChartDALC)
+		leftChart = makeDALC('#leftChart', false, datasets[0].data);
+	else
+		leftChart = makeConnected('#leftChart', false, datasets[0].data);
 
-	rightChart = makeConnected(connectedScatterSelector, interactConnected, datasets[0].data);
+	if (rightChartDALC)
+		rightChart = makeDALC('#rightChart', true, datasets[0].data);
+	else
+		rightChart = makeConnected('#rightChart', true, datasets[0].data);
 
 	afterUpdatePoints();
 }
@@ -869,11 +874,8 @@ function randomize(points) {
 function afterUpdatePoints() {
 	scaleScales();
 
-	if (randomizeConnected)
+	if (randomizeRightChart)
 		randomize(rightChart.points);
-
-	if (randomizeDALC)
-		randomize(leftChart.points);
 
 	sliderValue = 0;
 	pointsToDraw = leftChart.points.length;
