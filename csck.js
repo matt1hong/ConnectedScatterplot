@@ -688,6 +688,8 @@ function mousemoveCS(connected) {
 	connected.points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, width-m[0])));
 	connected.points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 
+	// BUG: This isn't working anymore because we don't know which of the charts this is, and which the other one is.
+	// It's only an issue in CSCK though, so not really all that important for now
 	if (!disconnected) {
 		connected.points[draggedIndex].value1 = connected.points[draggedIndex].value1;
 		connected.points[draggedIndex].value2 = connected.points[draggedIndex].value2;
@@ -710,6 +712,8 @@ function mousemoveDALC(dualAxes) {
 		dualAxes.points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 	}
 
+	// BUG: This isn't working anymore because we don't know which of the charts this is, and which the other one is.
+	// It's only an issue in CSCK though, so not really all that important for now
 	if (!disconnected) {
 		dualAxes.points[draggedIndex].value1 = dualAxes.points[draggedIndex].value1;
 		dualAxes.points[draggedIndex].value2 = dualAxes.points[draggedIndex].value2;
