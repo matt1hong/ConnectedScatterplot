@@ -124,6 +124,8 @@ function makeDALC(lineChartSelector, interactive, dataPoints) {
 		.y(function(d) { return yScale(d.value2); })
 		.interpolate(smoothLines?'cardinal':'linear');
 
+	d3.select(lineChartSelector).select('svg').remove();
+
 	dualAxes.svg = d3.select(lineChartSelector).append('svg')
 		.attr('width', width+2*PADX)
 		.attr('height', height+2*PADY)
@@ -220,6 +222,8 @@ function makeConnected(connectedScatterSelector, interactive, dataPoints) {
 		.x(function(d) { return width-xScale(d.value1); })
 		.y(function(d) { return yScale(d.value2); })
 		.interpolate(smoothLines?'cardinal':'linear');
+
+	d3.select(connectedScatterSelector).select('svg').remove();
 
 	connected.svg = d3.select(connectedScatterSelector).append('svg')
 		.attr('width', width+1.5*PADX)

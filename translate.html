@@ -14,7 +14,6 @@
 	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 </head>
 <body>
-	<p id="mode"></p>
 	<div id="charts">
 		<div id="leftChart" class="chart" style="clear:left;"></div>
 		<div class="spacer"><img src="arrow.png" width="95" height="90"></div>
@@ -55,7 +54,6 @@
 			step += 1;
 			if (step == stepsPerMode*(currentMode+1)) {
 				currentMode += 1;
-				d3.select('#mode').text(modes[currentMode]);
 				initialSetup(modes[currentMode][0] === 'd', modes[currentMode][modes[currentMode].length-1] === 'c');
 			}
 			if (step < datasets.length) {
@@ -108,7 +106,6 @@
 		d3.shuffle(modes);
 
 		stepsPerMode = datasets.length/modes.length;
-		d3.select('#mode').text(modes[currentMode]);
 
 		initialSetup(modes[currentMode][0] === 'd', modes[currentMode][modes[currentMode].length-1] === 'c');
 	}, 'translate');
