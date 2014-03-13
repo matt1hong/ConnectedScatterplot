@@ -105,6 +105,9 @@ text.axis2 {
 	fill: green;
 }
 
+
+/* Translate study */
+
 .btn-success #progressOutline {
 	border: 1px solid white;
 	border-radius: 2px;
@@ -117,4 +120,12 @@ text.axis2 {
 	background: white;
 	height: 100%;
 	width: 0%;
+}
+
+.instructions {
+	display: none;
+}
+
+#studycontent {
+	display: none;
 }

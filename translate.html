@@ -14,20 +14,92 @@
 	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 </head>
 <body>
-	<div id="charts">
-		<div id="leftChart" class="chart" style="clear:left;"></div>
-		<div class="spacer"><img src="arrow.png" width="95" height="90"></div>
-		<div id="rightChart" class="chart"></div>
+	<div id="studycontent">
+		<div id="charts">
+			<div id="leftChart" class="chart" style="clear:left;"></div>
+			<div class="spacer"><img src="arrow.png" width="95" height="90"></div>
+			<div id="rightChart" class="chart"></div>
+		</div>
+
+		<div class="container">
+			<div class="row" style="margin-top:30px;">
+				<div class="row">
+					<div class="col-sm-offset-10 col-sm-2">
+						<button role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">
+							<span id="submitText">Submit</span>
+							<div id="progressOutline"><div id="progressBar"></div></div>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
-	<div class="container">
-		<div class="row" style="margin-top:30px;">
-			<div class="row">
-			<div class="col-sm-offset-10 col-sm-2">
-				<button role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">
-					<span id="submitText">Submit</span>
-					<div id="progressOutline"><div id="progressBar"></div></div>
+	<div id="initial-instructions">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-6">
+				<h2>Study on Connected Scatterplots and Dual-Axis Line Charts</h2>
+				<p>In this study, you will be asked to translate data points from one type of chart into another. Please read the instructions below carefully before moving on.</p>
+				<p>The two types of chart used are dual-axis line charts and connected scatterplots. There will be four phases in this study. In two of them, you will be copying from one chart to an identical one, in the two others you will be translating between the two different types.</p>
+				<p>Both charts show data over time. Dual-axis line charts have a time axis along the bottom, and two vertical value axes. The points in the chart, as well as the lines between them, depict the data. The two axis on the left and right are color-coded to match the colors of the lines they correspond to.</p>
+				<p>Connected scatterplots show the data in a two-dimensional space, where one value axis is horizontal, the other one vertical. The points represent points in time, just like in dual-axis line charts. In addition to the lines, the connected scatterplots shows arrows to indicate direction. The colors on the axis are the same as in the dual-axis line chart, and both represent the same data.</p>
+
+				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="startStudy();" style="float:right;">Start
 				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="instructions-cs2cs" class="instructions">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-6">
+				<h2>Copy Connected Scatterplot to Connected Scatterplot</h2>
+				<p>In this part of the study, you will see two connected scatterplots side by side. Copy the chart on the left to the chart on the right.</p>
+				<p></p>
+				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="instructions-cs2dalc" class="instructions">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-6">
+				<h2>Translate Connected Scatterplot to Dual-Axis Line Chart</h2>
+				<p>In this part of the study, you will see a connected scatterplot on the left and a dual-axis line chart on the right. Translate the data from the dual-axis</p>
+				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="instructions-dalc2cs" class="instructions">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-6">
+				<h2>Translate Dual-Axis Line Chart to Connected Scatterplot</h2>
+				<p>In this part of the study, you will see a connected scatterplot on the left and a dual-axis line chart on the right. Translate the data from the dual-axis</p>
+				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="instructions-dalc2dalc" class="instructions">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-6">
+				<h2>Copy Dual-Axis Line Chart to Dual-Axis Line Chart</h2>
+				<p>In this part of the study, you will see a connected scatterplot on the left and a dual-axis line chart on the right. Translate the data from the dual-axis</p>
+				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="thankyou" class="instructions">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-6">
+				<h2>Thank you for your participation!</h2>
+				<p>Your responses have been recorded. Thanks for taking part in this study!</p>
 			</div>
 		</div>
 	</div>
@@ -37,7 +109,7 @@
 	var studyID = 'translate';
 	var resultID = makeResultID();
 
-	var step = 0;
+	var step = -1;
 
 	var next = false;
 
@@ -45,44 +117,70 @@
 
 	var modes = ['dalc2cs', 'cs2dalc', 'cs2cs', 'dalc2dalc'];
 
-	var currentMode = 0;
+	var currentMode = -1;
 
 	var stepsPerMode;
 
+	var phaseChange = false;
+
 	function nextStep() {
-		if (next) {
-			step += 1;
-			if (step == stepsPerMode*(currentMode+1)) {
-				currentMode += 1;
-				initialSetup(modes[currentMode][0] === 'd', modes[currentMode][modes[currentMode].length-1] === 'c');
-			}
-			if (step < datasets.length) {
-				toggleCheatMode(false);
-				next = false;
-				loadData(step);
+		if (step === stepsPerMode*(currentMode+1)-1 && !phaseChange)
+			nextPhase();
+		else {
+			d3.select('#instructions-'+modes[currentMode]).style('display', 'none');
+			d3.select('#studycontent').style('display', 'block');
+	
+			if (phaseChange) {
 				d3.select('#submitText').text('Submit');
 				d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
 				startTime = new Date().getTime();
 			} else {
-			    d3.select('#submitText').text('Thank You!');
-			    d3.select('#submit').classed('btn-danger', true).classed('btn-success', false).on('click', null).attr('disabled', 'disabled');
+				if (next) {
+					step += 1;
+					toggleCheatMode(false);
+					next = false;
+					loadData(step);
+					d3.select('#submitText').text('Submit');
+					d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
+					startTime = new Date().getTime();
+				} else {
+					submitResponse(studyID, resultID+'-'+datasets[step].name, {
+						mode: modes[currentMode],
+						step: step,
+						stepInMode: step % stepsPerMode,
+						dataset: datasets[step].name,
+						time: (new Date()).getTime()-startTime,
+						platform: navigator.platform,
+						points: rightChart.points
+					});
+					d3.select('#submitText').text('Next');
+					d3.select('#submit').classed('btn-primary', false).classed('btn-success', true);
+					$('#progressBar').width('' + (step+1) / datasets.length * 100 + '%');
+					toggleCheatMode(true);
+					next = true;
+				}
 			}
-		} else {
-			submitResponse(studyID, resultID+'-'+datasets[step].name, {
-				mode: modes[currentMode],
-				step: step,
-				stepInMode: step % stepsPerMode,
-				dataset: datasets[step].name,
-				time: (new Date()).getTime()-startTime,
-				platform: navigator.platform,
-				points: rightChart.points
-			});
-			d3.select('#submitText').text('Next');
-			d3.select('#submit').classed('btn-primary', false).classed('btn-success', true);
-			$('#progressBar').width('' + (step+1) / datasets.length * 100 + '%');
-			toggleCheatMode(true);
-			next = true;
 		}
+		phaseChange = false;
+	}
+
+	function nextPhase() {
+		d3.select('#studycontent').style('display', 'none');
+		if (step < datasets.length-1) {
+			currentMode += 1;
+			step = Math.max(step, 0);
+			next = false;
+			d3.select('#instructions-'+modes[currentMode]).style('display', 'block');
+			initialSetup(modes[currentMode][0] === 'd', modes[currentMode][modes[currentMode].length-1] === 'c');
+			phaseChange = true;
+		} else {
+			d3.select('#thankyou').style('display', 'block');
+		}
+	}
+
+	function startStudy() {
+		d3.select('#initial-instructions').style('display', 'none');
+		nextPhase();
 	}
 
 	if (window.location.hash === '#test') {
@@ -106,8 +204,6 @@
 		d3.shuffle(modes);
 
 		stepsPerMode = datasets.length/modes.length;
-
-		initialSetup(modes[currentMode][0] === 'd', modes[currentMode][modes[currentMode].length-1] === 'c');
 	}, 'translate');
 
 </script>

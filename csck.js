@@ -375,6 +375,13 @@ function scaleScales() {
 	copyLefttoRight();
 }
 
+function otherChart(chart) {
+	if (chart === leftChart)
+		return rightChart;
+	else
+		return leftChart;
+}
+
 function redrawConnected(connected, recreate) {
 	if (recreate) {
 		connected.foreground.selectAll('line').remove();
@@ -429,7 +436,7 @@ function redrawConnected(connected, recreate) {
 
 		connected.background.selectAll('g').remove();
 
-		connected.background.select('path').datum(leftChart.points).attr('d', connected.lineDA);
+		connected.background.select('path').datum(otherChart(connected).points).attr('d', connected.lineDA);
 
 		var xScaleInverse = d3.scale.linear()
 			.domain(xScale.domain())
@@ -557,8 +564,8 @@ function redrawDualAxes(dualAxes, recreate) {
 		dualAxes.foreground.select('path.line2').datum(dualAxes.points.slice(0, pointsToDraw)).attr('d', dualAxes.lineDA2);
 
 		if (cheatMode) {
-			dualAxes.background.select('path.cheat1').datum(rightChart.points).attr('d', dualAxes.lineDA1);
-			dualAxes.background.select('path.cheat2').datum(rightChart.points).attr('d', dualAxes.lineDA2);
+			dualAxes.background.select('path.cheat1').datum(otherChart(dualAxes).points).attr('d', dualAxes.lineDA1);
+			dualAxes.background.select('path.cheat2').datum(otherChart(dualAxes).points).attr('d', dualAxes.lineDA2);
 		}
 
 		dualAxes.background.selectAll('g').remove();
