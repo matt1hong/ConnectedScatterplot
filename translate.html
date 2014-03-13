@@ -124,41 +124,38 @@
 	var phaseChange = false;
 
 	function nextStep() {
-		if (step === stepsPerMode*(currentMode+1)-1 && !phaseChange)
+		if (step === stepsPerMode*(currentMode+1)-1 && !phaseChange) {
 			nextPhase();
-		else {
+			d3.select('#submitText').text('Submit');
+			d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
+			startTime = new Date().getTime();
+		} else {
 			d3.select('#instructions-'+modes[currentMode]).style('display', 'none');
 			d3.select('#studycontent').style('display', 'block');
-	
-			if (phaseChange) {
+
+			if (next) {
+				step += 1;
+				toggleCheatMode(false);
+				next = false;
+				loadData(step);
 				d3.select('#submitText').text('Submit');
 				d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
 				startTime = new Date().getTime();
 			} else {
-				if (next) {
-					step += 1;
-					toggleCheatMode(false);
-					next = false;
-					loadData(step);
-					d3.select('#submitText').text('Submit');
-					d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
-					startTime = new Date().getTime();
-				} else {
-					submitResponse(studyID, resultID+'-'+datasets[step].name, {
-						mode: modes[currentMode],
-						step: step,
-						stepInMode: step % stepsPerMode,
-						dataset: datasets[step].name,
-						time: (new Date()).getTime()-startTime,
-						platform: navigator.platform,
-						points: rightChart.points
-					});
-					d3.select('#submitText').text('Next');
-					d3.select('#submit').classed('btn-primary', false).classed('btn-success', true);
-					$('#progressBar').width('' + (step+1) / datasets.length * 100 + '%');
-					toggleCheatMode(true);
-					next = true;
-				}
+				submitResponse(studyID, resultID+'-'+datasets[step].name, {
+					mode: modes[currentMode],
+					step: step,
+					stepInMode: step % stepsPerMode,
+					dataset: datasets[step].name,
+					time: (new Date()).getTime()-startTime,
+					platform: navigator.platform,
+					points: rightChart.points
+				});
+				d3.select('#submitText').text('Next');
+				d3.select('#submit').classed('btn-primary', false).classed('btn-success', true);
+				$('#progressBar').width('' + (step+1) / datasets.length * 100 + '%');
+				toggleCheatMode(true);
+				next = true;
 			}
 		}
 		phaseChange = false;
@@ -169,7 +166,7 @@
 		if (step < datasets.length-1) {
 			currentMode += 1;
 			step = Math.max(step, 0);
-			next = false;
+			next = true;
 			d3.select('#instructions-'+modes[currentMode]).style('display', 'block');
 			initialSetup(modes[currentMode][0] === 'd', modes[currentMode][modes[currentMode].length-1] === 'c');
 			phaseChange = true;
