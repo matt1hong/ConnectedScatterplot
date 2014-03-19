@@ -1,5 +1,5 @@
-var width = 600,
-    height = 600;
+var width = 500,
+    height = 500;
 
 var showArrows = false;
 var showDots = true;
