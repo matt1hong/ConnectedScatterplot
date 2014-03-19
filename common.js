@@ -52,6 +52,7 @@ function rotateArray(points, amount) {
 }
 
 function submitResponse(studyID, resultID, data) {
+//	console.log(data);
 	d3.xhr('http://draw.eagereyes.org/submit.php')
 		.header('content-type', 'application/x-www-form-urlencoded')
 		.post('study='+encodeURIComponent(studyID)+'&'+

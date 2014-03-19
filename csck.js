@@ -12,6 +12,8 @@ var cheatMode = true;
 
 var study = false;
 
+var clockwise = true;
+
 // fraction of lines with arrows
 var ARROW_FRACTION = .2;
 
@@ -866,20 +868,22 @@ function copyRighttoLeft() {
 }
 
 function randomize(points) {
-	initialDiamond.unshift.apply(initialDiamond, initialDiamond.splice(Math.random()*initialDiamond.length, initialDiamond.length));
+	
+	var orderValues = initialDiamond.slice();
 
-	var switchValues = Math.random() >= .5;
+	orderValues.unshift.apply(initialDiamond, initialDiamond.splice(Math.random()*initialDiamond.length, initialDiamond.length));
+
+	clockwise = Math.random() >= .5;
 
 	for (var i = 0; i < points.length; i++) {
-		if (switchValues) {
-			points[i].value1 = initialDiamond[i].value2;
-			points[i].value2 = initialDiamond[i].value1;
+		if (clockwise) {
+			points[i].value1 = orderValues[i].value2;
+			points[i].value2 = orderValues[i].value1;
 		} else {
-			points[i].value1 = initialDiamond[i].value1;
-			points[i].value2 = initialDiamond[i].value2;
+			points[i].value1 = orderValues[i].value1;
+			points[i].value2 = orderValues[i].value2;
 		}
 	}
-
 }
 
 function afterUpdatePoints() {

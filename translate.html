@@ -216,13 +216,23 @@
 				d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
 				startTime = new Date().getTime();
 			} else {
+				var globalDelta = 0;
+				rightChart.points.forEach(function(d, i) {
+					d.delta1 = d.value1-leftChart.points[i].value1;
+					d.delta2 = d.value2-leftChart.points[i].value2;
+					d.delta = Math.sqrt(d.delta1*d.delta1+d.delta2*d.delta2);
+					globalDelta += d.delta;
+				});
+				globalDelta /= rightChart.points.length;
 				submitResponse(studyID, resultID+'-'+datasets[step].name, {
 					mode: modes[currentMode],
 					step: step,
 					stepInMode: step % stepsPerMode,
 					dataset: datasets[step].name,
 					time: (new Date()).getTime()-startTime,
+					clockwise: clockwise,
 					platform: navigator.platform,
+					globalDelta: globalDelta,
 					points: rightChart.points
 				});
 				d3.select('#submitText').text('Next');
