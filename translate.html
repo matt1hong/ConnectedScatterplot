@@ -25,7 +25,7 @@
 			<div class="row" style="margin-top:30px;">
 				<div class="row">
 					<div class="col-sm-offset-10 col-sm-2">
-						<button role="button" id="submit" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">
+						<button role="button" class="btn btn-primary btn-lg btn-block study" onclick="nextStep();">
 							<span id="submitText">Submit</span>
 							<div id="progressOutline"><div id="progressBar"></div></div>
 						</button>
@@ -37,26 +37,90 @@
 
 	<div id="initial-instructions">
 		<div class="row">
-			<div class="col-sm-offset-1 col-sm-6">
+			<div class="col-sm-offset-1 col-sm-10">
 				<h2>Study on Connected Scatterplots and Dual-Axis Line Charts</h2>
-				<p>In this study, you will be asked to translate data points from one type of chart into another. Please read the instructions below carefully before moving on.</p>
-				<p>The two types of chart used are dual-axis line charts and connected scatterplots. There will be four phases in this study. In two of them, you will be copying from one chart to an identical one, in the two others you will be translating between the two different types.</p>
-				<p>Both charts show data over time. Dual-axis line charts have a time axis along the bottom, and two vertical value axes. The points in the chart, as well as the lines between them, depict the data. The two axis on the left and right are color-coded to match the colors of the lines they correspond to.</p>
+				<p>In this study, you will be asked to translate data points from one type of chart into another. Both charts show data over time. Dual-axis line charts have a time axis along the bottom, and two vertical value axes. The points in the chart, as well as the lines between them, depict the data. The two axis on the left and right are color-coded to match the colors of the lines they correspond to.</p>
 				<p>Connected scatterplots show the data in a two-dimensional space, where one value axis is horizontal, the other one vertical. The points represent points in time, just like in dual-axis line charts. In addition to the lines, the connected scatterplots shows arrows to indicate direction. The colors on the axis are the same as in the dual-axis line chart, and both represent the same data.</p>
+				<p>You will now see a brief tutorial explaining the two chart types. Please pay close attention, since you likely haven't seen one of them before.</p>
+				<p>The study begins right after the tutorial and consists of 28 steps in four phases. When you're done with each step, click the <i>Submit</i> button. You will then see how you did and be able to click the <i>Next</i> button to go to the next step. That button will also indicate your progress within the study.</p>
+				<p>At the very end, you will be given a code to paste into Mechanical Turk.</p>
 
-				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="startStudy();" style="float:right;">Start
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(1);" style="float:right;">Start Tutorial</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Tutorial -->
+
+	<div id="tutorial1" class="tutorial">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<h2>Study on Connected Scatterplots and Dual-Axis Line Charts</h2>
+				<img src="img/cs-tutorial1.png" width="1069" height="506">
+				<p>You will see dual-axis line charts and connected scatterplots. In this example, we will translate from the dual-axis line chart on the left to the connected scatterplot on the right.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(2);" style="float:right;">Next
 				</button>
 			</div>
 		</div>
 	</div>
 
+	<div id="tutorial2" class="tutorial">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<h2>Study on Connected Scatterplots and Dual-Axis Line Charts</h2>
+				<img src="img/cs-tutorial2.png" width="1069" height="506">
+				<p>You will see dual-axis line charts and connected scatterplots. In this example, we will translate from the dual-axis line chart on the left to the connected scatterplot on the right.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(3);" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="tutorial3" class="tutorial">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<h2>Study on Connected Scatterplots and Dual-Axis Line Charts</h2>
+				<img src="img/cs-tutorial3.png" width="1069" height="506">
+				<p>You will see dual-axis line charts and connected scatterplots. In this example, we will translate from the dual-axis line chart on the left to the connected scatterplot on the right.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(4);" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="tutorial4" class="tutorial">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<h2>Study on Connected Scatterplots and Dual-Axis Line Charts</h2>
+				<img src="img/cs-tutorial4.png" width="1069" height="506">
+				<p>You will see dual-axis line charts and connected scatterplots. In this example, we will translate from the dual-axis line chart on the left to the connected scatterplot on the right.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(5);" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="tutorial5" class="tutorial">
+		<div class="row">
+			<div class="col-sm-offset-1 col-sm-10">
+				<h2>Study on Connected Scatterplots and Dual-Axis Line Charts</h2>
+				<img src="img/cs-tutorial5.png" width="1069" height="506">
+				<p>You will see dual-axis line charts and connected scatterplots. In this example, we will translate from the dual-axis line chart on the left to the connected scatterplot on the right.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="startStudy();" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- Phase Instructions -->
+
 	<div id="instructions-cs2cs" class="instructions">
 		<div class="row">
 			<div class="col-sm-offset-1 col-sm-6">
 				<h2>Copy Connected Scatterplot to Connected Scatterplot</h2>
-				<p>In this part of the study, you will see two connected scatterplots side by side. Copy the chart on the left to the chart on the right.</p>
+				<p>In this part of the study, you will see two connected scatterplots side by side. Copy the points from the chart on the left to the chart on the right.</p>
 				<p></p>
-				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
+				<button role="button" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
 				</button>
 			</div>
 		</div>
@@ -67,7 +131,7 @@
 			<div class="col-sm-offset-1 col-sm-6">
 				<h2>Translate Connected Scatterplot to Dual-Axis Line Chart</h2>
 				<p>In this part of the study, you will see a connected scatterplot on the left and a dual-axis line chart on the right. Translate the data from the dual-axis</p>
-				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
+				<button role="button" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
 				</button>
 			</div>
 		</div>
@@ -78,7 +142,7 @@
 			<div class="col-sm-offset-1 col-sm-6">
 				<h2>Translate Dual-Axis Line Chart to Connected Scatterplot</h2>
 				<p>In this part of the study, you will see a connected scatterplot on the left and a dual-axis line chart on the right. Translate the data from the dual-axis</p>
-				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
+				<button role="button" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
 				</button>
 			</div>
 		</div>
@@ -89,7 +153,7 @@
 			<div class="col-sm-offset-1 col-sm-6">
 				<h2>Copy Dual-Axis Line Chart to Dual-Axis Line Chart</h2>
 				<p>In this part of the study, you will see a connected scatterplot on the left and a dual-axis line chart on the right. Translate the data from the dual-axis</p>
-				<button role="button" id="submit" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
+				<button role="button" class="btn btn-primary btn-lg" onclick="nextStep();" style="float:right;">Start
 				</button>
 			</div>
 		</div>
@@ -100,6 +164,7 @@
 			<div class="col-sm-offset-1 col-sm-6">
 				<h2>Thank you for your participation!</h2>
 				<p>Your responses have been recorded. Thanks for taking part in this study!</p>
+				<p id="mturk" style="display:none;">Here is the code to provide to finish this HIT on Mechnical Turk: <b><span id="mturk-code"></span></b></p>
 			</div>
 		</div>
 	</div>
@@ -122,6 +187,15 @@
 	var stepsPerMode;
 
 	var phaseChange = false;
+
+	function tutorialStep(step) {
+		if (step === 1) {
+			d3.select('#initial-instructions').style('display', 'none');
+		} else {
+			d3.select('#tutorial'+(step-1)).style('display', 'none');
+		}
+		d3.select('#tutorial'+step).style('display', 'block');
+	}
 
 	function nextStep() {
 		if (step === stepsPerMode*(currentMode+1)-1 && !phaseChange) {
@@ -176,13 +250,18 @@
 	}
 
 	function startStudy() {
-		d3.select('#initial-instructions').style('display', 'none');
+		d3.select('#tutorial5').style('display', 'none');
 		nextPhase();
 	}
 
 	if (window.location.hash === '#test') {
 		studyID += '-test';
+	} else if (window.location.hash === '#mturk') {
+		studyID += '-mturk';
+		d3.select('#mturk').style('display', 'block');
+		d3.select('#mturk-code').text(resultID);
 	}
+
 
 	loadDataSets(true, function() {
 		GENERATEDATASETS = false;

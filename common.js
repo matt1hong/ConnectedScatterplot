@@ -65,5 +65,5 @@ function submitResponse(studyID, resultID, data) {
 function makeResultID() {
 	var d = ''+(new Date()).getTime();
 	var s = '000000' + Math.floor(Math.random()*1000000);
-	return d + '-' + s.substr(s.length-6);
+	return d + '_' + s.substr(s.length-6);
 }
