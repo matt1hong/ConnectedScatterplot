@@ -39,7 +39,7 @@ var currentDataSet;
 var pointsToDraw;
 
 var timeScale = d3.time.scale()
-	.range([0, width]);
+	.range([10, width-10]);
 
 var xScale = d3.scale.linear()
 	.range([width, 0]);
@@ -497,7 +497,7 @@ function redrawConnected(connected, recreate) {
 				});
 
 			circle
-				.classed('selected', function(d, i) { return i === selectedIndex; })
+				.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 				.attr('cx', function(d) { return width-xScale(d.value1); })
 				.attr('cy', function(d) { return yScale(d.value2); });
 
@@ -542,7 +542,7 @@ function redrawConnected(connected, recreate) {
 
 		connected.foreground.selectAll('circle')
 			.data(connected.points.slice(0, pointsToDraw))
-			.classed('selected', function(d, i) { return i === selectedIndex; })
+			.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 			.attr('cx', function(d) { return width-xScale(d.value1); })
 			.attr('cy', function(d) { return yScale(d.value2); });
 
@@ -639,7 +639,7 @@ function redrawDualAxes(dualAxes, recreate) {
 				});
 
 			dualAxes.blueCircles
-				.classed('selected', function(d, i) { return i === selectedIndex; })
+				.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 				.attr('cx', function(d) { return timeScale(d.date); })
 				.attr('cy', function(d) { return xScale(d.value1); });
 
@@ -658,7 +658,7 @@ function redrawDualAxes(dualAxes, recreate) {
 				});
 
 			dualAxes.greenCircles
-				.classed('selected', function(d, i) { return i === selectedIndex; })
+				.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 				.attr('cx', function(d) { return timeScale(d.date); })
 				.attr('cy', function(d) { return yScale(d.value2); });
 		} else {
@@ -676,11 +676,11 @@ function redrawDualAxes(dualAxes, recreate) {
 
 		dualAxes.blueCircles
 			.data(dualAxes.points.slice(0, pointsToDraw))
-			.classed('selected', function(d, i) { return i === selectedIndex; })
+			.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 			.attr('cy', function(d) { return xScale(d.value1); });
 		dualAxes.greenCircles
 			.data(dualAxes.points.slice(0, pointsToDraw))
-			.classed('selected', function(d, i) { return i === selectedIndex; })
+			.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 			.attr('cy', function(d) { return yScale(d.value2); });
 	}
 }
