@@ -210,7 +210,8 @@
 	}
 
 	function nextStep() {
-		if (step === stepsPerMode*(currentMode+1)-1 && !phaseChange) {
+		if (step === stepsPerMode*(currentMode+1) && !phaseChange) {
+			submitResults();
 			nextPhase();
 			d3.select('#submitText').text('Submit');
 			d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
@@ -220,36 +221,18 @@
 			d3.select('#studycontent').style('display', 'block');
 
 			if (next) {
-				step += 1;
 				toggleCheatMode(false);
 				next = false;
 				loadData(step);
+				step += 1;
 				d3.select('#submitText').text('Submit');
 				d3.select('#submit').classed('btn-primary', true).classed('btn-success', false);
 				startTime = new Date().getTime();
 			} else {
-				var globalDelta = 0;
-				rightChart.points.forEach(function(d, i) {
-					d.delta1 = d.value1-leftChart.points[i].value1;
-					d.delta2 = d.value2-leftChart.points[i].value2;
-					d.delta = Math.sqrt(d.delta1*d.delta1+d.delta2*d.delta2);
-					globalDelta += d.delta;
-				});
-				globalDelta /= rightChart.points.length;
-				submitResponse(studyID, resultID+'-'+datasets[step].name, {
-					mode: modes[currentMode],
-					step: step,
-					stepInMode: step % stepsPerMode,
-					dataset: datasets[step].name,
-					time: (new Date()).getTime()-startTime,
-					clockwise: clockwise,
-					platform: navigator.platform,
-					globalDelta: globalDelta,
-					points: rightChart.points
-				});
+				submitResults();
 				d3.select('#submitText').text('Next');
 				d3.select('#submit').classed('btn-primary', false).classed('btn-success', true);
-				$('#progressBar').width('' + (step+1) / datasets.length * 100 + '%');
+				$('#progressBar').width('' + step / datasets.length * 100 + '%');
 				toggleCheatMode(true);
 				next = true;
 			}
@@ -257,9 +240,31 @@
 		phaseChange = false;
 	}
 
+	function submitResults() {
+		var globalDelta = 0;
+		rightChart.points.forEach(function(d, i) {
+			d.delta1 = d.value1-leftChart.points[i].value1;
+			d.delta2 = d.value2-leftChart.points[i].value2;
+			d.delta = Math.sqrt(d.delta1*d.delta1+d.delta2*d.delta2);
+			globalDelta += d.delta;
+		});
+		globalDelta /= rightChart.points.length;
+		submitResponse(studyID, resultID+'-'+datasets[step-1].name, {
+			mode: modes[currentMode],
+			step: step,
+			stepInMode: step % stepsPerMode,
+			dataset: datasets[step-1].name,
+			time: (new Date()).getTime()-startTime,
+			clockwise: clockwise,
+			platform: navigator.platform,
+			globalDelta: globalDelta,
+			points: rightChart.points
+		});
+	}
+
 	function nextPhase() {
 		d3.select('#studycontent').style('display', 'none');
-		if (step < datasets.length-1) {
+		if (step < datasets.length) {
 			currentMode += 1;
 			step = Math.max(step, 0);
 			next = true;
