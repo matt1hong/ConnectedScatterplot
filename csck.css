@@ -129,3 +129,7 @@ text.axis2 {
 .tutorial {
 	display: none;
 }
+
+.row {
+	margin-left: 10px;
+}
