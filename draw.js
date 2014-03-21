@@ -60,7 +60,7 @@ function drawSetup() {
 		.attr('class', 'drawn')
 		.datum(points);
 
-	makeResultID();
+	resultID = makeResultID();
 }
 
 function drawConnected(datasetnum) {
