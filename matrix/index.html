@@ -1,0 +1,88 @@
+<html>
+<head>
+	<title>Connected Scatterplot Matrix</title>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="queue.min.js" charset="utf-8"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.11.1/themes/smoothness/jquery-ui.css">
+	<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+	<script src="//code.jquery.com/ui/1.11.1/jquery-ui.js"></script>
+	<style>
+
+		#chart {
+			width: 800px;
+			height: 800px;
+			float: left;
+		}
+
+		#ui {
+			width: 400px;
+			float: left;
+		}
+
+		#source {
+			margin-bottom: 10px;
+		}
+
+		.csplot {
+			fill: none;
+			stroke: darkorange;
+		}
+
+	</style>
+</head>
+<body>
+	<div id="chart"></div>
+
+	<div id="ui">
+		<div id="source">
+			<label><input type="radio" name="dataset" value="sunspots" onclick="switchTo(sunspots);"/>Sun Spots</label>
+			<label><input type="radio" name="dataset" value="flutrends" onclick="switchTo(flutrends);" checked/>Flu Trends</label>
+			<label><input type="radio" name="dataset" value="sine" onclick="switchTo(sine);"/>Sine Wave</label>
+
+		</div>
+
+		<div id="periodicity-slider"></div><span id="periodicity-val"></span>
+		<div id="shift-slider"></div><span id="shift-val"></span>
+	</div>
+
+	<script src="csmatrix.js" charset="utf-8"></script>
+	<script>
+		init();
+
+
+		function setupSliders() {
+			$("#periodicity-slider" ).slider({
+				value: settings.periodicity,
+				min: 5,
+				max: 200,
+				step: 1,
+				slide: function(event, ui) {
+					settings.periodicity = ui.value;
+					$('#periodicity-val').text(settings.periodicity);
+					sliceTime();
+				}
+			});
+			$('#periodicity-val').text(settings.periodicity);
+
+			$("#shift-slider" ).slider({
+				value: settings.shift,
+				min: 0,
+				max: 30,
+				step: 1,
+				slide: function(event, ui) {
+					settings.shift = ui.value;
+					$('#shift-val').text(settings.shift);
+					sliceTime();
+				}
+			});
+			$('#shift-val').text(settings.shift);
+		}
+
+		function switchTo(dataset) {
+			settings.data = dataset;
+			sliceTime();
+		}
+
+	</script>
+</body>
+</html>
