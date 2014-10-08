@@ -106,25 +106,23 @@ function init() {
 		.defer(d3.csv, 'sunspots.csv')
 		.await(function(error, fludata, sundata) {
 			
-			sunspots = sundata.map(function(d) { return +d.ssn; });
-
-			var ssyears = [];
+			// resample sunspots to yearly average, as the monthly data is very noisy
+			sunspots = [];
 			var month = 0;
 			var sum = 0;
-			for (var i = 0; i < sunspots.length; i += 1) {
-				sum += sunspots[i];
+			for (var i = 0; i < sundata.length; i += 1) {
+				sum += +sundata[i].ssn;
 				month += 1;
 				if (month == 12) {
-					ssyears.push(sum/12);
+					sunspots.push(sum/12);
 					sum = 0;
 					month = 0;
 				}
 			}
 			if (month > 0) {
-				ssyears.push(sum/month);
+				sunspots.push(sum/month);
 			}
 
-			sunspots = ssyears;
 
 			flutrends = fludata.map(function(d) { return +d['United States']; });
 
