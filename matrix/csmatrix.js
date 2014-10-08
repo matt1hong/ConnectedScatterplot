@@ -52,21 +52,51 @@ function csplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, scale) {
 	}
 }
 
+function daplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, yScale, xScale) {
+
+	var line = d3.svg.line()
+		.x(function(d) { return xOffset+xScale(d); })
+		.y(function(d) { return yOffset+yScale(settings.data[dataOffset1+d].value); });
+
+	if (Math.max(dataOffset1, dataOffset2)+settings.shift+numValues > settings.data.length) {
+		numValues = settings.data.length-(Math.max(dataOffset1, dataOffset2)+settings.shift);
+	}
+
+	settings.svg.append('path')
+		.attr('d', line(d3.range(numValues)))
+		.attr('class', 'daplot1');
+
+	line.y(function(d) { return yOffset+yScale(settings.data[dataOffset2+d+settings.shift].value); });
+
+	settings.svg.append('path')
+		.attr('d', line(d3.range(numValues)))
+		.attr('class', 'daplot2');
+}
+
 function sliceTime() {
 	
 	var numSlices = Math.min(Math.ceil(settings.data.length/settings.periodicity), settings.numSlices);
+
+	var plotSize = svgSize/settings.numSlices;
 
 	var scale = d3.scale.linear()
 		.domain(d3.extent(settings.data, function(d) { return d.value; }))
 		.range([0, svgSize/settings.numSlices]);
 
+	var xScale = d3.scale.linear()
+		.domain([0, settings.periodicity])
+		.range([0, plotSize]);
+
 	settings.svg.selectAll('path').remove();
+
 
 	for (var y = 0; y < numSlices; y += 1) {
 		for (var x = 0; x < numSlices; x += 1) {
+			var rest = (Math.max(x, y)*settings.periodicity>settings.data.length-settings.periodicity)?settings.data.length-Math.max(x, y)*settings.periodicity:settings.periodicity;
 			if (x >= y) {
-				var rest = (Math.max(x, y)*settings.periodicity>settings.data.length-settings.periodicity)?settings.data.length-Math.max(x, y)*settings.periodicity:settings.periodicity;
-				csplot(x*svgSize/settings.numSlices, y*svgSize/settings.numSlices, x*settings.periodicity, y*settings.periodicity, rest, scale);
+				csplot(x*plotSize, y*plotSize, x*settings.periodicity, y*settings.periodicity, rest, scale);
+			} else {
+				daplot(x*plotSize, y*plotSize, x*settings.periodicity, y*settings.periodicity, rest, scale, xScale);
 			}
 		}
 	}
