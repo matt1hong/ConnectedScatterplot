@@ -5,6 +5,7 @@ var sinewave;
 
 var settings = {
 	periodicity: 52,
+	overlap: 0,
 	shift: 0,
 	svg: null,
 	data: null
@@ -13,17 +14,21 @@ var settings = {
 var svgSize = 800;
 
 function csplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, scale) {
-	
-	var line = d3.svg.line()
-		.x(function(d, i) { return xOffset+scale(settings.data[dataOffset1+i].value); })
-		.y(function(d, i) { return yOffset+scale(settings.data[dataOffset2+i+settings.shift].value); });
 
-	if (Math.max(dataOffset1, dataOffset2)+settings.shift+numValues > settings.data.length) {
-		numValues = settings.data.length-(Math.max(dataOffset1, dataOffset2)+settings.shift);
+	var initialOverlap = Math.min(dataOffset1, dataOffset2, settings.overlap);	
+
+	var line = d3.svg.line()
+		.x(function(d, i) { return xOffset+scale(settings.data[dataOffset1-initialOverlap+i].value); })
+		.y(function(d, i) { return yOffset+scale(settings.data[dataOffset2-initialOverlap+i+settings.shift].value); });
+
+	if (Math.max(dataOffset1, dataOffset2)+settings.shift+numValues+settings.overlap > settings.data.length) {
+		numValues = settings.data.length-(Math.max(dataOffset1, dataOffset2)+settings.shift+settings.overlap);
+	} else {
+		numValues += settings.overlap;
 	}
 
 	settings.svg.append('path')
-		.attr('d', line(d3.range(numValues)))
+		.attr('d', line(d3.range(initialOverlap+numValues)))
 		.attr('class', 'csplot');
 }
 

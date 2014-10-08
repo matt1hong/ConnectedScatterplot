@@ -28,6 +28,10 @@
 			stroke: darkorange;
 		}
 
+		.slider {
+			margin-bottom: 10px;
+		}
+
 	</style>
 </head>
 <body>
@@ -40,9 +44,14 @@
 			<label><input type="radio" name="dataset" value="sine" onclick="switchTo(sine);"/>Sine Wave</label>
 
 		</div>
+		Periodicity: <span id="periodicity-val"></span>
+		<div id="periodicity-slider" class="slider"></div>
 
-		<div id="periodicity-slider"></div><span id="periodicity-val"></span>
-		<div id="shift-slider"></div><span id="shift-val"></span>
+		Overlap: <span id="overlap-val"></span>
+		<div id="overlap-slider" class="slider"></div>
+
+		Shift: <span id="shift-val"></span>
+		<div id="shift-slider" class="slider"></div>
 	</div>
 
 	<script src="csmatrix.js" charset="utf-8"></script>
@@ -51,31 +60,25 @@
 
 
 		function setupSliders() {
-			$("#periodicity-slider" ).slider({
-				value: settings.periodicity,
-				min: 5,
-				max: 200,
-				step: 1,
-				slide: function(event, ui) {
-					settings.periodicity = ui.value;
-					$('#periodicity-val').text(settings.periodicity);
-					sliceTime();
-				}
-			});
-			$('#periodicity-val').text(settings.periodicity);
 
-			$("#shift-slider" ).slider({
-				value: settings.shift,
-				min: 0,
-				max: 30,
-				step: 1,
-				slide: function(event, ui) {
-					settings.shift = ui.value;
-					$('#shift-val').text(settings.shift);
-					sliceTime();
-				}
-			});
-			$('#shift-val').text(settings.shift);
+			function makeSlider(name, min, max) {
+				$('#'+name+'-slider').slider({
+					value: settings[name],
+					min: min,
+					max: max,
+					step: 1,
+					slide: function(event, ui) {
+						settings[name] = ui.value;
+						$('#'+name+'-val').text(settings[name]);
+						sliceTime();
+					}
+				});
+				$('#'+name+'-val').text(settings[name]);
+			}
+
+			makeSlider('periodicity', 5, 200);
+			makeSlider('overlap', 0, 20);
+			makeSlider('shift', 0, 30);
 		}
 
 		function switchTo(dataset) {
