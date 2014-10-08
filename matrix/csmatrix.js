@@ -17,8 +17,8 @@ var svgSize = 800;
 function csplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, scale) {
 
 	var line = d3.svg.line()
-		.x(function(d, i) { return xOffset+scale(settings.data[dataOffset1+i].value); })
-		.y(function(d, i) { return yOffset+scale(settings.data[dataOffset2+i+settings.shift].value); });
+		.x(function(d, i) { return xOffset+scale(settings.data[dataOffset1+i]); })
+		.y(function(d, i) { return yOffset+scale(settings.data[dataOffset2+i+settings.shift]); });
 
 	if (Math.max(dataOffset1, dataOffset2)+settings.shift+numValues > settings.data.length) {
 		numValues = settings.data.length-(Math.max(dataOffset1, dataOffset2)+settings.shift);
@@ -56,7 +56,7 @@ function daplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, yScale, x
 
 	var line = d3.svg.line()
 		.x(function(d) { return xOffset+xScale(d); })
-		.y(function(d) { return yOffset+yScale(settings.data[dataOffset1+d].value); });
+		.y(function(d) { return yOffset+yScale(settings.data[dataOffset1+d]); });
 
 	if (Math.max(dataOffset1, dataOffset2)+settings.shift+numValues > settings.data.length) {
 		numValues = settings.data.length-(Math.max(dataOffset1, dataOffset2)+settings.shift);
@@ -66,7 +66,7 @@ function daplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, yScale, x
 		.attr('d', line(d3.range(numValues)))
 		.attr('class', 'daplot1');
 
-	line.y(function(d) { return yOffset+yScale(settings.data[dataOffset2+d+settings.shift].value); });
+	line.y(function(d) { return yOffset+yScale(settings.data[dataOffset2+d+settings.shift]); });
 
 	settings.svg.append('path')
 		.attr('d', line(d3.range(numValues)))
@@ -80,7 +80,7 @@ function sliceTime() {
 	var plotSize = svgSize/settings.numSlices;
 
 	var scale = d3.scale.linear()
-		.domain(d3.extent(settings.data, function(d) { return d.value; }))
+		.domain(d3.extent(settings.data))
 		.range([0, svgSize/settings.numSlices]);
 
 	var xScale = d3.scale.linear()
@@ -88,7 +88,6 @@ function sliceTime() {
 		.range([0, plotSize]);
 
 	settings.svg.selectAll('path').remove();
-
 
 	for (var y = 0; y < numSlices; y += 1) {
 		for (var x = 0; x < numSlices; x += 1) {
@@ -107,19 +106,27 @@ function init() {
 		.defer(d3.csv, 'sunspots.csv')
 		.await(function(error, fludata, sundata) {
 			
-			sunspots = sundata.map(function(d) {
-				return {
-					date: new Date(d.year, d.month-1, 1),
-					value: +d.ssn
-				}
-			});
+			sunspots = sundata.map(function(d) { return +d.ssn; });
 
-			flutrends = fludata.map(function(d) {
-				return {
-					date: new Date(d.Date),
-					value: +d['United States']
+			var ssyears = [];
+			var month = 0;
+			var sum = 0;
+			for (var i = 0; i < sunspots.length; i += 1) {
+				sum += sunspots[i];
+				month += 1;
+				if (month == 12) {
+					ssyears.push(sum/12);
+					sum = 0;
+					month = 0;
 				}
-			});
+			}
+			if (month > 0) {
+				ssyears.push(sum/month);
+			}
+
+			sunspots = ssyears;
+
+			flutrends = fludata.map(function(d) { return +d['United States']; });
 
 			settings.data = flutrends;
 
@@ -133,14 +140,7 @@ function init() {
 		});
 
 	sine = [];
-	var d = new Date();
 	for (var i = 0; i < Math.PI*12; i += Math.PI/25) {
-		var p = {
-			date: d,
-			value: i*Math.sin(i),
-		}
-		sine.push(p);
-
-		d = new Date(d.getTime()+24*3600*1000);
+		sine.push(i*Math.sin(i));
 	}
 }
