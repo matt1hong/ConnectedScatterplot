@@ -55,7 +55,7 @@
 		Overlap: <span id="overlap-val"></span>
 		<div id="overlap-slider" class="slider"></div>
 
-		Shift: <span id="shift-val"></span>
+		Phase Shift: <span id="shift-val"></span>
 		<div id="shift-slider" class="slider"></div>
 	</div>
 
@@ -88,6 +88,7 @@
 
 		function switchTo(dataset) {
 			settings.data = dataset;
+			settings.numSlices = 10;
 			sliceTime();
 		}
 
