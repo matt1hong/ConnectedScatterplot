@@ -15,21 +15,40 @@ var svgSize = 800;
 
 function csplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, scale) {
 
-	var initialOverlap = Math.min(dataOffset1, dataOffset2, settings.overlap);	
-
 	var line = d3.svg.line()
-		.x(function(d, i) { return xOffset+scale(settings.data[dataOffset1-initialOverlap+i].value); })
-		.y(function(d, i) { return yOffset+scale(settings.data[dataOffset2-initialOverlap+i+settings.shift].value); });
+		.x(function(d, i) { return xOffset+scale(settings.data[dataOffset1+i].value); })
+		.y(function(d, i) { return yOffset+scale(settings.data[dataOffset2+i+settings.shift].value); });
 
-	if (Math.max(dataOffset1, dataOffset2)+settings.shift+numValues+settings.overlap > settings.data.length) {
-		numValues = settings.data.length-(Math.max(dataOffset1, dataOffset2)+settings.shift+settings.overlap);
-	} else {
-		numValues += settings.overlap;
+	if (Math.max(dataOffset1, dataOffset2)+settings.shift+numValues > settings.data.length) {
+		numValues = settings.data.length-(Math.max(dataOffset1, dataOffset2)+settings.shift);
 	}
 
 	settings.svg.append('path')
-		.attr('d', line(d3.range(initialOverlap+numValues)))
+		.attr('d', line(d3.range(numValues)))
 		.attr('class', 'csplot');
+
+	if (settings.overlap > 0) {
+		var initialOverlap = Math.min(dataOffset1, dataOffset2, settings.overlap);
+		dataOffset1 -= initialOverlap;
+		dataOffset2 -= initialOverlap;
+
+		if (initialOverlap > 1) {
+			settings.svg.append('path')
+				.attr('d', line(d3.range(initialOverlap+1)))
+				.attr('class', 'csoverlap');
+		}
+
+		dataOffset1 += initialOverlap+numValues-1;
+		dataOffset2 += initialOverlap+numValues-1;
+
+		numValues = Math.min(settings.data.length-(dataOffset1+settings.overlap), settings.data.length-(dataOffset2+settings.shift+settings.overlap), settings.overlap);
+
+		if (numValues > 1) {
+			settings.svg.append('path')
+				.attr('d', line(d3.range(numValues)))
+				.attr('class', 'csoverlap');
+		}
+	}
 }
 
 function sliceTime() {
@@ -39,7 +58,7 @@ function sliceTime() {
 		.domain(d3.extent(settings.data, function(d) { return d.value; }))
 		.range([0, svgSize/numSlices]);
 
-	settings.svg.selectAll('.csplot').remove();
+	settings.svg.selectAll('path').remove();
 
 	for (var y = 0; y < numSlices; y += 1) {
 		for (var x = 0; x < numSlices; x += 1) {
