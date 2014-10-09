@@ -11,6 +11,7 @@
 		#chart {
 			width: 800px;
 			height: 800px;
+			margin-right: 30px;
 			float: left;
 		}
 
@@ -57,8 +58,8 @@
 			<label><input type="radio" name="dataset" value="sunspots" onclick="switchTo(sunspots);"/>Sun Spots</label>
 			<label><input type="radio" name="dataset" value="flutrends" onclick="switchTo(flutrends);" checked/>Flu Trends</label>
 			<label><input type="radio" name="dataset" value="sine" onclick="switchTo(sine);"/>Sine Wave</label>
-
 		</div>
+
 		Periodicity: <span id="periodicity-val"></span>
 		<div id="periodicity-slider" class="slider"></div>
 
@@ -67,6 +68,12 @@
 
 		Phase Shift: <span id="shift-val"></span>
 		<div id="shift-slider" class="slider"></div>
+
+		<div>
+			<label><input type="radio" name="diagonal" value="all" onclick="showAll(true);" checked />Show All</label>
+			<label><input type="radio" name="diagonal" value="diagonalonly" onclick="showAll(false);"/>Single Sequence</label>
+		</div>
+
 	</div>
 
 	<script src="csmatrix.js" charset="utf-8"></script>
@@ -98,9 +105,14 @@
 
 		function switchTo(dataset) {
 			settings.data = dataset;
-			settings.numSlices = 10;
 			sliceTime();
 		}
+
+		function showAll(all) {
+			settings.showAll = all;
+			sliceTime();
+		}
+
 
 	</script>
 </body>

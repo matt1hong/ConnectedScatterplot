@@ -8,6 +8,7 @@ var settings = {
 	overlap: 5,
 	shift: 0,
 	numSlices: 10,
+	showAll: true,
 	svg: null,
 	data: null
 }
@@ -92,9 +93,9 @@ function sliceTime() {
 	for (var y = 0; y < numSlices; y += 1) {
 		for (var x = 0; x < numSlices; x += 1) {
 			var rest = (Math.max(x, y)*settings.periodicity>settings.data.length-settings.periodicity)?settings.data.length-Math.max(x, y)*settings.periodicity:settings.periodicity;
-			if (x >= y) {
+			if (x >= y && settings.showAll || (settings.showAll == false && x >= y && x <= y+2)) {
 				csplot(x*plotSize, y*plotSize, x*settings.periodicity, y*settings.periodicity, rest, scale);
-			} else {
+			} else if (settings.showAll || (settings.showAll == false && x <= y && x >= y-2)) {
 				daplot(x*plotSize, y*plotSize, x*settings.periodicity, y*settings.periodicity, rest, scale, xScale);
 			}
 		}
