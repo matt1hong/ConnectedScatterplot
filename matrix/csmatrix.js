@@ -9,6 +9,7 @@ var settings = {
 	shift: 0,
 	numSlices: 10,
 	showAll: true,
+	showDALCs: true,
 	svg: null,
 	timelineSVG: null,
 	data: null
@@ -136,7 +137,7 @@ function sliceTime() {
 			var rest = (Math.max(x, y)*settings.periodicity>settings.data.length-settings.periodicity)?settings.data.length-Math.max(x, y)*settings.periodicity:settings.periodicity;
 			if (x >= y && settings.showAll || (settings.showAll == false && x >= y && x <= y+1)) {
 				csplot(x*plotSize, y*plotSize, x*settings.periodicity, y*settings.periodicity, rest, scale);
-			} else if (settings.showAll || (settings.showAll == false && x <= y && x >= y-1)) {
+			} else if ((settings.showAll || (settings.showAll == false && x <= y && x >= y-1)) && settings.showDALCs) {
 				daplot(x*plotSize, y*plotSize, x*settings.periodicity, y*settings.periodicity, rest, scale, xScale);
 			}
 		}

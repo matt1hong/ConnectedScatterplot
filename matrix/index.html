@@ -87,8 +87,11 @@
 		<div id="shift-slider" class="slider"></div>
 
 		<div>
-			<label><input type="radio" name="diagonal" value="all" onclick="showAll(true);" checked />Show All</label>
-			<label><input type="radio" name="diagonal" value="diagonalonly" onclick="showAll(false);"/>Single Sequence</label>
+			<br />
+			<label><input type="radio" name="diagonal" value="all" onclick="showAll(true);" checked /> Show All CSs</label>
+			<label><input type="radio" name="diagonal" value="diagonalonly" onclick="showAll(false);"/> Single Sequence</label>
+			<br /><br />
+			<label><input type="checkbox" name="dalcs" onclick="toggleDALCs();" checked /> Show DALCs</label>
 		</div>
 	</div>
 
@@ -133,6 +136,10 @@
 			sliceTime();
 		}
 
+		function toggleDALCs() {
+			settings.showDALCs = !settings.showDALCs;
+			sliceTime();
+		}
 
 	</script>
 </body>
