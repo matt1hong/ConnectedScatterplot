@@ -127,7 +127,7 @@ function sliceTime() {
 
 	var xScale = d3.scale.linear()
 		.domain([0, settings.periodicity])
-		.range([0, plotSize]);
+		.range([0, plotSize-2]);
 
 	settings.svg.selectAll('path').remove();
 
