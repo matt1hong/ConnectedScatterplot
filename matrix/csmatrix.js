@@ -10,10 +10,14 @@ var settings = {
 	numSlices: 10,
 	showAll: true,
 	svg: null,
+	timelineSVG: null,
 	data: null
 }
 
-var svgSize = 800;
+var svgSize = 700;
+
+var TIMELINEWIDTH = 1200;
+var TIMELINEHEIGHT = 300;
 
 function csplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, scale) {
 
@@ -74,6 +78,43 @@ function daplot(xOffset, yOffset, dataOffset1, dataOffset2, numValues, yScale, x
 		.attr('class', 'daplot2');
 }
 
+function timeline() {
+	if (settings.timelineSVG === null) {
+		settings.timelineSVG = d3.select('#timeline').append('svg')
+								.attr('width', TIMELINEWIDTH).attr('height', TIMELINEHEIGHT);
+	}
+
+	var xScale = d3.scale.linear()
+		.domain([0, settings.data.length])
+		.range([0, TIMELINEWIDTH]);
+
+	var yScale = d3.scale.linear()
+		.domain(d3.extent(settings.data))
+		.range([0, TIMELINEHEIGHT]);
+
+	var line = d3.svg.line()
+		.x(function(d, i) { return xScale(i); })
+		.y(yScale);
+
+	settings.timelineSVG.selectAll('rect').remove();
+
+	settings.timelineSVG.selectAll('rect')
+		.data(d3.range(0, settings.data.length, settings.periodicity*2))
+		.enter().append('rect')
+			.attr('x', function(d, i) { return xScale(d); })
+			.attr('y', 0)
+			.attr('width', xScale(settings.periodicity))
+			.attr('height', TIMELINEHEIGHT)
+			.attr('class', 'interval');
+
+	settings.timelineSVG.select('path').remove();
+
+	settings.timelineSVG.append('path')
+		.attr('d', line(settings.data))
+		.attr('class', 'timeline');
+
+}
+
 function sliceTime() {
 	
 	var numSlices = Math.min(Math.ceil(settings.data.length/settings.periodicity), settings.numSlices);
@@ -93,13 +134,15 @@ function sliceTime() {
 	for (var y = 0; y < numSlices; y += 1) {
 		for (var x = 0; x < numSlices; x += 1) {
 			var rest = (Math.max(x, y)*settings.periodicity>settings.data.length-settings.periodicity)?settings.data.length-Math.max(x, y)*settings.periodicity:settings.periodicity;
-			if (x >= y && settings.showAll || (settings.showAll == false && x >= y && x <= y+2)) {
+			if (x >= y && settings.showAll || (settings.showAll == false && x >= y && x <= y+1)) {
 				csplot(x*plotSize, y*plotSize, x*settings.periodicity, y*settings.periodicity, rest, scale);
-			} else if (settings.showAll || (settings.showAll == false && x <= y && x >= y-2)) {
+			} else if (settings.showAll || (settings.showAll == false && x <= y && x >= y-1)) {
 				daplot(x*plotSize, y*plotSize, x*settings.periodicity, y*settings.periodicity, rest, scale, xScale);
 			}
 		}
 	}
+
+	timeline();
 }
 
 function init() {
