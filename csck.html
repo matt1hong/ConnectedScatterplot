@@ -16,9 +16,9 @@
 	<h1>Connected Scatterplot Construction Kit</h1>
 	<div id="charts">
 		<div id="drawSlider" class="slider"></div>
-		<div id="linechart" class="chart" style="clear:left;"></div>
+		<div id="leftChart" class="chart" style="clear:left;"></div>
 		<div class="spacer"></div>
-		<div id="connectedscatter" class="chart"></div>
+		<div id="rightChart" class="chart"></div>
 		<div id="shiftSlider" class="slider"></div>
 	</div>
 	<div style="clear:left; float:left; margin-top: 10px;">
@@ -102,7 +102,7 @@
 
 
 	loadDataSets(false, function() {
-		initialSetup('#linechart', '#connectedscatter');
+		initialSetup(true, false);
 	});
 </script>
 </body>
