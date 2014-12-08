@@ -3,6 +3,10 @@
 <html>
 <head>
 	<title>Connected Scatterplot Construction Kit</title>
+	<!-- bootstrap -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+
 	<link rel="stylesheet" href="csck.css">
 	<script src="d3.v3.min.js"></script>
 	<script type="text/javascript" src="csck.js"></script>
@@ -13,45 +17,87 @@
 	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 </head>
 <body>
-	<h1>Connected Scatterplot Construction Kit</h1>
-	<div id="charts">
-		<div id="drawSlider" class="slider"></div>
-		<div id="leftChart" class="chart" style="clear:left;"></div>
-		<div class="spacer"></div>
-		<div id="rightChart" class="chart"></div>
-		<div id="shiftSlider" class="slider"></div>
+	<div class="row">
+		<div class="col-md-12">
+			<h1>Connected Scatterplot Construction Kit</h1>
+		</div>
 	</div>
-	<div style="clear:left; float:left; margin-top: 10px;">
-		<label><input type="checkbox" id="smooth" onclick="toggleSmooth(this.checked);" checked /> Smooth</label>&nbsp;
-		<label><input type="checkbox" id="dots" onclick="toggleDots(this.checked);" checked /> Dots</label>
-		<label><input type="checkbox" id="arrows" onclick="toggleArrows(this.checked);" /> Arrows</label>&nbsp;
-		<label><input type="checkbox" id="labels" onclick="toggleLabels(this.checked);" /> Labels</label>
-		<label><input type="checkbox" id="grid" onclick="toggleGrid(this.checked);" /> Grid</label>
-		<label><input type="checkbox" id="disconnect" onclick="toggleDisconnect(this.checked);" /> Disconnect</label>
-		<label><input type="checkbox" id="cheatMode" onclick="toggleCheatMode(this.checked);" checked disabled /> Cheat</label>
-		<button type="button" onclick="addSamples();">Add samples</button>&nbsp;
-		<button type="button" onclick="exportData();">Export Data</button>&nbsp;
+	<div class="row">
+		<div class="col-md-6">
+			<form>
+				<label for="dataset">Dataset:</label>
+				<select id="dataset" onchange="loadData(+this.value)">
+				</select>
+			</form>
+		</div>
 	</div>
-	<div style="float:right;">
-		<button type="button" onclick="flipH();">Flip H</button>&nbsp;
-		<button type="button" onclick="flipV();">Flip V</button>&nbsp;
-		<button type="button" onclick="rotateCW();">Rotate CW</button>&nbsp;
-		<button type="button" onclick="rotateCCW();">Rotate CCW</button>
+	<div class="row">
+		<div class="col-md-6">
+			<div id="drawSlider" class="slider"></div>
+		</div>
 	</div>
-	<div style="clear:both;">
-		<form>
-			<label for="dataset">Dataset:</label>
-			<select id="dataset" onchange="loadData(+this.value)">
-			</select>
-		</form>
+	<div class="row" id="charts">
+		<div class="col-md-6">
+			<div id="leftChart" class="chart"></div>
+		</div>
+		<div class="col-md-6">
+			<div id="rightChart" class="chart"></div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-6">
+			<div id="shiftSlider" class="slider"></div>
+		</div>
+		<div class="col-md-6">
+			<button type="button" onclick="flipH();">Flip H</button>&nbsp;
+			<button type="button" onclick="flipV();">Flip V</button>&nbsp;
+			<button type="button" onclick="rotateCW();">Rotate CW</button>&nbsp;
+			<button type="button" onclick="rotateCCW();">Rotate CCW</button>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<label><input type="checkbox" id="smooth" onclick="toggleSmooth(this.checked);" checked /> Smooth</label>&nbsp;
+			<label><input type="checkbox" id="dots" onclick="toggleDots(this.checked);" checked /> Dots</label>
+			<label><input type="checkbox" id="arrows" onclick="toggleArrows(this.checked);" /> Arrows</label>&nbsp;
+			<label><input type="checkbox" id="labels" onclick="toggleLabels(this.checked);" /> Labels</label>
+			<label><input type="checkbox" id="grid" onclick="toggleGrid(this.checked);" /> Grid</label>
+			<label><input type="checkbox" id="disconnect" onclick="toggleDisconnect(this.checked);" /> Disconnect</label>
+			<label><input type="checkbox" id="cheatMode" onclick="toggleCheatMode(this.checked);" checked disabled /> Cheat</label>
+			<button type="button" onclick="addSamples();">Add samples</button>&nbsp;
+			<button type="button" onclick="exportData();">Export Data</button>&nbsp;
+		</div>
 	</div>
 
-	<div id="export" style="margin-top:30px;">
-		<pre>
-		</pre>
+	<div class="row" id="export">
+		<div class="col-md-12">
+			<pre>
+			</pre>
+		</div>
 	</div>
 
-<!-- Based on <a href="http://bl.ocks.org/mbostock/4342190">Mike Bostock's Spline Editor example</a>. -->
+	<div class="row">
+		<div class="col-md-8">
+			<h2>Instructions</h2>
+
+			<p>This page allows users to experiment with a few data sets to compare the connected scatterplot (CS) to the dual-axis line chart (DALC). The controls are described from the top down, left to right.</p>
+
+			<dl class="dl-horizontal">
+				<dt>Dataset</dt><dd>Selects the dataset to be shown. These are largely taken from the news graphics examples mentioned in the paper. The ones that include 'vs' in the name are word use frequency taken from Google n-gram search. The last few datasets are synthetic datasets to see certain features (such as loops).</dd>
+				<dt>Top Slider</dt><dd>Allows the user to draw just a part of the chart, so it is possible to see how it gets constructed from the data points over time.</dd>
+				<dt>Displays</dt><dd>The points in both displays can be clicked and moved. When clicking, the point turns orange in both charts, so it can be identified. Moving a point in one chart changes the data value, and thus also moves it in the other. Movement in the DALC is restricted to vertical, since the time points are fixed.</dd>
+				<dt>Bottom Slider</dt><dd>This shifts the data series against each other to study the effects of phase shifts.</dd>
+				<dt>Flip and Rotate Buttons</dt><dd>These buttons flip and rotate the data on the CS, which also affects the DALC. This is useful when trying to find certain structures in the CS to then examine in the DALC.</dd>
+				<dt>Checkboxes</dt><dd>These turn features like line smoothing, dots, arrows, labels, and the grid on and off.</dd>
+				<dt>Disconnect</dt><dd>Selecting this makes the two charts independent. This was mostly used to test how this would work in the translation study.</dd>
+				<dt>Cheat</dt><dd>This box turns the gray line in the background on and off that helps see what the respective other chart's data looks like, even when they are disconnected.</dd>
+				<dt>Add samples</dt><dd>This adds points between the existing ones. It is mostly usefule when exploring some of the small datasets and trying to create cases for a study.</dd>
+				<dt>Export Data</dt><dd>Displays the currently displayed data as a JSON snippet in a text box for easy exporting and use in a study.</dd>
+			</dl>
+			<p>To ensure reviewer anonymity, accesses to this page are not logged.</p>
+
+		</div>
+	</div>
 
 <script type="text/javascript">
 	var sliderValue = 0;
@@ -78,6 +124,7 @@
 			data.push(d);
 		});
 		d3.select('#export pre').text(JSON.stringify(data));
+		d3.select('#export').style('visibility', 'visible');
 	}
 
 	$('#shiftSlider').slider({

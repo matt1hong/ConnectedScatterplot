@@ -74,7 +74,7 @@ div.spacer {
 }
 
 div.slider {
-	width: 600px;
+	width: 500px;
 	clear: left;
 	float: left;
 	margin-left: 40px;
@@ -132,4 +132,8 @@ text.axis2 {
 
 .row {
 	margin-left: 10px;
+}
+
+#export {
+	visibility: collapse;
 }
