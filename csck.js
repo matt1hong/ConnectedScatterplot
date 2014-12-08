@@ -36,6 +36,9 @@ var commonScales = false;
 var leftChart;
 var rightChart;
 
+// these are just for the CSCK, so the two can communicate when points are moved.
+var globalDALC, globalCS;
+
 var currentDataSet;
 
 var pointsToDraw;
@@ -342,14 +345,14 @@ function initialSetup(leftChartDALC, rightChartDALC) {
 	d3.select('option.data-'+datasets[0].name).attr('selected', true);
 
 	if (leftChartDALC)
-		leftChart = makeDALC('#leftChart', false, datasets[0].data);
+		globalDALC = leftChart = makeDALC('#leftChart', true, datasets[0].data);
 	else
-		leftChart = makeConnected('#leftChart', false, datasets[0].data);
+		globalCS = leftChart = makeConnected('#leftChart', true, datasets[0].data);
 
 	if (rightChartDALC)
-		rightChart = makeDALC('#rightChart', true, datasets[0].data);
+		globalDALC = rightChart = makeDALC('#rightChart', true, datasets[0].data);
 	else
-		rightChart = makeConnected('#rightChart', true, datasets[0].data);
+		globalCS = rightChart = makeConnected('#rightChart', true, datasets[0].data);
 
 	afterUpdatePoints();
 }
@@ -706,11 +709,9 @@ function mousemoveCS(connected) {
 	connected.points[draggedIndex].value1 = xScale.invert(Math.max(0, Math.min(width, width-m[0])));
 	connected.points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 
-	// BUG: This isn't working anymore because we don't know which of the charts this is, and which the other one is.
-	// It's only an issue in CSCK though, so not really all that important for now
 	if (!disconnected) {
-		connected.points[draggedIndex].value1 = connected.points[draggedIndex].value1;
-		connected.points[draggedIndex].value2 = connected.points[draggedIndex].value2;
+		globalDALC.points[draggedIndex].value1 = connected.points[draggedIndex].value1;
+		globalDALC.points[draggedIndex].value2 = connected.points[draggedIndex].value2;
 	}
 
 	redraw(false);
@@ -730,11 +731,9 @@ function mousemoveDALC(dualAxes) {
 		dualAxes.points[draggedIndex].value2 = yScale.invert(Math.max(0, Math.min(height, m[1])));
 	}
 
-	// BUG: This isn't working anymore because we don't know which of the charts this is, and which the other one is.
-	// It's only an issue in CSCK though, so not really all that important for now
 	if (!disconnected) {
-		dualAxes.points[draggedIndex].value1 = dualAxes.points[draggedIndex].value1;
-		dualAxes.points[draggedIndex].value2 = dualAxes.points[draggedIndex].value2;
+		globalCS.points[draggedIndex].value1 = dualAxes.points[draggedIndex].value1;
+		globalCS.points[draggedIndex].value2 = dualAxes.points[draggedIndex].value2;
 	}
 
 	redraw(false);
