@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Compare Trends in Chart</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+	<link rel="stylesheet" href="csck.css">
+	<script src="d3.v3.min.js"></script>
+	<script type="text/javascript" src="queue.min.js"></script>
+	<script type="text/javascript" src="common.js"></script>
+	<script type="text/javascript" src="csck.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+	<script src="//code.jquery.com/jquery-1.11.0.js"></script>
+	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+	<style type="text/css">
+div {
+	margin: 0 auto;
+	width: 600px;
+}
+#header {
+	margin-top: 40px;
+	font-size: 14px;
+	height: 100px;
+}
+#study{
+	display: none;
+	text-align: center;
+}
+#wrong, #timed-out{
+	display: none;
+	color: red;
+}
+#continue{
+	display: none;
+}
+	</style>
+</head>
+<body>
+	<div id="header">
+		<div class="tutorial" id="tutorial-1">
+			<p>In this experiment, a chart will be shown.</p>
+			<p>Each point represents two values: one on the horizontal axis, and one on the vertical axis.</p>
+			<p>Two points that are adjacent across time are connected by an arrow.</p>
+			<p>Press <b>s</b> or <b>d</b> to continue.</p>
+			<div class="example">
+				<img src="img/instructions.jpg"/>
+			</div>
+		</div>
+		<div class="tutorial" id="tutorial-2">
+			<p>At first, only the question will be shown.</p>
+			<p>Then, click <b>s</b> or <b>d</b> to reveal the chart in question and start the timer.</p>
+			<p>Pick the correct answer by pressing <b>s</b> (same) or <b>d</b> (different).</p>
+			<p>Be as quick and accurate as you can.</p>
+			<p>We will measure both correctness and speed.</p>
+			<p>Press <b>s</b> or <b>d</b> to start practice.</p>
+		</div>
+		<div id="study">
+			<p>The trends are:</p>
+				<p>
+					<p id='same' style="display: inline;">(<b>s</b>)ame</p> 
+					/ 
+					<p id='different' style="display: inline;">(<b>d</b>)ifferent</p>
+				</p>
+			<p id='wrong'>Your answer was incorrect. Timed out for 5 seconds...</p>
+			<p id='timed-out'>That took more than t seconds. Please answer more quickly.</p>
+			<p id='continue'>Press <b>s</b> or <b>d</b> to continue.</p>
+		</div>
+	</div>
+	<div id="leftChart"></div>
+	<div id="footer"></div>
+	<script type="text/javascript">
+
+$(function(){
+
+var numTrials = 10;
+var numLines = 1;
+
+// var Block = function(subjectID){
+// 	this.subjectID = subjectID;
+// 	this.trials = [];
+// };
+
+var Trial = function(index, label1, label2, data, startYear){
+	this.index = -1;
+	this.label1 = '';
+	this.label2 = '';
+	this.data = [];
+	this.startYear = '';
+	this.highlight = false;
+	this.response = true;
+	this.responseTime = 0;
+};
+
+var trials = [];
+
+datasets = [{
+	'label1': 'Number of Troops (thousands)', 
+	'label2': 'Budget (billion $)', 
+	'study': true, 
+	'data': [
+		{'date': "1/1/1948", 'value1':233, 'value2': 100},
+		{'date': "1/1/1949", 'value1':100, 'value2': 400}
+	]}];
+
+var now = 1;
+var tutorialStep = function(event){
+	var k = event.keyCode;
+
+	if (k === 83 || k === 68) {
+		if (now < 2) {
+			$('#tutorial-' + now).hide();
+			$('#tutorial-' + (now + 1)).show();
+		} 
+		else {
+			$('#tutorial-' + now).hide();
+			studyStep();
+		}
+		++now;
+	};
+};
+
+var startStudy = function(){
+	for (var i = 0; i<10; i++){
+		var trial = new Trial();
+		trial.data = datasets[0];
+	}
+}
+
+var runTrial = function(trial){
+
+	var response;
+
+	var processResponse = function(event){
+		var k = event.keyCode;
+		var data = datasets[0].data;
+		var answer = (data[0]['value1'] - data[1]['value1'])/(data[0]['value2'] - data[1]['value2']) === 1;
+		
+		if (k === 83 || k === 68) {
+			if (k === 83 && answer){
+				$('#same').css('color', 'blue');
+				$('#continue').css('color', 'blue').show();
+			} else if (k === 68 && !answer){
+				$('#different').css('color', 'blue');
+				$('#continue').css('color', 'blue').show();
+			} else {
+				if (answer){
+					$('#same').css('color', 'red');
+					$('#different').css('color', 'blue');
+				}else{
+					$('#different').css('color', 'blue');
+					$('#same').css('color', 'red');
+				}
+				$('#wrong').show();
+			}
+		}
+
+		response = k;
+	};
+
+	$('#study').show();
+	setTimeout(function(){
+		$(document).keyup(processResponse);
+		initialSetup(false);
+	}, 3000);
+
+};
+
+interactDALC = false;
+showArrows = true;
+smoothLines = false;
+
+$(document).keyup(tutorialStep);
+$('#tutorial-1').show();
+
+});
+	</script>
+</body>
+</html>
