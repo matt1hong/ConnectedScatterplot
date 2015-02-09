@@ -72,13 +72,16 @@ div {
 
 $(function(){
 
-var numTrials = 10;
+var numTrials = 1;
+
+//Number of segments being drawn
 var numLines = 1;
 
-// var Block = function(subjectID){
-// 	this.subjectID = subjectID;
-// 	this.trials = [];
-// };
+//Classes
+var Block = function(subjectID){
+	this.subjectID = subjectID;
+	this.trials = [];
+};
 
 var Trial = function(index, label1, label2, data, startYear){
 	this.index = -1;
@@ -87,12 +90,12 @@ var Trial = function(index, label1, label2, data, startYear){
 	this.data = [];
 	this.startYear = '';
 	this.highlight = false;
-	this.response = true;
+	this.response = null;
 	this.responseTime = 0;
+	this.result = null;
 };
 
-var trials = [];
-
+//Initial fake data
 datasets = [{
 	'label1': 'Number of Troops (thousands)', 
 	'label2': 'Budget (billion $)', 
@@ -102,66 +105,168 @@ datasets = [{
 		{'date': "1/1/1949", 'value1':100, 'value2': 400}
 	]}];
 
-var now = 1;
+//Stepping through the tutorial
+var tutorialNow = 1;
 var tutorialStep = function(event){
 	var k = event.keyCode;
 
 	if (k === 83 || k === 68) {
-		if (now < 2) {
-			$('#tutorial-' + now).hide();
-			$('#tutorial-' + (now + 1)).show();
+		if (tutorialNow < 2) {
+			$('#tutorial-' + tutorialNow).hide();
+			$('#tutorial-' + (tutorialNow + 1)).show();
 		} 
 		else {
-			$('#tutorial-' + now).hide();
-			studyStep();
+			$('#tutorial-' + tutorialNow).hide();
+			runBlock();
 		}
-		++now;
+		++tutorialNow;
 	};
 };
 
-var startStudy = function(){
-	for (var i = 0; i<10; i++){
+//To send results
+var sendJSON = function(_block, callback) {
+    // // strip out icon data
+    // for (var t in _block.trials) {
+    //     for (var d in _block.trials[t].data) {
+    //         _block.trials[t].data[d].icons = [];
+    //     }
+    // }
+    // // make sure version is set
+    // _block.version = perfExperiment.version;
+    // // show size of block data
+    // console.log(encodeURIComponent(JSON.stringify(_block, null, " ")).length);
+
+    // // get correctess and time
+    // _block.avgRT = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.RT; }, 0) / _block.trials.length;
+    // _block.avgCorrect = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.responseCorrect; }, 0) / _block.trials.length;
+
+    // send
+    var studyName = 'study1';
+    d3.xhr('submit-trends.php', 'application/x-www-form-urlencoded', callback)
+        .header('content-type', 'application/x-www-form-urlencoded')
+        .post('study=' + encodeURIComponent(studyName) + '&' +
+            'subjectID=' + encodeURIComponent(_block.subjectID) + '&' +
+            'data=' + encodeURIComponent(JSON.stringify(_block, null, " ")))
+        .on('error', function (error) {
+            console.log('ERROR: ' + error);
+            if (typeof callback != "undefined")
+                callback();
+        });
+};
+
+var runBlock = function(){
+	/**
+	* Run a block
+	*/
+
+	var block = new Block('000');
+
+	//Initialize all trials first
+	for (var i = 0; i<numTrials; i++){
 		var trial = new Trial();
-		trial.data = datasets[0];
-	}
-}
+		trial.data = datasets[0].data;
+		block.trials.push(trial);
+	};
+
+	//Run each trial
+	for (var i = 0; i<numTrials; i++){
+		block.trials[i] = runTrial(block.trials[i]);
+	};
+
+	//Send block
+	sendJSON(block);
+};
 
 var runTrial = function(trial){
+	/**
+	* Run a trial
+	*/
 
-	var response;
+	//Time variables
+	var delay = 3000;
+	var timeLimit = 10000;
+	var penalty = 5000;
+
+	var endTrial = function(event){
+		/**
+		* Callback to move on to the next trial
+		*/
+		k = event.keyCode;
+
+		if (k === 83 || k === 68){
+			return trial;
+		}
+	};
 
 	var processResponse = function(event){
+		/**
+		* Callback processes keyboard input during trial
+		* Evaluates answer and compares it with the response, computing the result
+		* Sets the response and the result for the trial
+		*/
 		var k = event.keyCode;
 		var data = datasets[0].data;
 		var answer = (data[0]['value1'] - data[1]['value1'])/(data[0]['value2'] - data[1]['value2']) === 1;
 		
 		if (k === 83 || k === 68) {
 			if (k === 83 && answer){
+				// Correct and same
 				$('#same').css('color', 'blue');
 				$('#continue').css('color', 'blue').show();
+				$(document).keyup(endTrial);
+				trial.result = true;
 			} else if (k === 68 && !answer){
+				// Correct and different
 				$('#different').css('color', 'blue');
 				$('#continue').css('color', 'blue').show();
+				$(document).keyup(endTrial);
+				trial.result = true;
 			} else {
+				// Wrong
+				$(document).keyup(null);
 				if (answer){
+					//Same
 					$('#same').css('color', 'red');
 					$('#different').css('color', 'blue');
 				}else{
+					//Different
 					$('#different').css('color', 'blue');
 					$('#same').css('color', 'red');
 				}
 				$('#wrong').show();
+				// Enable continue after timeout
+				setTimeout(function(){
+					$('#wrong').hide();
+					$('#continue').css('color', 'red').show();
+					$(document).keyup(endTrial);
+				}, penalty);
+				trial.result = false;
 			}
 		}
 
-		response = k;
+		trial.response = k;
 	};
 
+	// Show question
 	$('#study').show();
+	// Show chart after delay
 	setTimeout(function(){
+		//Keyboard input
 		$(document).keyup(processResponse);
+
+		//Show chart
 		initialSetup(false);
-	}, 3000);
+
+		setTimeout(function(){
+			//When subject goes over time limit
+			if (!response) {
+				$('#timed-out').show();
+				$('#continue').css('color', 'red').show();
+				$(document).keyup(endTrial);
+			}
+		}, timeLimit);
+
+	}, delay);
 
 };
 
