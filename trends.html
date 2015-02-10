@@ -72,6 +72,8 @@ div {
 
 $(function(){
 
+var timeLimit = 10000;
+
 var numTrials = 1;
 
 //Number of segments being drawn
@@ -117,7 +119,8 @@ var tutorialStep = function(event){
 		} 
 		else {
 			$('#tutorial-' + tutorialNow).hide();
-			runBlock();
+			$(document).unbind("keyup", tutorialStep);
+			runBlocks();
 		}
 		++tutorialNow;
 	};
@@ -142,6 +145,7 @@ var sendJSON = function(_block, callback) {
 
     // send
     var studyName = 'study1';
+    console.log(_block)
     d3.xhr('submit-trends.php', 'application/x-www-form-urlencoded', callback)
         .header('content-type', 'application/x-www-form-urlencoded')
         .post('study=' + encodeURIComponent(studyName) + '&' +
@@ -154,27 +158,49 @@ var sendJSON = function(_block, callback) {
         });
 };
 
-var runBlock = function(){
+var runBlocks = function(){
 	/**
-	* Run a block
+	* Run blocks
 	*/
 
-	var block = new Block('000');
+	var bl = new Block('000');
 
-	//Initialize all trials first
 	for (var i = 0; i<numTrials; i++){
+		//Initialize all trials first
+		console.log(i)
 		var trial = new Trial();
 		trial.data = datasets[0].data;
-		block.trials.push(trial);
+		bl.trials.push(trial);
 	};
 
-	//Run each trial
-	for (var i = 0; i<numTrials; i++){
-		block.trials[i] = runTrial(block.trials[i]);
+	//Run each block
+	var runBlock = function(block){
+		/**
+		* Deferred function
+		*/
+		var r = $.Deferred();
+
+		for (var i = 0; i<numTrials; i++){
+			var trial = block.trials[i];
+			runTrial(trial);
+
+			setTimeout(function(){
+				//Reached time limit
+				if (!trial.response) {
+					//If no response yet
+					$('#timed-out').show();
+					$('#continue').css('color', 'red').show();
+					// $(document).keyup(endTrial);
+				}
+				r.resolve();
+			}, timeLimit);
+		};
+
+		return r;
 	};
 
-	//Send block
-	sendJSON(block);
+	//Send block when it finishes
+	runBlock(bl).done(function(){sendJSON(bl);});
 };
 
 var runTrial = function(trial){
@@ -184,7 +210,6 @@ var runTrial = function(trial){
 
 	//Time variables
 	var delay = 3000;
-	var timeLimit = 10000;
 	var penalty = 5000;
 
 	var endTrial = function(event){
@@ -256,15 +281,6 @@ var runTrial = function(trial){
 
 		//Show chart
 		initialSetup(false);
-
-		setTimeout(function(){
-			//When subject goes over time limit
-			if (!response) {
-				$('#timed-out').show();
-				$('#continue').css('color', 'red').show();
-				$(document).keyup(endTrial);
-			}
-		}, timeLimit);
 
 	}, delay);
 
