@@ -30,7 +30,7 @@ div {
 	display: none;
 	color: red;
 }
-#continue{
+#continue, #done{
 	display: none;
 }
 	</style>
@@ -65,14 +65,16 @@ div {
 			<p id='timed-out'>That took more than t seconds. Please answer more quickly.</p>
 			<p id='continue'>Press <b>s</b> or <b>d</b> to continue.</p>
 		</div>
+		<div id="done">
+			<p>You finished! You rock! Thanks for participating!</p>
+		</div>
 	</div>
 	<div id="leftChart"></div>
-	<div id="footer"></div>
 	<script type="text/javascript">
 
 $(function(){
 
-var timeLimit = 10000;
+var timeLimit = 6000;
 
 var numTrials = 1;
 
@@ -128,12 +130,6 @@ var tutorialStep = function(event){
 
 //To send results
 var sendJSON = function(_block, callback) {
-    // // strip out icon data
-    // for (var t in _block.trials) {
-    //     for (var d in _block.trials[t].data) {
-    //         _block.trials[t].data[d].icons = [];
-    //     }
-    // }
     // // make sure version is set
     // _block.version = perfExperiment.version;
     // // show size of block data
@@ -167,61 +163,46 @@ var runBlocks = function(){
 
 	for (var i = 0; i<numTrials; i++){
 		//Initialize all trials first
-		console.log(i)
 		var trial = new Trial();
 		trial.data = datasets[0].data;
 		bl.trials.push(trial);
 	};
 
-	//Run each block
-	var runBlock = function(block){
-		/**
-		* Deferred function
-		*/
-		var r = $.Deferred();
+	var finTrials = [];
 
-		for (var i = 0; i<numTrials; i++){
-			var trial = block.trials[i];
-			runTrial(trial);
+	$.each(bl.trials, function (i,v) { finTrials.push(runTrial(v)); });
 
-			setTimeout(function(){
-				//Reached time limit
-				if (!trial.response) {
-					//If no response yet
-					$('#timed-out').show();
-					$('#continue').css('color', 'red').show();
-					// $(document).keyup(endTrial);
-				}
-				r.resolve();
-			}, timeLimit);
-		};
+	$.when.apply($, finTrials)
+		.done(function(){
+			sendJSON(bl);
 
-		return r;
-	};
-
-	//Send block when it finishes
-	runBlock(bl).done(function(){sendJSON(bl);});
+			$('#study').hide();
+			$('#leftChart').hide();
+			$('#done').show();
+		});
 };
 
 var runTrial = function(trial){
 	/**
 	* Run a trial
+	* Deferred function
 	*/
-
-	//Time variables
-	var delay = 3000;
-	var penalty = 5000;
+	var r = $.Deferred();
 
 	var endTrial = function(event){
 		/**
 		* Callback to move on to the next trial
 		*/
-		k = event.keyCode;
+		var k = event.keyCode;
 
 		if (k === 83 || k === 68){
-			return trial;
+			r.resolve();
 		}
 	};
+
+	//Time variables
+	var delay = 3000;
+	var penalty = 5000;
 
 	var processResponse = function(event){
 		/**
@@ -278,12 +259,21 @@ var runTrial = function(trial){
 	setTimeout(function(){
 		//Keyboard input
 		$(document).keyup(processResponse);
-
 		//Show chart
 		initialSetup(false);
 
+		setTimeout(function(){
+		//Reached time limit
+			if (!trial.response) {
+				//If no response yet
+				$('#timed-out').show();
+				$('#continue').css('color', 'red').show();
+				$(document).keyup(endTrial);
+			}
+		}, timeLimit);
 	}, delay);
 
+	return r;
 };
 
 interactDALC = false;
