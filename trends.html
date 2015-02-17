@@ -57,13 +57,13 @@ div {
 		<div id="study">
 			<p>The trends are:</p>
 				<p>
-					<p id='same' style="display: inline;">(<b>s</b>)ame</p> 
+					<p id='same' class='choice' style="display: inline;">(<b>s</b>)ame</p> 
 					/ 
-					<p id='different' style="display: inline;">(<b>d</b>)ifferent</p>
+					<p id='different' class='choice' style="display: inline;">(<b>d</b>)ifferent</p>
 				</p>
-			<p id='wrong'>Your answer was incorrect. Timed out for 5 seconds...</p>
-			<p id='timed-out'>That took more than t seconds. Please answer more quickly.</p>
-			<p id='continue'>Press <b>s</b> or <b>d</b> to continue.</p>
+			<p id='wrong' class='result'>Your answer was incorrect. Timed out for 5 seconds...</p>
+			<p id='timed-out' class='result'>That took more than <a id="time-limit"></a> seconds. Please answer more quickly.</p>
+			<p id='continue' class='result'>Press <b>s</b> or <b>d</b> to continue.</p>
 		</div>
 		<div id="done">
 			<p>You finished! You rock! Thanks for participating!</p>
@@ -74,17 +74,20 @@ div {
 
 $(function(){
 
+// Part of block?
+var delay = 3000;
+var penalty = 5000;
 var timeLimit = 6000;
+var numTrials = 10;
 
-var numTrials = 1;
-
-//Number of segments being drawn
-var numLines = 1;
-
-//Classes
 var Block = function(subjectID){
 	this.subjectID = subjectID;
+	this.numTrials = 10;
 	this.trials = [];
+	this.highlight = false;
+	this.opacity = 1;
+	this.numLines = 1;
+	this.date = "";
 };
 
 var Trial = function(index, label1, label2, data, startYear){
@@ -93,21 +96,10 @@ var Trial = function(index, label1, label2, data, startYear){
 	this.label2 = '';
 	this.data = [];
 	this.startYear = '';
-	this.highlight = false;
 	this.response = null;
 	this.responseTime = 0;
 	this.result = null;
 };
-
-//Initial fake data
-datasets = [{
-	'label1': 'Number of Troops (thousands)', 
-	'label2': 'Budget (billion $)', 
-	'study': true, 
-	'data': [
-		{'date': "1/1/1948", 'value1':233, 'value2': 100},
-		{'date': "1/1/1949", 'value1':100, 'value2': 400}
-	]}];
 
 //Stepping through the tutorial
 var tutorialNow = 1;
@@ -141,7 +133,7 @@ var sendJSON = function(_block, callback) {
 
     // send
     var studyName = 'study1';
-    console.log(_block)
+
     d3.xhr('submit-trends.php', 'application/x-www-form-urlencoded', callback)
         .header('content-type', 'application/x-www-form-urlencoded')
         .post('study=' + encodeURIComponent(studyName) + '&' +
@@ -158,29 +150,34 @@ var runBlocks = function(){
 	/**
 	* Run blocks
 	*/
-
 	var bl = new Block('000');
 
 	for (var i = 0; i<numTrials; i++){
 		//Initialize all trials first
 		var trial = new Trial();
-		trial.data = datasets[0].data;
+		trial.data = datasets[i].data;
 		bl.trials.push(trial);
 	};
 
-	var finTrials = [];
+	var chain = bl.trials.slice(1,numTrials).reduce(function(prev, curr){
+		return prev.then(function(){ return runTrial(curr); });
+	},runTrial(bl.trials[0]));
 
-	$.each(bl.trials, function (i,v) { finTrials.push(runTrial(v)); });
-
-	$.when.apply($, finTrials)
+	chain
 		.done(function(){
 			sendJSON(bl);
-
 			$('#study').hide();
 			$('#leftChart').hide();
 			$('#done').show();
 		});
 };
+
+var drawChart = function(trial){
+	currentDataSet = trial.data;
+	globalCS = leftChart = makeConnected('#leftChart', true, trial.data);
+	globalDALC = rightChart = makeDALC('#rightChart', true, trial.data);
+	afterUpdatePoints();
+}
 
 var runTrial = function(trial){
 	/**
@@ -196,13 +193,13 @@ var runTrial = function(trial){
 		var k = event.keyCode;
 
 		if (k === 83 || k === 68){
+			$('.choice').css('color', 'black');
+			$('.result').hide();
+			$('#leftChart').empty();
+			$(document).unbind('keyup', endTrial);
 			r.resolve();
 		}
 	};
-
-	//Time variables
-	var delay = 3000;
-	var penalty = 5000;
 
 	var processResponse = function(event){
 		/**
@@ -215,6 +212,7 @@ var runTrial = function(trial){
 		var answer = (data[0]['value1'] - data[1]['value1'])/(data[0]['value2'] - data[1]['value2']) === 1;
 		
 		if (k === 83 || k === 68) {
+			$(document).unbind('keyup', processResponse);
 			if (k === 83 && answer){
 				// Correct and same
 				$('#same').css('color', 'blue');
@@ -229,11 +227,10 @@ var runTrial = function(trial){
 				trial.result = true;
 			} else {
 				// Wrong
-				$(document).keyup(null);
 				if (answer){
 					//Same
-					$('#same').css('color', 'red');
-					$('#different').css('color', 'blue');
+					$('#same').css('color', 'blue');
+					$('#different').css('color', 'red');
 				}else{
 					//Different
 					$('#different').css('color', 'blue');
@@ -248,9 +245,8 @@ var runTrial = function(trial){
 				}, penalty);
 				trial.result = false;
 			}
+			trial.response = k;
 		}
-
-		trial.response = k;
 	};
 
 	// Show question
@@ -260,12 +256,13 @@ var runTrial = function(trial){
 		//Keyboard input
 		$(document).keyup(processResponse);
 		//Show chart
-		initialSetup(false);
+		drawChart(trial);
 
 		setTimeout(function(){
 		//Reached time limit
 			if (!trial.response) {
 				//If no response yet
+				$('#time-limit').text(timeLimit/1000);
 				$('#timed-out').show();
 				$('#continue').css('color', 'red').show();
 				$(document).keyup(endTrial);
@@ -279,6 +276,8 @@ var runTrial = function(trial){
 interactDALC = false;
 showArrows = true;
 smoothLines = false;
+
+loadDataSets();
 
 $(document).keyup(tutorialStep);
 $('#tutorial-1').show();
