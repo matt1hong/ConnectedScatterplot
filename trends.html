@@ -55,7 +55,7 @@ div {
 			<p>Press <b>s</b> or <b>d</b> to start practice.</p>
 		</div>
 		<div id="study">
-			<p>The trends are:</p>
+			<p>In year <a id='year'></a>, the trends are:</p>
 				<p>
 					<p id='same' class='choice' style="display: inline;">(<b>s</b>)ame</p> 
 					/ 
@@ -73,29 +73,66 @@ div {
 	<script type="text/javascript">
 
 $(function(){
+var debug = true;
 
-// Part of block?
-var delay = 3000;
-var penalty = 5000;
+var blockSeq = [2,3];
+
+// Use datasets from the translate study
+loadDataSets(true, function() {
+	GENERATEDATASETS = false;
+	ARROW_FRACTION = .5;
+
+	study = true;
+
+	disconnected = true;
+	randomizeRightChart = true;
+	showArrows = true;
+	smoothLines = false;
+	commonScales = true;
+	cheatMode = false;
+
+	d3.shuffle(datasets);
+	d3.shuffle(modes);
+
+	stepsPerMode = datasets.length/modes.length;
+}, 'translate');
+
+var generateSingleDatasets = function() {
+};
+
+var delay = (debug ? 0 : 3000);
+var penalty = (debug ? 0 : 5000);
 var timeLimit = 6000;
-var numTrials = 10;
+var numTrials = (debug ? 3 : 10);
 
-var Block = function(subjectID){
+// Block 1: Chart
+// Block 2: Chart with highlighting
+// Block 3: Chart with filtering
+// Block 4: Single segment
+var Block = function(index, blockClass, subjectID){
+	this.index = -1;
+	this.blockClass = blockClass;
 	this.subjectID = subjectID;
-	this.numTrials = 10;
 	this.trials = [];
-	this.highlight = false;
-	this.opacity = 1;
-	this.numLines = 1;
+	this.highlight = (blockClass === 2 ? true : false);
+	this.filter = (blockClass === 3 ? 0 : 1);
+	this.datasets = (blockClass === 1 ? d3.shuffle(singleDatasets) : d3.shuffle(datasets))
 	this.date = "";
 };
 
-var Trial = function(index, label1, label2, data, startYear){
+var Trial = function(index, block){
 	this.index = -1;
-	this.label1 = '';
-	this.label2 = '';
-	this.data = [];
-	this.startYear = '';
+
+	var dataset = block.datasets[index];
+	this.data = dataset.data;
+	this.label1 = dataset.label1;
+	this.label2 = dataset.label2;
+	this.randIndex = Math.floor(Math.random() * dataset.data.length)
+	var randDate = dataset.data[this.randIndex].date;
+	this.startYear = randDate.slice(randDate.length - 4, randDate.length);
+
+	this.highlight = block.highlight;
+	this.filter = block.filter;
 	this.response = null;
 	this.responseTime = 0;
 	this.result = null;
@@ -114,7 +151,7 @@ var tutorialStep = function(event){
 		else {
 			$('#tutorial-' + tutorialNow).hide();
 			$(document).unbind("keyup", tutorialStep);
-			runBlocks();
+			runBlocks(blockSeq);
 		}
 		++tutorialNow;
 	};
@@ -149,27 +186,19 @@ var sendJSON = function(_block, callback) {
 var runBlocks = function(){
 	/**
 	* Run blocks
+	* blockSeq contains the order of blocks 
 	*/
-	var bl = new Block('000');
 
-	for (var i = 0; i<numTrials; i++){
-		//Initialize all trials first
-		var trial = new Trial();
-		trial.data = datasets[i].data;
-		bl.trials.push(trial);
+	for (var i = 0; i<blockSeq.length; i++) {
+		block = new Block(i, blockSeq[i], '000');
+
+		for (var j = 0; j<numTrials; j++) {
+			var trial = new Trial(j, block);
+			block.trials.push(trial);
+		};
+
+		runTrials(block);
 	};
-
-	var chain = bl.trials.slice(1,numTrials).reduce(function(prev, curr){
-		return prev.then(function(){ return runTrial(curr); });
-	},runTrial(bl.trials[0]));
-
-	chain
-		.done(function(){
-			sendJSON(bl);
-			$('#study').hide();
-			$('#leftChart').hide();
-			$('#done').show();
-		});
 };
 
 var drawChart = function(trial){
@@ -179,12 +208,8 @@ var drawChart = function(trial){
 	afterUpdatePoints();
 }
 
-var runTrial = function(trial){
-	/**
-	* Run a trial
-	* Deferred function
-	*/
-	var r = $.Deferred();
+var runTrials = function(block){
+	var trial = block.trials.pop()
 
 	var endTrial = function(event){
 		/**
@@ -197,7 +222,15 @@ var runTrial = function(trial){
 			$('.result').hide();
 			$('#leftChart').empty();
 			$(document).unbind('keyup', endTrial);
-			r.resolve();
+
+			if (block.trials.length === 0) {
+				sendJSON(block);
+				$('#study').hide();
+				$('#leftChart').hide();
+				$('#done').show();	
+			} else {
+				runTrials(block);
+			}
 		}
 	};
 
@@ -208,7 +241,7 @@ var runTrial = function(trial){
 		* Sets the response and the result for the trial
 		*/
 		var k = event.keyCode;
-		var data = datasets[0].data;
+		var data = trial.data;
 		var answer = (data[0]['value1'] - data[1]['value1'])/(data[0]['value2'] - data[1]['value2']) === 1;
 		
 		if (k === 83 || k === 68) {
@@ -250,6 +283,7 @@ var runTrial = function(trial){
 	};
 
 	// Show question
+	$('#year').text(trial.startYear);
 	$('#study').show();
 	// Show chart after delay
 	setTimeout(function(){
@@ -257,6 +291,23 @@ var runTrial = function(trial){
 		$(document).keyup(processResponse);
 		//Show chart
 		drawChart(trial);
+
+		var foreground = d3.select('g:last-of-type')
+
+		var line = d3.svg.line()
+			.x(function(d) { return width-xScale(d.value1); })
+			.y(function(d) { return yScale(d.value2); })
+			.interpolate(smoothLines?'cardinal':'linear');
+
+		//Highlighting
+		if (trial.highlight){
+			var intervalData = trial.data[trial.randIndex]
+			foreground.append('path')
+				.datum(intervalData)
+				.attr('d', line)
+				.attr('class', 'line')
+				.attr('stroke', 'yellow');
+		}
 
 		setTimeout(function(){
 		//Reached time limit
@@ -269,15 +320,12 @@ var runTrial = function(trial){
 			}
 		}, timeLimit);
 	}, delay);
-
-	return r;
 };
 
 interactDALC = false;
 showArrows = true;
 smoothLines = false;
-
-loadDataSets();
+showLabels = true;
 
 $(document).keyup(tutorialStep);
 $('#tutorial-1').show();
