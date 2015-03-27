@@ -6,6 +6,7 @@
 	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
 	<link rel="stylesheet" href="csck.css">
 	<script src="d3.v3.min.js"></script>
+	<script type="text/javascript" src="moment.min.js"></script>
 	<script type="text/javascript" src="queue.min.js"></script>
 	<script type="text/javascript" src="common.js"></script>
 	<script type="text/javascript" src="csck.js"></script>
@@ -33,20 +34,60 @@ div {
 #continue, #done{
 	display: none;
 }
+#highlighted{
+	stroke: yellow;
+}
+.date{
+	color: black;
+	font-weight: bold;
+}
+.tutorial, .eg1, .eg2, .eg3{
+	display: none;
+}
 	</style>
 </head>
 <body>
 	<div id="header">
 		<div class="tutorial" id="tutorial-1">
 			<p>In this experiment, a chart will be shown.</p>
-			<p>Each point represents two values: one on the horizontal axis, and one on the vertical axis.</p>
-			<p>Two points that are adjacent across time are connected by an arrow.</p>
 			<p>Press <b>s</b> or <b>d</b> to continue.</p>
-			<div class="example">
-				<img src="img/instructions.jpg"/>
-			</div>
 		</div>
 		<div class="tutorial" id="tutorial-2">
+			<p>Each point represents two values: one on the horizontal axis, and one on the vertical axis.</p>
+			<p>Press <b>s</b> or <b>d</b> to continue.</p>
+		</div>
+		<div class="tutorial" id="tutorial-3">
+			<p>Two points that are adjacent across time are connected by an arrow.</p>
+			<p>Press <b>s</b> or <b>d</b> to continue.</p>
+		</div>
+		<div class="example">
+			<img src="img/trends/instructions.jpg" id="ex0" class="eg1"/>
+			<img src="img/trends/instructions1.png" id="ex1" class="eg2"/>
+			<img src="img/trends/instructions2.png" id="ex2" class="eg2"/>
+			<img src="img/trends/instructions3.png" id="ex3" class="eg2"/>
+			<img src="img/trends/instructions4.png" id="ex4" class="eg2"/>
+			<img src="img/trends/instructions5.png" id="ex5" class="eg2"/>
+			<img src="img/trends/instructions6.png" id="ex6" class="eg2"/>
+			<img src="img/trends/instructions7.png" id="ex7" class="eg2"/>
+			<img src="img/trends/instructions8.png" id="ex8" class="eg2"/>
+			<img src="img/trends/instructions9.png" id="ex9" class="eg2"/>
+			<img src="img/trends/instructions10.png" id="ex10" class="eg2"/>
+			<img src="img/trends/instructions11.png" id="ex11" class="eg2"/>
+			<img src="img/trends/instructions12.png" id="ex12" class="eg2"/>
+			<img src="img/trends/instructions13.png" id="ex13" class="eg2"/>
+			<img src="img/trends/instructions14.png" id="ex14" class="eg2"/>
+			<img src="img/trends/instructions15.png" id="ex15" class="eg2"/>
+			<img src="img/trends/instructions16.png" id="ex16" class="eg2"/>
+			<img src="img/trends/instructions17.png" id="ex17" class="eg2"/>
+			<img src="img/trends/instructions18.png" id="ex18" class="eg3"/>
+			<img src="img/trends/instructions19.png" id="ex19" class="eg3"/>
+			<img src="img/trends/instructions20.png" id="ex20" class="eg3"/>
+			<img src="img/trends/instructions21.png" id="ex21" class="eg3"/>
+			<img src="img/trends/instructions22.png" id="ex22" class="eg3"/>
+			<img src="img/trends/instructions23.png" id="ex23" class="eg3"/>
+			<img src="img/trends/instructions24.png" id="ex24" class="eg3"/>
+		</div>
+		<div class="tutorial" id="tutorial-4">
 			<p>At first, only the question will be shown.</p>
 			<p>Then, click <b>s</b> or <b>d</b> to reveal the chart in question and start the timer.</p>
 			<p>Pick the correct answer by pressing <b>s</b> (same) or <b>d</b> (different).</p>
@@ -55,7 +96,7 @@ div {
 			<p>Press <b>s</b> or <b>d</b> to start practice.</p>
 		</div>
 		<div id="study">
-			<p>In year <a id='year'></a>, the trends are:</p>
+			<p>From <a id='year1' class='date'></a> to <a id='year2' class='date'></a>, the trends are:</p>
 				<p>
 					<p id='same' class='choice' style="display: inline;">(<b>s</b>)ame</p> 
 					/ 
@@ -70,267 +111,6 @@ div {
 		</div>
 	</div>
 	<div id="leftChart"></div>
-	<script type="text/javascript">
-
-$(function(){
-var debug = true;
-
-var blockSeq = [2,3];
-
-// Use datasets from the translate study
-loadDataSets(true, function() {
-	GENERATEDATASETS = false;
-	ARROW_FRACTION = .5;
-
-	study = true;
-
-	disconnected = true;
-	randomizeRightChart = true;
-	showArrows = true;
-	smoothLines = false;
-	commonScales = true;
-	cheatMode = false;
-
-	d3.shuffle(datasets);
-	d3.shuffle(modes);
-
-	stepsPerMode = datasets.length/modes.length;
-}, 'translate');
-
-var generateSingleDatasets = function() {
-};
-
-var delay = (debug ? 0 : 3000);
-var penalty = (debug ? 0 : 5000);
-var timeLimit = 6000;
-var numTrials = (debug ? 3 : 10);
-
-// Block 1: Chart
-// Block 2: Chart with highlighting
-// Block 3: Chart with filtering
-// Block 4: Single segment
-var Block = function(index, blockClass, subjectID){
-	this.index = -1;
-	this.blockClass = blockClass;
-	this.subjectID = subjectID;
-	this.trials = [];
-	this.highlight = (blockClass === 2 ? true : false);
-	this.filter = (blockClass === 3 ? 0 : 1);
-	this.datasets = (blockClass === 1 ? d3.shuffle(singleDatasets) : d3.shuffle(datasets))
-	this.date = "";
-};
-
-var Trial = function(index, block){
-	this.index = -1;
-
-	var dataset = block.datasets[index];
-	this.data = dataset.data;
-	this.label1 = dataset.label1;
-	this.label2 = dataset.label2;
-	this.randIndex = Math.floor(Math.random() * dataset.data.length)
-	var randDate = dataset.data[this.randIndex].date;
-	this.startYear = randDate.slice(randDate.length - 4, randDate.length);
-
-	this.highlight = block.highlight;
-	this.filter = block.filter;
-	this.response = null;
-	this.responseTime = 0;
-	this.result = null;
-};
-
-//Stepping through the tutorial
-var tutorialNow = 1;
-var tutorialStep = function(event){
-	var k = event.keyCode;
-
-	if (k === 83 || k === 68) {
-		if (tutorialNow < 2) {
-			$('#tutorial-' + tutorialNow).hide();
-			$('#tutorial-' + (tutorialNow + 1)).show();
-		} 
-		else {
-			$('#tutorial-' + tutorialNow).hide();
-			$(document).unbind("keyup", tutorialStep);
-			runBlocks(blockSeq);
-		}
-		++tutorialNow;
-	};
-};
-
-//To send results
-var sendJSON = function(_block, callback) {
-    // // make sure version is set
-    // _block.version = perfExperiment.version;
-    // // show size of block data
-    // console.log(encodeURIComponent(JSON.stringify(_block, null, " ")).length);
-
-    // // get correctess and time
-    // _block.avgRT = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.RT; }, 0) / _block.trials.length;
-    // _block.avgCorrect = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.responseCorrect; }, 0) / _block.trials.length;
-
-    // send
-    var studyName = 'study1';
-
-    d3.xhr('submit-trends.php', 'application/x-www-form-urlencoded', callback)
-        .header('content-type', 'application/x-www-form-urlencoded')
-        .post('study=' + encodeURIComponent(studyName) + '&' +
-            'subjectID=' + encodeURIComponent(_block.subjectID) + '&' +
-            'data=' + encodeURIComponent(JSON.stringify(_block, null, " ")))
-        .on('error', function (error) {
-            console.log('ERROR: ' + error);
-            if (typeof callback != "undefined")
-                callback();
-        });
-};
-
-var runBlocks = function(){
-	/**
-	* Run blocks
-	* blockSeq contains the order of blocks 
-	*/
-
-	for (var i = 0; i<blockSeq.length; i++) {
-		block = new Block(i, blockSeq[i], '000');
-
-		for (var j = 0; j<numTrials; j++) {
-			var trial = new Trial(j, block);
-			block.trials.push(trial);
-		};
-
-		runTrials(block);
-	};
-};
-
-var drawChart = function(trial){
-	currentDataSet = trial.data;
-	globalCS = leftChart = makeConnected('#leftChart', true, trial.data);
-	globalDALC = rightChart = makeDALC('#rightChart', true, trial.data);
-	afterUpdatePoints();
-}
-
-var runTrials = function(block){
-	var trial = block.trials.pop()
-
-	var endTrial = function(event){
-		/**
-		* Callback to move on to the next trial
-		*/
-		var k = event.keyCode;
-
-		if (k === 83 || k === 68){
-			$('.choice').css('color', 'black');
-			$('.result').hide();
-			$('#leftChart').empty();
-			$(document).unbind('keyup', endTrial);
-
-			if (block.trials.length === 0) {
-				sendJSON(block);
-				$('#study').hide();
-				$('#leftChart').hide();
-				$('#done').show();	
-			} else {
-				runTrials(block);
-			}
-		}
-	};
-
-	var processResponse = function(event){
-		/**
-		* Callback processes keyboard input during trial
-		* Evaluates answer and compares it with the response, computing the result
-		* Sets the response and the result for the trial
-		*/
-		var k = event.keyCode;
-		var data = trial.data;
-		var answer = (data[0]['value1'] - data[1]['value1'])/(data[0]['value2'] - data[1]['value2']) === 1;
-		
-		if (k === 83 || k === 68) {
-			$(document).unbind('keyup', processResponse);
-			if (k === 83 && answer){
-				// Correct and same
-				$('#same').css('color', 'blue');
-				$('#continue').css('color', 'blue').show();
-				$(document).keyup(endTrial);
-				trial.result = true;
-			} else if (k === 68 && !answer){
-				// Correct and different
-				$('#different').css('color', 'blue');
-				$('#continue').css('color', 'blue').show();
-				$(document).keyup(endTrial);
-				trial.result = true;
-			} else {
-				// Wrong
-				if (answer){
-					//Same
-					$('#same').css('color', 'blue');
-					$('#different').css('color', 'red');
-				}else{
-					//Different
-					$('#different').css('color', 'blue');
-					$('#same').css('color', 'red');
-				}
-				$('#wrong').show();
-				// Enable continue after timeout
-				setTimeout(function(){
-					$('#wrong').hide();
-					$('#continue').css('color', 'red').show();
-					$(document).keyup(endTrial);
-				}, penalty);
-				trial.result = false;
-			}
-			trial.response = k;
-		}
-	};
-
-	// Show question
-	$('#year').text(trial.startYear);
-	$('#study').show();
-	// Show chart after delay
-	setTimeout(function(){
-		//Keyboard input
-		$(document).keyup(processResponse);
-		//Show chart
-		drawChart(trial);
-
-		var foreground = d3.select('g:last-of-type')
-
-		var line = d3.svg.line()
-			.x(function(d) { return width-xScale(d.value1); })
-			.y(function(d) { return yScale(d.value2); })
-			.interpolate(smoothLines?'cardinal':'linear');
-
-		//Highlighting
-		if (trial.highlight){
-			var intervalData = trial.data[trial.randIndex]
-			foreground.append('path')
-				.datum(intervalData)
-				.attr('d', line)
-				.attr('class', 'line')
-				.attr('stroke', 'yellow');
-		}
-
-		setTimeout(function(){
-		//Reached time limit
-			if (!trial.response) {
-				//If no response yet
-				$('#time-limit').text(timeLimit/1000);
-				$('#timed-out').show();
-				$('#continue').css('color', 'red').show();
-				$(document).keyup(endTrial);
-			}
-		}, timeLimit);
-	}, delay);
-};
-
-interactDALC = false;
-showArrows = true;
-smoothLines = false;
-showLabels = true;
-
-$(document).keyup(tutorialStep);
-$('#tutorial-1').show();
-
-});
-	</script>
+	<script type="text/javascript" src="trends.js"></script>
 </body>
 </html>

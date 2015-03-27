@@ -10,13 +10,13 @@ rect {
 circle,
 line,
 .line {
-	fill: none;
+	/*fill: none;*/
 	stroke: purple;
 	stroke-width: 1.5px;
 }
 
 circle {
-	fill: white;
+	/*fill: white;*/
 	cursor: move;
 }
 
