@@ -104,20 +104,6 @@ var runExperiment = function(){
 		});
 };
 
-//Stepping through the tutorial
-var exampleStep = function(index) {
-	var previous = null;
-	$('.eg' + index).each(function (i, e){
-		if (previous){
-			$(previous).hide();
-		}
-		setTimeout(function (){
-			$(e).show();
-		}, i*500);
-		previous = this;
-	});
-};
-
 var tutorialNow = 1;
 var tutorialStep = function(event){
 	var k = event.keyCode;
@@ -131,12 +117,6 @@ var tutorialStep = function(event){
 			$('#tutorial-' + tutorialNow).hide();
 			$(document).unbind("keyup", tutorialStep);
 			runExperiment();
-		}
-		if (tutorialNow != 4){
-			exampleStep(tutorialNow+1);
-		}
-		else {
-			$('.example').hide();
 		}
 		++tutorialNow;
 	}
@@ -174,6 +154,12 @@ var drawCS = function(trial){
 	globalDALC = rightChart = makeDALC('#rightChart', true, trial.data);
 	afterUpdatePoints();
 
+	//Change if you wanna mess with the axis min/max
+	xScale.domain([0, 10]);
+	yScale.domain([0, 10]);
+
+	redraw(true);
+
 	//Modify chart for this experiment
 	leftChart.foreground.select('path').remove();
 	leftChart.foreground.selectAll('circle').remove();
@@ -198,6 +184,7 @@ var drawCS = function(trial){
 		.data(leftChart.points.slice(0, pointsToDraw))
 			.enter()
 		.append('circle')
+		.attr('class', 'cs')
 		.attr('r', 2)
 		.attr('cx', function(d) { return width-xScale(d.value1); })
 		.attr('cy', function(d) { return yScale(d.value2); })
@@ -277,6 +264,12 @@ var drawDALC = function(trial) {
 	globalCS = rightChart = makeConnected('#rightChart', true, trial.data);
 	afterUpdatePoints();
 
+	//Change if you wanna mess with the axis min/max
+	xScale.domain([0, 7]);
+	yScale.domain([0, 10]);
+
+	redraw(true)
+
 	//Modify chart for this experiment
 	// leftChart.foreground.selectAll('circle').remove();
 	// leftChart.foreground.selectAll('text').remove();
@@ -340,7 +333,7 @@ var drawDALC = function(trial) {
 		.data(leftChart.points.slice(0, pointsToDraw))
 		.enter()
 		.append('circle')
-		.attr('r', 2)
+		.attr('r', 1)
 		.attr('class', 'line1')
 		.attr('cx', function(d) { return timeScale(d.date); })
 		.attr('cy', function(d) { return xScale(d.value1); })
@@ -353,7 +346,7 @@ var drawDALC = function(trial) {
 		.data(leftChart.points.slice(0, pointsToDraw));
 
 	leftChart.greenCircles.enter().append('circle')
-		.attr('r', 2)
+		.attr('r', 1)
 		.attr('class', 'line2')
 		.attr('cx', function(d) { return timeScale(d.date); })
 		.attr('cy', function(d) { return yScale(d.value2); })
