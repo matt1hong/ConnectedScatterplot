@@ -5,9 +5,7 @@ var debug = true;
 // Order of blocks to be given
 var blockSeq = [2,3,1];
 
-loadDataSets(true, null, 'translate');
-
-CHARTTYPE = 'd'
+CHARTTYPE = 'c';
 
 ARROW_FRACTION = 0.5;
 GENERATEDATASETS = false;
@@ -21,6 +19,78 @@ disconnected = true;
 randomizeRightChart = true;
 commonScales = true;
 cheatMode = false;
+
+var deg2rad = function(angle){
+	return (angle / 180) * Math.PI;
+};
+
+var trendsDatasets = [];
+
+var makeTrendsData = function() {
+	//Generates data to be used for the trends study
+	var angleIncr = 3;
+	var dist = 4;
+
+	var lines = [];
+	for (var angle = 0; angle < 360; angle += angleIncr) {
+		//Pick a random point by generating two random values
+		var p1 = {};
+		p1.value1 = Math.random() * 10;
+		p1.value2 = Math.random() * 10;
+
+		//Get the point at distance d and angle away from that point
+		var p2 = {};
+		p2.value1 = p1.value1 + dist * Math.cos(deg2rad(angle));
+		p2.value2 = p1.value2 + dist * Math.sin(deg2rad(angle));
+
+		//If p2 not in bounds, go back, pick another random point at this angle
+		if ((p2.value1 < 0) || (p2.value2 < 0) || (p2.value1 >= 10) || (p2.value2 >= 10)) {
+			angle -= angleIncr;
+			continue;
+		}
+
+		//Save this line
+		lines.push([p1,p2]);
+	};
+
+	//Embeds it in the original dataset
+	while (lines.length !== 0) {
+		var dataset = JSON.parse(JSON.stringify(datasets[Math.floor(Math.random() * datasets.length)]));
+		var line = lines.pop();
+
+		var summedDistances = [];
+		for (var i = 0; i < dataset.data.length - 1; i++) {
+			//Calculating distances between points
+			var dist1 = Math.pow(dataset.data[i].value1 - line[0].value1, 2) + Math.pow(dataset.data[i].value2 - line[0].value2, 2); 
+			var dist2 = Math.pow(dataset.data[i + 1].value1 - line[1].value1, 2) + Math.pow(dataset.data[i + 1].value2 - line[1].value2, 2); 
+
+			summedDistances.push(dist1 + dist2);
+		};
+
+		//Find the line segment closest to our new line segment
+		var min = summedDistances[0];
+		var minIndex = 0;
+		for (var i = 1; i < summedDistances.length; i++) {
+			if (summedDistances[i] < min) {
+				min = summedDistances[i];
+				minIndex = i;
+			}
+		};
+
+		//Substitute
+		var oldPoint1 = dataset.data[minIndex];
+		var oldPoint2 = dataset.data[minIndex + 1];
+		var newPoint1 = {'date': oldPoint1['date'], 'value1': line[0].value1, 'value2': line[0].value2};
+		var newPoint2 = {'date': oldPoint2['date'], 'value1': line[1].value1, 'value2': line[1].value2};
+		dataset.data[minIndex] = newPoint1;
+		dataset.data[minIndex + 1] = newPoint2;
+		dataset.ind = minIndex;
+
+		trendsDatasets.push(dataset);
+	}
+};
+
+loadDataSets(true, makeTrendsData, 'translate'); //Loads to global 'datasets'
 
 var delay = (debug ? 0 : 3000);
 var penalty = (debug ? 0 : 5000);
@@ -42,7 +112,7 @@ var Block = function(index, chartType,blockClass, subjectID){
 	} else if (blockClass === 3) {
 		this.opacity = 0;
 	}
-	this.datasets = (blockClass === 4 ? d3.shuffle(singleDatasets) : d3.shuffle(datasets))
+	this.datasets = d3.shuffle(trendsDatasets);
 	this.date = "";
 };
 
@@ -54,11 +124,11 @@ var Trial = function(index, block){
 	this.data = dataset.data;
 	this.label1 = dataset.label1;
 	this.label2 = dataset.label2;
-	this.randIndex = Math.floor(Math.random() * (dataset.data.length - 1));
+	this.ind = dataset.ind;
 
 	// Data points in question
-	var startYear = new Date(dataset.data[this.randIndex].date);
-	var endYear = new Date(dataset.data[this.randIndex + 1].date);
+	var startYear = new Date(dataset.data[this.ind].date);
+	var endYear = new Date(dataset.data[this.ind + 1].date);
 	this.startYear = startYear.getFullYear();
 	this.endYear = endYear.getFullYear();
 
@@ -148,6 +218,8 @@ var sendJSON = function(_block, callback) {
 };
 
 var drawCS = function(trial){
+	console.log(trendsDatasets)
+	console.log(datasets)
 	//Draw normally
 	currentDataSet = trial.data;
 	globalCS = leftChart = makeConnected('#leftChart', true, trial.data);
@@ -167,7 +239,7 @@ var drawCS = function(trial){
 	leftChart.foreground.selectAll('line').remove();
 
 	//Draw path, graying out liness other than one in question
-	var points = trial.data.slice(trial.randIndex, trial.randIndex + 2);
+	var points = trial.data.slice(trial.ind, trial.ind + 2);
 	
 	for (var i = 0; i < leftChart.points.length - 1; i++) {
 		leftChart.foreground.append('path')
@@ -175,7 +247,7 @@ var drawCS = function(trial){
 			.attr('d', leftChart.lineDA)
 			.attr('class', 'line')
 			.attr('opacity', function() {
-				return i === trial.randIndex ? 1 : trial.opacity;
+				return i === trial.ind ? 1 : trial.opacity;
 			});
 	};
 
@@ -189,7 +261,7 @@ var drawCS = function(trial){
 		.attr('cx', function(d) { return width-xScale(d.value1); })
 		.attr('cy', function(d) { return yScale(d.value2); })
 		.attr('opacity', function(d, i) {
-			return (i === trial.randIndex || i === trial.randIndex + 1) ? 1 : trial.opacity;
+			return (i === trial.ind || i === trial.ind + 1) ? 1 : trial.opacity;
 		})
 		.attr('fill', 'purple');
 
@@ -203,7 +275,7 @@ var drawCS = function(trial){
 			.attr('x', function(d) { return width-xScale(d.value1); })
 			.attr('y', function(d) { return yScale(d.value2) + 12; })
 			.attr('opacity', function(d, i) {
-				return (i === trial.randIndex || i === trial.randIndex + 1) ? 1 : trial.opacity;
+				return (i === trial.ind || i === trial.ind + 1) ? 1 : trial.opacity;
 			});
 
 	//Put an arrow on each segment
@@ -248,7 +320,7 @@ var drawCS = function(trial){
 			.style('marker-mid', 'url(#arrow)')
 			.attr('class','line')
 			.attr('opacity', function() {
-				return (i === trial.randIndex) ? 1 : trial.opacity;
+				return (i === trial.ind) ? 1 : trial.opacity;
 			});
 		indices.push(segments[i].index);
 		i += 1;
@@ -265,7 +337,7 @@ var drawDALC = function(trial) {
 	afterUpdatePoints();
 
 	//Change if you wanna mess with the axis min/max
-	xScale.domain([0, 7]);
+	xScale.domain([0, 10]);
 	yScale.domain([0, 10]);
 
 	redraw(true)
@@ -315,7 +387,7 @@ var drawDALC = function(trial) {
 							' '+segments[i].x+','+segments[i].y)
 				.attr('class','line ' + 'line' + (j+1))
 				.attr('opacity', function() {
-					return (i === trial.randIndex) ? 1 : trial.opacity;
+					return (i === trial.ind) ? 1 : trial.opacity;
 				});
 			indices.push(segments[i].index);
 			i += 1;
@@ -338,7 +410,7 @@ var drawDALC = function(trial) {
 		.attr('cx', function(d) { return timeScale(d.date); })
 		.attr('cy', function(d) { return xScale(d.value1); })
 		.attr('opacity', function(d,i) {
-			return (i === trial.randIndex || i === trial.randIndex + 1) ? 1 : trial.opacity;
+			return (i === trial.ind || i === trial.ind + 1) ? 1 : trial.opacity;
 		})
 		.attr('fill', 'blue');
 
@@ -351,7 +423,7 @@ var drawDALC = function(trial) {
 		.attr('cx', function(d) { return timeScale(d.date); })
 		.attr('cy', function(d) { return yScale(d.value2); })
 		.attr('opacity', function(d,i) {
-			return (i === trial.randIndex || i === trial.randIndex + 1) ? 1 : trial.opacity;
+			return (i === trial.ind || i === trial.ind + 1) ? 1 : trial.opacity;
 		})
 		.attr('fill', 'green');
 };
@@ -392,10 +464,10 @@ var runTrials = function(block){
 			var k = event.keyCode;
 
 			var data = trial.data;
-			var x1 = data[trial.randIndex]['value1'];
-			var x2 = data[trial.randIndex + 1]['value1'];
-			var y1 = data[trial.randIndex]['value2'];
-			var y2 = data[trial.randIndex + 1]['value2'];
+			var x1 = data[trial.ind]['value1'];
+			var x2 = data[trial.ind + 1]['value1'];
+			var y1 = data[trial.ind]['value2'];
+			var y2 = data[trial.ind + 1]['value2'];
 
 			var answer = Math.sign((x2 - x1)/(y2 - y1)) === 1;
 
