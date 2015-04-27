@@ -5,7 +5,7 @@ var debug = true;
 // Order of blocks to be given
 var blockSeq = [2,3,1];
 
-CHARTTYPE = 'c';
+CHARTTYPE = 'd';
 
 ARROW_FRACTION = 0.5;
 GENERATEDATASETS = false;
@@ -26,34 +26,10 @@ var deg2rad = function(angle){
 
 var trendsDatasets = [];
 
-var makeTrendsData = function() {
-	//Generates data to be used for the trends study
-	var angleIncr = 3;
-	var dist = 4;
-
-	var lines = [];
-	for (var angle = 0; angle < 360; angle += angleIncr) {
-		//Pick a random point by generating two random values
-		var p1 = {};
-		p1.value1 = Math.random() * 10;
-		p1.value2 = Math.random() * 10;
-
-		//Get the point at distance d and angle away from that point
-		var p2 = {};
-		p2.value1 = p1.value1 + dist * Math.cos(deg2rad(angle));
-		p2.value2 = p1.value2 + dist * Math.sin(deg2rad(angle));
-
-		//If p2 not in bounds, go back, pick another random point at this angle
-		if ((p2.value1 < 0) || (p2.value2 < 0) || (p2.value1 >= 10) || (p2.value2 >= 10)) {
-			angle -= angleIncr;
-			continue;
-		}
-
-		//Save this line
-		lines.push([p1,p2]);
-	};
-
+var embedInDatasets = function(lines){
 	//Embeds it in the original dataset
+	var newDatasets = [];
+
 	while (lines.length !== 0) {
 		var dataset = JSON.parse(JSON.stringify(datasets[Math.floor(Math.random() * datasets.length)]));
 		var line = lines.pop();
@@ -61,8 +37,8 @@ var makeTrendsData = function() {
 		var summedDistances = [];
 		for (var i = 0; i < dataset.data.length - 1; i++) {
 			//Calculating distances between points
-			var dist1 = Math.pow(dataset.data[i].value1 - line[0].value1, 2) + Math.pow(dataset.data[i].value2 - line[0].value2, 2); 
-			var dist2 = Math.pow(dataset.data[i + 1].value1 - line[1].value1, 2) + Math.pow(dataset.data[i + 1].value2 - line[1].value2, 2); 
+			var dist1 = Math.pow(dataset.data[i].value1 - line.t1.value1, 2) + Math.pow(dataset.data[i].value2 - line.t1.value2, 2); 
+			var dist2 = Math.pow(dataset.data[i + 1].value1 - line.t2.value1, 2) + Math.pow(dataset.data[i + 1].value2 - line.t2.value2, 2); 
 
 			summedDistances.push(dist1 + dist2);
 		};
@@ -80,15 +56,143 @@ var makeTrendsData = function() {
 		//Substitute
 		var oldPoint1 = dataset.data[minIndex];
 		var oldPoint2 = dataset.data[minIndex + 1];
-		var newPoint1 = {'date': oldPoint1['date'], 'value1': line[0].value1, 'value2': line[0].value2};
-		var newPoint2 = {'date': oldPoint2['date'], 'value1': line[1].value1, 'value2': line[1].value2};
+		var newPoint1 = {'date': oldPoint1['date'], 'value1': line.t1.value1, 'value2': line.t1.value2};
+		var newPoint2 = {'date': oldPoint2['date'], 'value1': line.t2.value1, 'value2': line.t2.value2};
 		dataset.data[minIndex] = newPoint1;
 		dataset.data[minIndex + 1] = newPoint2;
 		dataset.ind = minIndex;
 
-		trendsDatasets.push(dataset);
+		dataset.params = {};
+
+		if (line.dataClass === 'angles') {
+			dataset.params.angle = line.angle;
+			dataset.params.actualAngle = line.actualAngle;
+		} else {
+			dataset.params.slope1 = line.slope1;
+			dataset.params.slope2 = line.slope2;
+			dataset.params.actualSlope1 = line.actualSlope1;
+			dataset.params.actualSlope2 = line.actualSlope2;
+		}
+
+		dataset.dataClass = line.dataClass;
+
+		newDatasets.push(dataset);
 	}
+
+	return newDatasets;
+}
+
+var makeTrendsDataAngles = function() {
+	//Generates data to be used for the trends study with the varying angles method
+	var angleIncr = 3;
+	var dist = 4;
+
+	var lines = [];
+	for (var angle = 0; angle < 360; angle += angleIncr) {
+		var newLine = {};
+		newLine.angle = angle;
+
+		//Angles vary between angle +- 1
+		angle = angle + Math.random() * 2 - 1;
+		newLine.actualAngle = angle;
+
+		//Pick a random point by generating two random values
+		var t1 = {};
+		t1.value1 = Math.random() * 10;
+		t1.value2 = Math.random() * 10;
+
+		//Get the point at distance d and angle away from that point
+		var t2 = {};
+		t2.value1 = t1.value1 + dist * Math.cos(deg2rad(angle));
+		t2.value2 = t1.value2 + dist * Math.sin(deg2rad(angle));
+
+		//If t2 not in bounds, go back, pick another random point at this angle
+		if ((t2.value1 < 0) || 
+			(t2.value2 < 0) || 
+			(t2.value1 >= 10) || 
+			(t2.value2 >= 10)) {
+			angle -= angleIncr;
+			continue;
+		}
+
+		newLine.t1 = t1;
+		newLine.t2 = t2;
+
+		newLine.dataClass = 'angles';
+
+		//Save this line
+		lines.push(newLine);
+	};
+
+	return embedInDatasets(lines);
 };
+
+var makeTrendsDataSlopes = function(){ 
+	// Generates data to be used for the trends study according to the varying slopes method
+	var numSamples = 5;
+
+	//Limits on slope and distance leaves room for some variance
+	var slopeLim = 4;
+	var distLim = 9 - slopeLim;
+
+	var dualLines = [];
+	for (var i = -slopeLim; i <= slopeLim; i++) {
+		for (var j = -slopeLim; j <= slopeLim; j++) {
+			for (var d = 0; d < distLim; d++) {
+				for (var s = 0; s < numSamples; s++) {
+					var newLine = {};
+					newLine.slope1 = i;
+					newLine.slope2 = j;
+
+					//Slopes vary between slope +- 0.1
+					var randomSlope1 = i + Math.random() / 5 - 0.1;
+					var randomSlope2 = j + Math.random() / 5 - 0.1;
+
+					newLine.actualSlope1 = randomSlope1;
+					newLine.actualSlope2 = randomSlope2;
+
+					var t1 = {};
+					var t2 = {};
+					t1.value1 = Math.random() * 10;
+					t2.value1 = t1.value1 + randomSlope1;
+
+					//Controlling distances between midpoints
+					var mid = (t1.value1 + t2.value1) / 2;
+
+					t1.value2 = mid - d - randomSlope2 / 2;
+					t2.value2 = mid - d + randomSlope2 / 2;
+
+					// Make sure all lines are within bounds
+					if (t1.value2 < 0 || 
+						t1.value2 > 10 || 
+						t2.value1 < 0 || 
+						t2.value1 > 10 || 
+						t2.value2 < 0 || 
+						t2.value2 > 10) {
+						--s;
+						continue;
+					}
+
+					newLine.t1 = t1;
+					newLine.t2 = t2;
+
+					newLine.dataClass = 'slopes';
+
+					dualLines.push(newLine);
+				};
+			};
+		};
+	};
+	
+	return embedInDatasets(dualLines);
+}
+
+var makeTrendsData = function(){
+	dataAngles = makeTrendsDataAngles();
+	dataSlopes = makeTrendsDataSlopes();
+
+	trendsDatasets = dataAngles.concat(dataSlopes);
+}
 
 loadDataSets(true, makeTrendsData, 'translate'); //Loads to global 'datasets'
 
@@ -101,57 +205,48 @@ var numTrials = (debug ? 3 : 10);
 // Block 2: Chart with highlighting
 // Block 3: Chart with filtering
 // Block 4: Single segment
-var Block = function(index, chartType,blockClass, subjectID){
-	this.index = -1;
+var Block = function(chartType,blockClass, subjectID){
 	this.chartType = chartType;
 	this.blockClass = blockClass;
 	this.subjectID = subjectID;
 	this.trials = [];
-	if (blockClass === 2) {
-		this.opacity = 0.3;
-	} else if (blockClass === 3) {
-		this.opacity = 0;
-	}
 	this.datasets = d3.shuffle(trendsDatasets);
-	this.date = "";
 };
 
-var Trial = function(index, block){
-	this.index = -1;
-
+var Trial = function(blockClass, dataset){
 	// Attach data
-	var dataset = block.datasets[index];
 	this.data = dataset.data;
 	this.label1 = dataset.label1;
 	this.label2 = dataset.label2;
 	this.ind = dataset.ind;
-
-	// Data points in question
-	var startYear = new Date(dataset.data[this.ind].date);
-	var endYear = new Date(dataset.data[this.ind + 1].date);
-	this.startYear = startYear.getFullYear();
-	this.endYear = endYear.getFullYear();
+	this.params = dataset.params;
 
 	// Opacity of the features not in question
-	this.opacity = block.opacity;
+	if (blockClass === 1) {
+		this.opacity = 1;
+	} else if (blockClass === 2) {
+		this.opacity = 0.3;
+	} else if (blockClass === 3) {
+		this.opacity = 0;
+	}
 
 	// Results
 	this.response = null;
 	this.responseTime = 0;
-	this.result = null;
+	this.correct = null;
 };
 
-var runBlock = function(i, blockNo){
+var runBlock = function(blockNo){
 	/**
 	* Run blocks
 	* blockSeq contains the order of blocks 
 	*/
 	var r = $.Deferred();
 
-	var block = new Block(i, CHARTTYPE, blockNo, '000');
+	var block = new Block(CHARTTYPE, blockNo, '000');
 
 	for (var j = 0; j<numTrials; j++) {
-		var trial = new Trial(j, block);
+		var trial = new Trial(block.blockClass, block.datasets[j]);
 		block.trials.push(trial);
 	};
 
@@ -162,9 +257,9 @@ var runBlock = function(i, blockNo){
 
 var runExperiment = function(){
 	//Runs the three blocks in the order given by the global var blockSeq
-	runBlock(0, blockSeq[0])
-		.then(function(){ runBlock(1, blockSeq[1])
-			.then(function(){ runBlock(2, blockSeq[2]) 
+	runBlock(blockSeq[0])
+		.then(function(){ runBlock(blockSeq[1])
+			.then(function(){ runBlock(blockSeq[2]) 
 				.then(function(){
 					$('#study').hide();
 					$('#leftChart').hide();
@@ -204,6 +299,7 @@ var sendJSON = function(_block, callback) {
     // _block.avgCorrect = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.responseCorrect; }, 0) / _block.trials.length;
 
     // send
+    delete _block.datasets;
 
     d3.xhr('submit-trends.php', 'application/x-www-form-urlencoded', callback)
         .header('content-type', 'application/x-www-form-urlencoded')
@@ -218,8 +314,6 @@ var sendJSON = function(_block, callback) {
 };
 
 var drawCS = function(trial){
-	console.log(trendsDatasets)
-	console.log(datasets)
 	//Draw normally
 	currentDataSet = trial.data;
 	globalCS = leftChart = makeConnected('#leftChart', true, trial.data);
@@ -340,7 +434,7 @@ var drawDALC = function(trial) {
 	xScale.domain([0, 10]);
 	yScale.domain([0, 10]);
 
-	redraw(true)
+	redraw(true);
 
 	//Modify chart for this experiment
 	// leftChart.foreground.selectAll('circle').remove();
@@ -399,8 +493,6 @@ var drawDALC = function(trial) {
 	//Replace circles
 	leftChart.foreground.selectAll('circle').remove();
 
-	console.log(leftChart.points)
-
 	leftChart.blueCircles = leftChart.foreground.selectAll('circle.line1')
 		.data(leftChart.points.slice(0, pointsToDraw))
 		.enter()
@@ -433,7 +525,7 @@ var runTrials = function(block){
 	//Deferred function; resolves after entire recursion finishes
 	var r = $.Deferred();
 
-	var recur = function(block){
+	var recur = function(block, trialNo){
 		var endTrial = function(event){
 			/**
 			* Callback to move on to the next trial
@@ -446,11 +538,11 @@ var runTrials = function(block){
 				$('#leftChart').empty();
 				$(document).unbind('keyup', endTrial);
 
-				if (block.trials.length === 0) {
+				if (trialNo === 0) {
 					sendJSON(block);
 					r.resolve();
 				} else {
-					recur(block);
+					recur(block, --trialNo);
 				}
 			}
 		};
@@ -461,6 +553,7 @@ var runTrials = function(block){
 			* Evaluates answer and compares it with the response, computing the result
 			* Sets the response and the result for the trial
 			*/
+			var timeStart = event.data.getTime();
 			var k = event.keyCode;
 
 			var data = trial.data;
@@ -472,6 +565,9 @@ var runTrials = function(block){
 			var answer = Math.sign((x2 - x1)/(y2 - y1)) === 1;
 
 			if (k === 83 || k === 68) {
+				var timeEnd = new Date().getTime();
+				trial.responseTime = timeEnd - timeStart;
+
 				trial.response = k;
 
 				$(document).unbind('keyup', processResponse);
@@ -481,13 +577,13 @@ var runTrials = function(block){
 					$('#same').css('color', 'blue');
 					$('#continue').css('color', 'blue').show();
 					$(document).keyup(endTrial);
-					trial.result = true;
+					trial.correct = true;
 				} else if (k === 68 && !answer){
 					// Correct and different
 					$('#different').css('color', 'blue');
 					$('#continue').css('color', 'blue').show();
 					$(document).keyup(endTrial);
-					trial.result = true;
+					trial.correct = true;
 				} else {
 					// Wrong
 					if (answer){
@@ -506,22 +602,24 @@ var runTrials = function(block){
 						$('#continue').css('color', 'red').show();
 						$(document).keyup(endTrial);
 					}, penalty);
-					trial.result = false;
+					trial.correct = false;
 				}
 			}
 		};
 
 		// Take a trial
-		var trial = block.trials.pop();
+		var trial = block.trials[trialNo];
 
 		// Show question
-		$('#year1').text(trial.startYear);
-		$('#year2').text(trial.endYear);
+		$('#year1').text('198' + trial.ind);
+		$('#year2').text('198' + (trial.ind + 1));
 		$('#study').show();
 
 		// Show chart after delay
 		setTimeout(function(){
-			$(document).keyup(processResponse);
+			var dateStart = new Date();
+
+			$(document).keyup(dateStart, processResponse);
 
 			//Draw chart
 			if (block.chartType === 'c') {
@@ -544,8 +642,8 @@ var runTrials = function(block){
 		}, delay);
 	};
 
-	// Run next trial
-	recur(block);
+	// Begin recursion
+	recur(block, block.trials.length - 1);
 
 	return r;
 };
