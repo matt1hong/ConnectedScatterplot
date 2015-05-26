@@ -140,7 +140,6 @@ var makeTrendsDataAngles = function() {
 			if (qs['length']) {
 				newLine.len = +qs['length'];
 			}
-			newLine.len = 0.5;
 
 			//Angles vary between angle +- 1
 			actualAngle = newLine.angle + Math.random() * 2 - 1;
@@ -325,7 +324,7 @@ var makeTrendsData = function(){
 
 	if (qs['greenslopes'] || qs['blueslopes'] || qs['distance']) {
 		trendsDatasets = dataSlopes;
-	} else if (qs['angles'] || qs['length']) {
+	} else if (qs['angle'] || qs['length']) {
 		trendsDatasets = dataAngles;
 	}
 	// switch (qs['data']) {
@@ -474,7 +473,6 @@ var arrangeLabels = function() {
        .each(function() {
          var that = this,
              a0 = this.getBoundingClientRect();
-             console.log(a0)
              var a = {
              	'left':a0.left - padding, 
              	'top':a0.top - padding, 
@@ -483,7 +481,6 @@ var arrangeLabels = function() {
              	'width':a0.width + padding*2, 
              	'height':a0.height + padding * 2
              };
-             console.log(a)
          leftChart.foreground.selectAll(".date")
             .each(function() {
               if(this != that) {
@@ -876,6 +873,5 @@ var runTrials = function(block){
 
 $(document).keyup(tutorialStep);
 $('#tutorial-1').show();
-exampleStep(tutorialNow);
 
 });
