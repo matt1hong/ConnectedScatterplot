@@ -1,5 +1,5 @@
-var width = 500,
-    height = 500;
+var width = 400,
+    height = 400;
 
 var showArrows = false;
 var showDots = true;
@@ -43,7 +43,7 @@ var currentDataSet;
 
 var pointsToDraw;
 
-var timeScale = d3.time.scale()
+var timeScale = d3.time.scale(d3.time.month, 3)
 	.range([10, width-10]);
 
 var xScale = d3.scale.linear()
@@ -360,6 +360,7 @@ function initialSetup(leftChartDALC, rightChartDALC) {
 function scaleScales() {
 	leftChart.points.forEach(function (d) {
 		d.date = new Date(d.date);
+		console.log(d.date)
 	});
 
 	timeScale.domain([leftChart.points[0].date, leftChart.points[leftChart.points.length-1].date]);
@@ -375,6 +376,9 @@ function scaleScales() {
 	} else {
 		xScale.domain(d3.extent(leftChart.points, function(d) { return d.value1; }));
 		yScale.domain(d3.extent(leftChart.points, function(d) { return d.value2; }));
+
+		xScale.domain([1, 2.4]);
+		yScale.domain([1, 2.4]);
 	}
 
 	copyLefttoRight();

@@ -13,5 +13,8 @@
 {"name":"house", "display":"Congress - House", "label1":"Ideological gap between parties", "label2":"Bills passed into law", "study":false},
 {"name":"senate", "display":"Congress - Senate", "label1":"Ideological gap between parties", "label2":"Bills passed into law", "study":false},
 {"name":"threepoints", "display":"Three Points", "label1":"", "label2":"", "study":false},
-{"name":"fivepoints", "display":"Five Points", "label1":"", "label2":"", "study":false}
+{"name":"fivepoints", "display":"Five Points", "label1":"", "label2":"", "study":false},
+{"name":"uv-curve", "display":"Excess Demand", "label1":"X1", "label2":"X2", "study":false},
+{"name":"uv-curve-cropped", "display":"Excess Demand (cropped)", "label1":"V", "label2":"U", "study":false},
+{"name":"uv-curve-cropped-2", "display":"Excess Demand (cropped 2)", "label1":"X1", "label2":"X2", "study":false}
 ]
