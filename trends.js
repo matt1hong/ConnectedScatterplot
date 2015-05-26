@@ -38,10 +38,10 @@ switch (qs['block']) {
 	case 'pure':
 		blockSeq = [1,1,1];
 		break;
-	case 'hl':
+	case 'highlighted':
 		blockSeq = [2,2,2];
 		break;
-	case 'iso':
+	case 'isolated':
 		blockSeq = [3,3,3];
 		break;
 }
