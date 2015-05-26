@@ -1,11 +1,50 @@
 $(function(){
 
-var debug = true;
+var debug = window.location.href.indexOf('debug') >= 0;
+
+// var debug = debugMode ? +location.search.slice(7, debugMode.length) : null;
+
+// http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+var qs = (function(a) {
+    if (a == "") return {};
+    var b = {};
+    for (var i = 0; i < a.length; ++i)
+    {
+        var p=a[i].split('=', 2);
+        if (p.length == 1)
+            b[p[0]] = "";
+        else
+            b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+    }
+    return b;
+})(window.location.search.substr(1).split('&'));
+
+// Order of chart types to be given
+var chartTypeSeq = d3.shuffle(['c', 'd']);
+
+switch (qs['type']) {
+	case 'd':
+		chartTypeSeq = ['d','d'];
+		break;
+	case 'c':
+		chartTypeSeq = ['c','c'];
+		break;
+}
 
 // Order of blocks to be given
-var blockSeq = [2,3,1];
+var blockSeq = d3.shuffle([1,2,3]);
 
-CHARTTYPE = 'd';
+switch (qs['block']) {
+	case 'pure':
+		blockSeq = [1,1,1];
+		break;
+	case 'hl':
+		blockSeq = [2,2,2];
+		break;
+	case 'iso':
+		blockSeq = [3,3,3];
+		break;
+}
 
 ARROW_FRACTION = 0.5;
 GENERATEDATASETS = false;
@@ -16,7 +55,6 @@ smoothLines = false;
 showLabels = true;
 study = true;
 disconnected = true;
-randomizeRightChart = true;
 commonScales = true;
 cheatMode = false;
 
@@ -72,6 +110,7 @@ var embedInDatasets = function(lines){
 			dataset.params.slope2 = line.slope2;
 			dataset.params.actualSlope1 = line.actualSlope1;
 			dataset.params.actualSlope2 = line.actualSlope2;
+			dataset.params.dist = line.dist;
 		}
 
 		dataset.dataClass = line.dataClass;
@@ -85,43 +124,55 @@ var embedInDatasets = function(lines){
 var makeTrendsDataAngles = function() {
 	//Generates data to be used for the trends study with the varying angles method
 	var angleIncr = 3;
-	var dist = 4;
+	var dist = 3;
 
 	var lines = [];
-	for (var angle = 0; angle < 360; angle += angleIncr) {
-		var newLine = {};
-		newLine.angle = angle;
+	for (var dist = 1; dist < 4; dist++) {
+		for (var angle = 0; angle < 360; angle += angleIncr) {
 
-		//Angles vary between angle +- 1
-		angle = angle + Math.random() * 2 - 1;
-		newLine.actualAngle = angle;
+			var newLine = {};
+			newLine.angle = angle;
+			newLine.dist = dist;
 
-		//Pick a random point by generating two random values
-		var t1 = {};
-		t1.value1 = Math.random() * 10;
-		t1.value2 = Math.random() * 10;
+			if (qs['a']) {
+				newLine.angle = +qs['a'];
+			}
+			if (qs['l']) {
+				newLine.dist = +qs['l'];
+			}
+			newLine.dist = 0.8
 
-		//Get the point at distance d and angle away from that point
-		var t2 = {};
-		t2.value1 = t1.value1 + dist * Math.cos(deg2rad(angle));
-		t2.value2 = t1.value2 + dist * Math.sin(deg2rad(angle));
+			//Angles vary between angle +- 1
+			actualAngle = newLine.angle + Math.random() * 2 - 1;
+			newLine.actualAngle = actualAngle;
 
-		//If t2 not in bounds, go back, pick another random point at this angle
-		if ((t2.value1 < 0) || 
-			(t2.value2 < 0) || 
-			(t2.value1 >= 10) || 
-			(t2.value2 >= 10)) {
-			angle -= angleIncr;
-			continue;
-		}
+			//Pick a random point by generating two random values
+			var t1 = {};
+			t1.value1 = Math.random() * 10;
+			t1.value2 = Math.random() * 10;
 
-		newLine.t1 = t1;
-		newLine.t2 = t2;
+			//Get the point at distance d and angle away from that point
+			var t2 = {};
+			t2.value1 = t1.value1 + newLine.dist * Math.cos(deg2rad(newLine.actualAngle));
+			t2.value2 = t1.value2 + newLine.dist * Math.sin(deg2rad(newLine.actualAngle));
 
-		newLine.dataClass = 'angles';
+			//If t2 not in bounds, go back, pick another random point at this angle
+			if ((t2.value1 < 0) || 
+				(t2.value2 < 0) || 
+				(t2.value1 >= 10) || 
+				(t2.value2 >= 10)) {
+				angle -= angleIncr;
+				continue;
+			}
 
-		//Save this line
-		lines.push(newLine);
+			newLine.t1 = t1;
+			newLine.t2 = t2;
+
+			newLine.dataClass = 'angles';
+
+			//Save this line
+			lines.push(newLine);
+		};
 	};
 
 	return embedInDatasets(lines);
@@ -138,15 +189,27 @@ var makeTrendsDataSlopes = function(){
 	var dualLines = [];
 	for (var i = -slopeLim; i <= slopeLim; i++) {
 		for (var j = -slopeLim; j <= slopeLim; j++) {
-			for (var d = 0; d < distLim; d++) {
+			for (var d = 0; d <= distLim; d++) {
 				for (var s = 0; s < numSamples; s++) {
+
 					var newLine = {};
+					newLine.dist = d;
 					newLine.slope1 = i;
 					newLine.slope2 = j;
 
+					if (qs['s1']) {
+						newLine.slope1 = +qs['s1'];
+					} 
+					if (qs['s2']) {
+						newLine.slope2 = +qs['s2'];
+					}
+					if (qs['d']) {
+						newLine.dist = +qs['d'];
+					}
+
 					//Slopes vary between slope +- 0.1
-					var randomSlope1 = i + Math.random() / 5 - 0.1;
-					var randomSlope2 = j + Math.random() / 5 - 0.1;
+					var randomSlope1 = newLine.slope1 + Math.random() / 5 - 0.1;
+					var randomSlope2 = newLine.slope2 + Math.random() / 5 - 0.1;
 
 					newLine.actualSlope1 = randomSlope1;
 					newLine.actualSlope2 = randomSlope2;
@@ -159,8 +222,8 @@ var makeTrendsDataSlopes = function(){
 					//Controlling distances between midpoints
 					var mid = (t1.value1 + t2.value1) / 2;
 
-					t1.value2 = mid - d - randomSlope2 / 2;
-					t2.value2 = mid - d + randomSlope2 / 2;
+					t1.value2 = mid - newLine.dist - randomSlope2 / 2;
+					t2.value2 = mid - newLine.dist + randomSlope2 / 2;
 
 					// Make sure all lines are within bounds
 					if (t1.value2 < 0 || 
@@ -187,19 +250,96 @@ var makeTrendsDataSlopes = function(){
 	return embedInDatasets(dualLines);
 }
 
+var intersectionOfLines = function(x1,y1,x2,y2,x3,y3,x4,y4) {
+	det1num = (x1 * y2 - y1 * x2) * (x3 - x4) - (x1 - x2) * (x3 * y4 - y3 * x4);
+	det2num = (x1 * y2 - y1 * x2) * (y3 - y4) - (y1 - y2) * (x3 * y4 - y3 * x4);
+	den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+
+	return {'x': det1num / den, 'y': det2num / den};
+}
+
+var makeHyperbolaDatasets = function() {
+	var datasets = [];
+	var lim = 6;
+
+	for (var i = 1; i <= lim / 2; i = i + 0.5) {
+		var dataset = {};
+		var data = [];
+		var params = {};
+		params.foci = i;
+
+		var d = (lim / 2 - i);
+		var x1 = i, y1 = i, x3 = -i, y3 = -i;
+
+		for (var j = 0; j < 7; j++) {
+			var x2 = -j * d / 6; 
+			var y2 = lim - j * d / 6;
+			var x4 = j * lim / 12;
+			var y4 = lim - j * lim / 12;
+
+			var point = intersectionOfLines(x1,y1,x2,y2,x3,y3,x4,y4);
+
+			console.log(x2, y2)
+
+			data.push({
+				date: new Date('1/1/' + (1980 + j)),
+				value1: point.x,
+				value2: point.y
+			});
+		};
+
+		for (var j = 1; j < 7; j++) {
+			var x2 = (lim - d) + j * d / 6;
+			var y2 = -d + j * d / 6;
+			var x4 = (j + 6) * lim / 12;
+			var y4 = lim - (j + 6) * lim / 12;
+
+			var point = intersectionOfLines(x1,y1,x2,y2,x3,y3,x4,y4);
+
+			console.log(x2, y2)
+
+			data.push({
+				date: new Date('1/1/' + (1980 + j + 6)),
+				value1: point.x,
+				value2: point.y
+			});
+		};
+
+		dataset.data = data;
+		dataset.dataClass = 'hyperbola';
+		dataset.ind = 0;
+		dataset.params = params;
+		dataset.label1 = 'V';
+		dataset.label2 = 'U';
+
+		datasets.push(dataset);
+ 	};
+ 	return datasets;
+};
+
 var makeTrendsData = function(){
 	dataAngles = makeTrendsDataAngles();
 	dataSlopes = makeTrendsDataSlopes();
 
 	trendsDatasets = dataAngles.concat(dataSlopes);
+
+	switch (qs['data']) {
+		case 'angles':
+			trendsDatasets = dataAngles;
+			break;
+		case 'slopes':
+			trendsDatasets = dataSlopes;
+			break;
+	}
+	// trendsDatasets = makeHyperbolaDatasets();
 }
 
 loadDataSets(true, makeTrendsData, 'translate'); //Loads to global 'datasets'
 
-var delay = (debug ? 0 : 3000);
+var delay = (debug ? 0 : 2000);
 var penalty = (debug ? 0 : 5000);
 var timeLimit = (debug ? 1000000 : 6000);
-var numTrials = (debug ? 3 : 10);
+var numTrials = (debug ? 3 : 166);
 
 // Block 1: Chart
 // Block 2: Chart with highlighting
@@ -236,14 +376,14 @@ var Trial = function(blockClass, dataset){
 	this.correct = null;
 };
 
-var runBlock = function(blockNo){
+var runBlock = function(chartType, blockNo){
 	/**
 	* Run blocks
 	* blockSeq contains the order of blocks 
 	*/
 	var r = $.Deferred();
 
-	var block = new Block(CHARTTYPE, blockNo, '000');
+	var block = new Block(chartType, blockNo, '000');
 
 	for (var j = 0; j<numTrials; j++) {
 		var trial = new Trial(block.blockClass, block.datasets[j]);
@@ -257,13 +397,19 @@ var runBlock = function(blockNo){
 
 var runExperiment = function(){
 	//Runs the three blocks in the order given by the global var blockSeq
-	runBlock(blockSeq[0])
-		.then(function(){ runBlock(blockSeq[1])
-			.then(function(){ runBlock(blockSeq[2]) 
-				.then(function(){
-					$('#study').hide();
-					$('#leftChart').hide();
-					$('#done').show();
+	runBlock(chartTypeSeq[0], blockSeq[0])
+		.then(function(){ runBlock(chartTypeSeq[0], blockSeq[1])
+			.then(function(){ runBlock(chartTypeSeq[0], blockSeq[2]) 
+				.then(function(){ runBlock(chartTypeSeq[1], blockSeq[0])
+					.then(function(){ runBlock(chartTypeSeq[1], blockSeq[1]) 
+						.then(function(){ runBlock(chartTypeSeq[1], blockSeq[2]) 
+							.then(function(){
+								$('#study').hide();
+								$('#leftChart').hide();
+								$('#done').show();
+							});
+						});
+					});
 				});
 			});
 		});
@@ -274,7 +420,7 @@ var tutorialStep = function(event){
 	var k = event.keyCode;
 
 	if (k === 83 || k === 68) {
-		if (tutorialNow < 4) {
+		if (tutorialNow < 6) {
 			$('#tutorial-' + tutorialNow).hide();
 			$('#tutorial-' + (tutorialNow + 1)).show();
 		} 
@@ -294,9 +440,9 @@ var sendJSON = function(_block, callback) {
     // // show size of block data
     // console.log(encodeURIComponent(JSON.stringify(_block, null, " ")).length);
 
-    // // get correctess and time
-    // _block.avgRT = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.RT; }, 0) / _block.trials.length;
-    // _block.avgCorrect = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.responseCorrect; }, 0) / _block.trials.length;
+    // get correctess and time
+    _block.avgRT = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.responseTime; }, 0) / _block.trials.length;
+    _block.avgCorrect = _block.trials.reduce(function (accumulator, trial) { return accumulator + trial.correct; }, 0) / _block.trials.length;
 
     // send
     delete _block.datasets;
@@ -304,7 +450,7 @@ var sendJSON = function(_block, callback) {
     d3.xhr('submit-trends.php', 'application/x-www-form-urlencoded', callback)
         .header('content-type', 'application/x-www-form-urlencoded')
         .post('study=' + encodeURIComponent(_block.blockClass) + '&' +
-            'subjectID=' + encodeURIComponent(_block.subjectID) + '&' +
+            'subjectID=' + encodeURIComponent(_block.subjectID + '-' + _block.avgRT.toFixed(2) + '-' + _block.avgCorrect.toFixed(2)) + '&' +
             'data=' + encodeURIComponent(JSON.stringify(_block, null, " ")))
         .on('error', function (error) {
             console.log('ERROR: ' + error);
