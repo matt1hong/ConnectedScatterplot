@@ -16,16 +16,34 @@
 	<style type="text/css">
 div {
 	margin: 0 auto;
-	width: 600px;
+	width: 480px;
+}
+@media screen and (max-height: 600px) {
+    body {
+        padding: 10px;
+        -moz-transform: scale(0.8,0.8);
+        -ms-transform: scale(0.8,0.8);
+        -o-transform: scale(0.8,0.8);
+        -webkit-transform: scale(0.8,0.8);
+        transform: scale(0.8,0.8);
+        -moz-transform-origin: left top;
+        -ms-transform-origin: left top;
+        -o-transform-origin: left top;
+        -webkit-transform-origin: left top;
+        transform-origin: left top;
+    }
 }
 #header {
 	margin-top: 40px;
-	font-size: 14px;
+	font-size: 16px;
 	height: 100px;
 }
 #study{
 	display: none;
 	text-align: center;
+}
+.exp2 {
+	float: left;
 }
 #wrong, #timed-out{
 	display: none;
@@ -41,8 +59,14 @@ div {
 	color: black;
 	font-weight: bold;
 }
-.tutorial, .eg1, .eg2, .eg3{
+.tutorial{
 	display: none;
+}
+.tutorial img {
+	position: absolute;
+	top:140px;
+	width: 800px;
+	margin-left: -160px;
 }
 circle.line1 {
 	fill: blue;
@@ -56,34 +80,103 @@ circle.cs {
 	</style>
 </head>
 <body>
+<!-- 	<div id="tutorial-1" class="tutorial">
+		<div class="row">
+			<div class="col-sm-10">
+				<img src="img/cs-tutorial1.png" width="1069" height="506">
+				<p>You will see dual-axes line charts and connected scatterplots. In this example, we will translate from the dual-axes line chart on the left to the connected scatterplot on the right.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(2);" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="tutorial-2" class="tutorial">
+		<div class="row">
+			<div class="col-sm-10">
+				<img src="img/cs-tutorial2.png" width="1069" height="506">
+				<p>Both charts show two series of data values over time. Point A is shown as two different points on the left, while it is only one point on the right.</p>
+				<p>Axes with the same color correspond to each other between the charts: blue is the left axis in the dual-axes line chart and the vertical axis on the connected scatterplot on the right; green is the right axis in the dual-axes line chart and the horizontal axis on the connected scatterplot on the right.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(3);" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="tutorial-3" class="tutorial">
+		<div class="row">
+			<div class="col-sm-10">
+				<img src="img/cs-tutorial3.png" width="1069" height="506">
+				<p>Each point represents two data values. We draw lines between consecutive points in both charts.</p>
+				<p>In the connected scatterplot on the right, the order of points is important, which is why there are arrows along some of the lines. In the dual-axes line chart on the left, time goes left to right, so we don't need arrows.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(4);" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="tutorial-4" class="tutorial">
+		<div class="row">
+			<div class="col-sm-10">
+				<img src="img/cs-tutorial4.png" width="1069" height="506">
+				<p>Depending on the values, the direction of the lines in the connected scatterplot changes. The length of the lines between points can also vary dramatically, depending on the difference in the values represented.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(5);" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div id="tutorial-5" class="tutorial">
+		<div class="row">
+			<div class="col-sm-10">
+				<img src="img/cs-tutorial5.png" width="1069" height="506">
+				<p>The completed charts. In the study, you will translate from and to dual-axes line charts and connected scatterplots.</p>
+				<p>Please be as precise as possible in transferring or copying the values from one chart to the other.</p>
+				<button role="button" class="btn btn-primary btn-lg" onclick="tutorialStep(6);" style="float:right;">Next
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="tutorial" id="tutorial-6">
+		<p>A question about a chart will be shown first.</p>
+		<p>Then, click <b>s</b> or <b>d</b> to reveal the chart in question and start the timer.</p>
+		<p>Pick the correct answer by pressing <b>s</b> or <b>d</b>.</p>
+		<p>Be as <b>quick</b> and <b>accurate</b> as you can.</p>
+		<p>Press <b>s</b> or <b>d</b> to start practice.</p>
+	</div> -->
 	<div id="header">
 		<div class="tutorial" id="tutorial-1">
-			<p>In this experiment, a chart like one below will be shown.</p>
+			<p>In this experiment, you will see two types of charts.</p>
 			<p>Press <b>s</b> or <b>d</b> to continue.</p>
-			<div class="example">
-				<img src="img/trends/instructions.gif">
-			</div>
+			<img src="img/cs-tutorial1.png">
 		</div>
 		<div class="tutorial" id="tutorial-2">
-			<p>Each point represents two values: one on the horizontal axis, and one on the vertical axis.</p>
+			<p>This tutorial describes their configurations by drawing the same data with the two methods.</p>
 			<p>Press <b>s</b> or <b>d</b> to continue.</p>
-			<div class="example">
-				<img src="img/trends/instructions-points.gif">
-			</div>
+			<img src="img/cs-tutorial2.png">
 		</div>
 		<div class="tutorial" id="tutorial-3">
-			<p>Two points that are adjacent across time are connected by an arrow.</p>
+			<p>Each data point associates two values - a value on the blue axis and another on the green axis - with a point in time. Note the difference in the location of the green axis.</p>
 			<p>Press <b>s</b> or <b>d</b> to continue.</p>
-			<div class="example">
-				<img src="img/trends/instructions-lines.gif">
-			</div>
+			<img src="img/cs-tutorial3.png">
 		</div>
 		<div class="tutorial" id="tutorial-4">
-			<p>A question about a chart will be shown first.</p>
-			<p>Then, click <b>s</b> or <b>d</b> to reveal the chart in question and start the timer.</p>
+			<p>The two values are on the left drawn with two points, and on the right drawn with a single point.</p>
+			<img src="img/cs-tutorial4.png">
+		</div>
+		<div class="tutorial" id="tutorial-5">
+			<p>On the left, time flows left to right. On the right, there are arrowheads on the lines to indicate such direction.</p>
+			<p>Press <b>s</b> or <b>d</b> to continue.</p>
+			<img src="img/cs-tutorial5.png">
+		</div>
+		<div class="tutorial" id="tutorial-6">
+			<p>The tutorial has ended. Now, once you press <b>s</b> or <b>d</b>, you will be given <b>5</b> practice trials.</p>
+			<p>When a trial begins, a question is first shown.</p>
+			<p>Then after a few seconds, a chart will be revealed and you will be able to answer the question.</p>
 			<p>Pick the correct answer by pressing <b>s</b> or <b>d</b>.</p>
-			<p>Be as quick and accurate as you can.</p>
-			<p>Press <b>s</b> or <b>d</b> to start practice.</p>
+			<p>You are being timed, and time is as important as correctness.</p>
+			<p>Be as <b>quick</b> and <b>accurate</b> as you can.</p>
 		</div>
 		<div id="study">
 			<p>From <a id='year1' class='date'></a> to <a id='year2' class='date'></a>, the trends are:</p>
