@@ -23,10 +23,10 @@ var qs = (function(a) {
 var chartTypeSeq = d3.shuffle(['c', 'd']);
 
 switch (qs['type']) {
-	case 'd':
+	case 'dalc':
 		chartTypeSeq = ['d','d'];
 		break;
-	case 'c':
+	case 'cs':
 		chartTypeSeq = ['c','c'];
 		break;
 }
@@ -124,23 +124,23 @@ var embedInDatasets = function(lines){
 var makeTrendsDataAngles = function() {
 	//Generates data to be used for the trends study with the varying angles method
 	var angleIncr = 3;
-	var dist = 3;
+	var len = 3;
 
 	var lines = [];
-	for (var dist = 1; dist < 4; dist++) {
+	for (var len = 1; len < 4; len++) {
 		for (var angle = 0; angle < 360; angle += angleIncr) {
 
 			var newLine = {};
 			newLine.angle = angle;
-			newLine.dist = dist;
+			newLine.len = len;
 
-			if (qs['a']) {
-				newLine.angle = +qs['a'];
+			if (qs['angle']) {
+				newLine.angle = +qs['angle'];
 			}
-			if (qs['l']) {
-				newLine.dist = +qs['l'];
+			if (qs['length']) {
+				newLine.len = +qs['length'];
 			}
-			newLine.dist = 0.8
+			newLine.len = 0.5;
 
 			//Angles vary between angle +- 1
 			actualAngle = newLine.angle + Math.random() * 2 - 1;
@@ -151,10 +151,10 @@ var makeTrendsDataAngles = function() {
 			t1.value1 = Math.random() * 10;
 			t1.value2 = Math.random() * 10;
 
-			//Get the point at distance d and angle away from that point
+			//Get the point at length len and angle away from that point
 			var t2 = {};
-			t2.value1 = t1.value1 + newLine.dist * Math.cos(deg2rad(newLine.actualAngle));
-			t2.value2 = t1.value2 + newLine.dist * Math.sin(deg2rad(newLine.actualAngle));
+			t2.value1 = t1.value1 + newLine.len * Math.cos(deg2rad(newLine.actualAngle));
+			t2.value2 = t1.value2 + newLine.len * Math.sin(deg2rad(newLine.actualAngle));
 
 			//If t2 not in bounds, go back, pick another random point at this angle
 			if ((t2.value1 < 0) || 
@@ -197,14 +197,14 @@ var makeTrendsDataSlopes = function(){
 					newLine.slope1 = i;
 					newLine.slope2 = j;
 
-					if (qs['s1']) {
-						newLine.slope1 = +qs['s1'];
+					if (qs['blueslope']) {
+						newLine.slope1 = +qs['blueslope'];
 					} 
-					if (qs['s2']) {
-						newLine.slope2 = +qs['s2'];
+					if (qs['greenslope']) {
+						newLine.slope2 = +qs['greenslope'];
 					}
-					if (qs['d']) {
-						newLine.dist = +qs['d'];
+					if (qs['distance']) {
+						newLine.dist = +qs['distance'];
 					}
 
 					//Slopes vary between slope +- 0.1
@@ -323,14 +323,19 @@ var makeTrendsData = function(){
 
 	trendsDatasets = dataAngles.concat(dataSlopes);
 
-	switch (qs['data']) {
-		case 'angles':
-			trendsDatasets = dataAngles;
-			break;
-		case 'slopes':
-			trendsDatasets = dataSlopes;
-			break;
+	if (qs['greenslopes'] || qs['blueslopes'] || qs['distance']) {
+		trendsDatasets = dataSlopes;
+	} else if (qs['angles'] || qs['length']) {
+		trendsDatasets = dataAngles;
 	}
+	// switch (qs['data']) {
+	// 	case 'angles':
+	// 		trendsDatasets = dataAngles;
+	// 		break;
+	// 	case 'slopes':
+	// 		trendsDatasets = dataSlopes;
+	// 		break;
+	// }
 	// trendsDatasets = makeHyperbolaDatasets();
 }
 
@@ -339,7 +344,7 @@ loadDataSets(true, makeTrendsData, 'translate'); //Loads to global 'datasets'
 var delay = (debug ? 0 : 2000);
 var penalty = (debug ? 0 : 5000);
 var timeLimit = (debug ? 1000000 : 6000);
-var numTrials = (debug ? 3 : 166);
+var numTrials = (debug ? 3 : 10);
 
 // Block 1: Chart
 // Block 2: Chart with highlighting
