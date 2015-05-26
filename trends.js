@@ -140,7 +140,7 @@ var makeTrendsDataAngles = function() {
 			if (qs['length']) {
 				newLine.len = +qs['length'];
 			}
-			newLine.len = 0.5;
+			newLine.len = 0.8;
 
 			//Angles vary between angle +- 1
 			actualAngle = newLine.angle + Math.random() * 2 - 1;
@@ -553,6 +553,15 @@ var drawCS = function(trial){
 	while (indices.length < segments.length) {
 		var x = (segments[i].x+segments[i].lastX)/2;
 		var y = (segments[i].y+segments[i].lastY)/2;
+
+		var dx = segments[i].x - segments[i].lastX;
+		var dy = segments[i].y - segments[i].lastY;
+		var len = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
+		
+		// Moves the arrow a bit forward so it's in the middle
+		x += 5.5*dx/len;
+		y += 5.5*dy/len;
+
 		leftChart.arrows.push(segments[i]);
 		segments[i].line = leftChart.foreground.append('polyline')
 			.attr('points', segments[i].lastX+','+segments[i].lastY+

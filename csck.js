@@ -258,6 +258,7 @@ function makeConnected(connectedScatterSelector, interactive, dataPoints) {
 			.attr('markerHeight', 5)
 			.attr('orient', 'auto')
 			.attr('stroke', 'white')
+			.attr('stroke-width', 0.5)
 			.attr('fill', 'purple')
 			.append('polygon')
 				.attr('points', '0,0 10,3 0,6');
@@ -360,7 +361,6 @@ function initialSetup(leftChartDALC, rightChartDALC) {
 function scaleScales() {
 	leftChart.points.forEach(function (d) {
 		d.date = new Date(d.date);
-		console.log(d.date)
 	});
 
 	timeScale.domain([leftChart.points[0].date, leftChart.points[leftChart.points.length-1].date]);
