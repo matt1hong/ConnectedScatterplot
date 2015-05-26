@@ -123,7 +123,7 @@ var embedInDatasets = function(lines){
 
 var makeTrendsDataAngles = function() {
 	//Generates data to be used for the trends study with the varying angles method
-	var angleIncr = 3;
+	var angleIncr = 2;
 	var len = 3;
 
 	var lines = [];
@@ -140,6 +140,9 @@ var makeTrendsDataAngles = function() {
 			if (qs['length']) {
 				newLine.len = +qs['length'];
 			}
+			// Length vary between length +- 0.5
+			actualLen = newLine.len + Math.random() - 0.5;
+			newLine.actualLen = actualLen;
 
 			//Angles vary between angle +- 1
 			actualAngle = newLine.angle + Math.random() * 2 - 1;
@@ -152,8 +155,8 @@ var makeTrendsDataAngles = function() {
 
 			//Get the point at length len and angle away from that point
 			var t2 = {};
-			t2.value1 = t1.value1 + newLine.len * Math.cos(deg2rad(newLine.actualAngle));
-			t2.value2 = t1.value2 + newLine.len * Math.sin(deg2rad(newLine.actualAngle));
+			t2.value1 = t1.value1 + newLine.actualLen * Math.cos(deg2rad(newLine.actualAngle));
+			t2.value2 = t1.value2 + newLine.actualLen * Math.sin(deg2rad(newLine.actualAngle));
 
 			//If t2 not in bounds, go back, pick another random point at this angle
 			if ((t2.value1 < 0) || 
