@@ -251,7 +251,7 @@ function makeConnected(connectedScatterSelector, interactive, dataPoints) {
 		.append('marker')
 			.attr('id', 'arrow')
 			.attr('viewBox', '0 0 10 6')
-			.attr('refX', 10)
+			.attr('refX', 8)
 			.attr('refY', 3)
 			.attr('markerUnits', 'strokeWidth')
 			.attr('markerWidth', 8)

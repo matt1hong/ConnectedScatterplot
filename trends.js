@@ -140,7 +140,7 @@ var makeTrendsDataAngles = function() {
 			if (qs['length']) {
 				newLine.len = +qs['length'];
 			}
-			newLine.len = 0.8;
+			newLine.len = 0.5;
 
 			//Angles vary between angle +- 1
 			actualAngle = newLine.angle + Math.random() * 2 - 1;
@@ -344,7 +344,7 @@ loadDataSets(true, makeTrendsData, 'translate'); //Loads to global 'datasets'
 var delay = (debug ? 0 : 2000);
 var penalty = (debug ? 0 : 5000);
 var timeLimit = (debug ? 1000000 : 6000);
-var numTrials = (debug ? 3 : 10);
+var numTrials = 10;
 
 // Block 1: Chart
 // Block 2: Chart with highlighting
@@ -464,6 +464,69 @@ var sendJSON = function(_block, callback) {
         });
 };
 
+// http://bl.ocks.org/larskotthoff/11406992
+var arrangeLabels = function() {
+  var move = 1;
+  var padding = 11;
+  while(move > 0) {
+    move = 0;
+    leftChart.foreground.selectAll(".date")
+       .each(function() {
+         var that = this,
+             a0 = this.getBoundingClientRect();
+             console.log(a0)
+             var a = {
+             	'left':a0.left - padding, 
+             	'top':a0.top - padding, 
+             	'right':a0.right + padding,
+             	'bottom':a0.bottom + padding,
+             	'width':a0.width + padding*2, 
+             	'height':a0.height + padding * 2
+             };
+             console.log(a)
+         leftChart.foreground.selectAll(".date")
+            .each(function() {
+              if(this != that) {
+                var b0 = this.getBoundingClientRect();
+                var b = {
+	             	'left':b0.left - padding, 
+	             	'top':b0.top - padding, 
+	             	'right':b0.right + padding,
+	             	'bottom':b0.bottom + padding,
+	             	'width':b0.width + padding*2, 
+	             	'height':b0.height + padding * 2
+	             };
+                if((Math.abs(a.left - b.left) * 2 < (a.width + b.width)) &&
+                   (Math.abs(a.top - b.top) * 2 < (a.height + b.height))) {
+                  // overlap, move labels
+                  var dx = (Math.max(0, a.right - b.left) +
+                           Math.min(0, a.left - b.right)) * 0.07,
+                      dy = (Math.max(0, a.bottom - b.top) +
+                           Math.min(0, a.top - b.bottom)) * 0.05,
+                      tt = d3.transform(d3.select(this).attr("transform")),
+                      to = d3.transform(d3.select(that).attr("transform"));
+                  move += Math.abs(dx) + Math.abs(dy);
+                
+                  tt.translate = [ tt.translate[0] - dx-2, tt.translate[1] - dy-1.5];
+                  to.translate = [ to.translate[0] + dx-2, to.translate[1] + dy-1.5];
+                  d3.select(this).attr("transform", "translate(" + tt.translate + ")");
+                  d3.select(that).attr("transform", "translate(" + to.translate + ")");
+                  a0 = this.getBoundingClientRect();
+                  a = {
+	             	'left':a0.left - padding, 
+	             	'top':a0.top - padding, 
+	             	'right':a0.right +padding,
+	             	'bottom':a0.bottom +padding,
+	             	'width':a0.width +padding * 2, 
+	             	'height':a0.height + padding * 2
+	             };
+                }
+              }
+            });
+       });
+  }
+};
+
 var drawCS = function(trial){
 	//Draw normally
 	currentDataSet = trial.data;
@@ -516,6 +579,7 @@ var drawCS = function(trial){
 
 	text.enter()
 		.append('text')
+			.attr('class', 'date')
 			.text(function(d) { return d.date.getFullYear(); })
 			.attr('x', function(d) { return width-xScale(d.value1); })
 			.attr('y', function(d) { return yScale(d.value2) + 12; })
@@ -559,8 +623,8 @@ var drawCS = function(trial){
 		var len = Math.sqrt(Math.pow(dx,2) + Math.pow(dy,2));
 		
 		// Moves the arrow a bit forward so it's in the middle
-		x += 5.5*dx/len;
-		y += 5.5*dy/len;
+		x += 4*dx/len;
+		y += 4*dy/len;
 
 		leftChart.arrows.push(segments[i]);
 		segments[i].line = leftChart.foreground.append('polyline')
@@ -581,6 +645,8 @@ var drawCS = function(trial){
 	}
 
 	leftChart.foreground.selectAll('path').remove();
+
+	arrangeLabels();
 }
 
 var drawDALC = function(trial) {
