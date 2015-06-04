@@ -28,7 +28,7 @@ var DAGRIDSIZE = height/9;
 
 var GENERATEDATASETS = true;
 
-var PADX = 40;
+var PADX = 60;
 var PADY = 20;
 
 var commonScales = false;

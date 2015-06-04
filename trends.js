@@ -346,7 +346,7 @@ loadDataSets(true, makeTrendsData, 'translate'); //Loads to global 'datasets'
 var delay = (debug ? 0 : 2000);
 var penalty = (debug ? 0 : 5000);
 var timeLimit = (debug ? 1000000 : 6000);
-var numTrials = 10;
+var numTrials = 100;
 
 // Block 1: Chart
 // Block 2: Chart with highlighting
@@ -433,7 +433,7 @@ var tutorialStep = function(event){
 		} 
 		else {
 			$('#tutorial-' + tutorialNow).hide();
-			$(document).unbind("keyup", tutorialStep);
+			$(document).off();
 			runExperiment();
 		}
 		++tutorialNow;
@@ -759,10 +759,10 @@ var runTrials = function(block){
 			var k = event.keyCode;
 
 			if (k === 83 || k === 68){
+				$(document).off();
 				$('.choice').css('color', 'black');
 				$('.result').hide();
 				$('#leftChart').empty();
-				$(document).unbind('keyup', endTrial);
 
 				if (trialNo === 0) {
 					sendJSON(block);
@@ -796,7 +796,7 @@ var runTrials = function(block){
 
 				trial.response = k;
 
-				$(document).unbind('keyup', processResponse);
+				$(document).off();
 
 				if (k === 83 && answer){
 					// Correct and same
@@ -861,6 +861,8 @@ var runTrials = function(block){
 					$('#time-limit').text(timeLimit/1000);
 					$('#timed-out').show();
 					$('#continue').css('color', 'red').show();
+
+					$(document).off();
 					$(document).keyup(endTrial);
 				}
 			}, timeLimit);
