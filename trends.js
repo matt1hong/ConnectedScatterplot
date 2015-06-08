@@ -140,7 +140,7 @@ var makeTrendsDataAngles = function() {
 			if (qs['length']) {
 				newLine.len = +qs['length'];
 			}
-			// Length vary between length +- 0.5
+			// Lengths vary between length +- 0.5
 			actualLen = newLine.len + Math.random() - 0.5;
 			newLine.actualLen = actualLen;
 
@@ -182,11 +182,12 @@ var makeTrendsDataAngles = function() {
 
 var makeTrendsDataSlopes = function(){ 
 	// Generates data to be used for the trends study according to the varying slopes method
-	var numSamples = 5;
+	var numSamples = 1;
 
 	//Limits on slope and distance leaves room for some variance
-	var slopeLim = 4;
-	var distLim = 9 - slopeLim;
+	var slopeLim = 2;
+	var distLim = 3;
+	// var distLim = 9 - slopeLim;
 
 	var dualLines = [];
 	for (var i = -slopeLim; i <= slopeLim; i++) {
@@ -209,9 +210,13 @@ var makeTrendsDataSlopes = function(){
 						newLine.dist = +qs['distance'];
 					}
 
-					//Slopes vary between slope +- 0.1
-					var randomSlope1 = newLine.slope1 + Math.random() / 5 - 0.1;
-					var randomSlope2 = newLine.slope2 + Math.random() / 5 - 0.1;
+					// //Slopes vary between slope +- 0.1
+					// var randomSlope1 = newLine.slope1 + Math.random() / 5 - 0.1;
+					// var randomSlope2 = newLine.slope2 + Math.random() / 5 - 0.1;
+
+					// Slopes vary between slope +- 0.5
+					var randomSlope1 = newLine.slope1 + Math.random() - 0.5;
+					var randomSlope2 = newLine.slope2 + Math.random() - 0.5;
 
 					newLine.actualSlope1 = randomSlope1;
 					newLine.actualSlope2 = randomSlope2;
@@ -221,11 +226,12 @@ var makeTrendsDataSlopes = function(){
 					t1.value1 = Math.random() * 10;
 					t2.value1 = t1.value1 + randomSlope1;
 
+					var plusOrMinus = Math.random() < 0.5 ? -1 : 1;
 					//Controlling distances between midpoints
 					var mid = (t1.value1 + t2.value1) / 2;
 
-					t1.value2 = mid - newLine.dist - randomSlope2 / 2;
-					t2.value2 = mid - newLine.dist + randomSlope2 / 2;
+					t1.value2 = mid - plusOrMinus * newLine.dist - randomSlope2 / 2;
+					t2.value2 = mid - plusOrMinus * newLine.dist + randomSlope2 / 2;
 
 					// Make sure all lines are within bounds
 					if (t1.value2 < 0 || 
@@ -325,7 +331,7 @@ var makeTrendsData = function(){
 
 	trendsDatasets = dataAngles.concat(dataSlopes);
 
-	if (qs['greenslopes'] || qs['blueslopes'] || qs['distance']) {
+	if (qs['greenslope'] || qs['blueslope'] || qs['distance']) {
 		trendsDatasets = dataSlopes;
 	} else if (qs['angle'] || qs['length']) {
 		trendsDatasets = dataAngles;
@@ -346,7 +352,7 @@ loadDataSets(true, makeTrendsData, 'translate'); //Loads to global 'datasets'
 var delay = (debug ? 0 : 2000);
 var penalty = (debug ? 0 : 5000);
 var timeLimit = (debug ? 1000000 : 6000);
-var numTrials = 100;
+var numTrials = 15;
 
 // Block 1: Chart
 // Block 2: Chart with highlighting
@@ -573,19 +579,25 @@ var drawCS = function(trial){
 		})
 		.attr('fill', 'purple');
 
-	//Put a label on each point
-	var text = leftChart.foreground.selectAll('text')
-		.data(leftChart.points.slice(0, pointsToDraw));
+		if (trial.opacity !== 0) {
+			//Put a label on each point
+			var text = leftChart.foreground.selectAll('text')
+				.data(leftChart.points.slice(0, pointsToDraw));
 
-	text.enter()
-		.append('text')
-			.attr('class', 'date')
-			.text(function(d) { return d.date.getFullYear(); })
-			.attr('x', function(d) { return width-xScale(d.value1); })
-			.attr('y', function(d) { return yScale(d.value2) + 12; })
-			.attr('opacity', function(d, i) {
-				return (i === trial.ind || i === trial.ind + 1) ? 1 : trial.opacity;
-			});
+			//Randomly put labels in one of the corners
+			var moveX = Math.random() < 0.5 ? 0 : -23;
+			var moveY = Math.random() < 0.5 ? -5 : 12;
+
+			text.enter()
+				.append('text')
+					.attr('class', 'date')
+					.text(function(d) { return d.date.getFullYear(); })
+					.attr('x', function(d) { return width-xScale(d.value1) + moveX; })
+					.attr('y', function(d) { return yScale(d.value2) + moveY; })
+					.attr('opacity', function(d, i) {
+						return (i === trial.ind || i === trial.ind + 1) ? 1 : trial.opacity;
+					});
+		}
 
 	//Put an arrow on each segment
 	var path = leftChart.foreground.select('path');
@@ -646,7 +658,7 @@ var drawCS = function(trial){
 
 	leftChart.foreground.selectAll('path').remove();
 
-	arrangeLabels();
+	// arrangeLabels();
 }
 
 var drawDALC = function(trial) {
@@ -833,18 +845,10 @@ var runTrials = function(block){
 			}
 		};
 
-		// Take a trial
-		var trial = block.trials[trialNo];
-
-		// Show question
-		$('#year1').text('198' + trial.ind);
-		$('#year2').text('198' + (trial.ind + 1));
-		$('#study').show();
-
-		// Show chart after delay
-		setTimeout(function(){
+		var draw = function(){
 			var dateStart = new Date();
 
+			$(document).off();
 			$(document).keyup(dateStart, processResponse);
 
 			//Draw chart
@@ -866,8 +870,23 @@ var runTrials = function(block){
 					$(document).keyup(endTrial);
 				}
 			}, timeLimit);
+		};
 
-		}, delay);
+		// Take a trial
+		var trial = block.trials[trialNo];
+
+		// Show question
+		$('#year1').text('198' + trial.ind);
+		$('#year2').text('198' + (trial.ind + 1));
+		$('#study').show();
+
+		// Draw chart on click
+		$(document).keyup(function(event){
+			var k = event.keyCode;
+			if (k === 83 || k === 68) {
+				draw();
+			}
+		});
 	};
 
 	// Begin recursion
