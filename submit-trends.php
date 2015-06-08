@@ -1,10 +1,11 @@
 <?php
 
 $study = rtrim($_POST['study']);
+$chart = rtrim($_POST['chart']);
 $subjectID = rtrim($_POST['subjectID']);
 $data = $_POST['data'];
 
-$dir = "data/" . $study;
+$dir = "data/" . $chart . "/" . $study;
 
 if (!file_exists($dir)) {
 	mkdir($dir);
