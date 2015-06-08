@@ -123,11 +123,10 @@ var embedInDatasets = function(lines){
 
 var makeTrendsDataAngles = function() {
 	//Generates data to be used for the trends study with the varying angles method
-	var angleIncr = 2;
-	var len = 3;
+	var angleIncr = 45;
 
 	var lines = [];
-	for (var len = 1; len < 4; len++) {
+	for (var len = 1; len <= 3; len+=2) {
 		for (var angle = 0; angle < 360; angle += angleIncr) {
 
 			var newLine = {};
@@ -140,12 +139,14 @@ var makeTrendsDataAngles = function() {
 			if (qs['length']) {
 				newLine.len = +qs['length'];
 			}
-			// Lengths vary between length +- 0.5
-			actualLen = newLine.len + Math.random() - 0.5;
+
+			// Lengths vary
+			var e = (len === 1 ? Math.random() - 0.5 : Math.random() * 2 - 1);
+			actualLen = newLine.len + e;
 			newLine.actualLen = actualLen;
 
-			//Angles vary between angle +- 1
-			actualAngle = newLine.angle + Math.random() * 2 - 1;
+			//Angles vary between angle +- 5
+			actualAngle = newLine.angle + Math.random() * 10 - 5;
 			newLine.actualAngle = actualAngle;
 
 			//Pick a random point by generating two random values
@@ -221,6 +222,11 @@ var makeTrendsDataSlopes = function(){
 					newLine.actualSlope1 = randomSlope1;
 					newLine.actualSlope2 = randomSlope2;
 
+					// Distances vary between dist +- 0.5
+					var randomDist = newLine.dist + Math.random() - 0.5;
+
+					newLine.actualDist = randomDist;
+
 					var t1 = {};
 					var t2 = {};
 					t1.value1 = Math.random() * 10;
@@ -230,8 +236,8 @@ var makeTrendsDataSlopes = function(){
 					//Controlling distances between midpoints
 					var mid = (t1.value1 + t2.value1) / 2;
 
-					t1.value2 = mid - plusOrMinus * newLine.dist - randomSlope2 / 2;
-					t2.value2 = mid - plusOrMinus * newLine.dist + randomSlope2 / 2;
+					t1.value2 = mid - plusOrMinus * newLine.actualDist - randomSlope2 / 2;
+					t2.value2 = mid - plusOrMinus * newLine.actualDist + randomSlope2 / 2;
 
 					// Make sure all lines are within bounds
 					if (t1.value2 < 0 || 
