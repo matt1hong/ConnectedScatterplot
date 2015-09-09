@@ -1,8 +1,8 @@
 var width = 400,
     height = 400;
 
-var showArrows = false;
-var showDots = true;
+var showArrows = true;
+var showDots = false;
 var showLabels = false;
 var showGrid = false;
 var smoothLines = true;
@@ -56,6 +56,149 @@ var draggedIndex = -1,
 	draggingBlue = true,
     selectedIndex = -1;
 
+function surrogateTimeSeries(dataset) {
+	data = dataset.data;
+	if (data.length % 2 == 0) {
+		data.pop();
+	}
+
+	// isolating the values
+	var values1 = [];
+	var values2 = [];
+
+	for (var i = 0; i < data.length; i++) {
+		values1.push(data[i].value1);
+		values2.push(data[i].value2);
+	};
+
+	// get parameters
+	var half_length = (data.length - 1) / 2;
+
+	var interv1 = math.range(1, half_length + 1);
+	var interv2 = math.range(half_length + 1, data.length);
+
+	// fft
+	var fft_freq1 = new complex_array.ComplexArray(data.length);
+	var fft_freq2 = new complex_array.ComplexArray(data.length);
+	for (i = 0; i < data.length; i++) {
+		fft_freq1.real[i] = values1[i]
+		fft_freq2.real[i] = values2[i]
+	};
+	fft_freq1.FFT();
+	fft_freq2.FFT();
+
+	var freq1 = math.zeros(data.length, 1);
+	var freq2 = math.zeros(data.length, 1);
+	for (i = 0; i < data.length; i++) {
+		freq1 = math.subset(
+			freq1,
+			math.index(i, 0),
+			math.complex(fft_freq1.real[i], fft_freq1.imag[i]));
+		freq2 = math.subset(
+			freq2,
+			math.index(i, 0),
+			math.complex(fft_freq2.real[i], fft_freq2.imag[i]));	
+	};
+
+	// surrogates
+	var surrogate_freq1 = [];
+	var surrogate_freq2 = [];
+
+	var phase_rand = math.zeros(half_length, 1);
+	phase_rand = phase_rand
+					.map(function(value, index, matrix) {
+						return value + Math.random();
+					});
+
+	phase_interv1 = math.exp(math.multiply(phase_rand, math.multiply(2*Math.PI,math.complex(0,1))));
+
+	//// upside down 
+	phase_interv2 = math.zeros(half_length, 1);
+	phase_interv1.forEach(function(value, index, matrix) {
+		phase_interv2 = math.subset(
+					phase_interv2, 
+					math.index(half_length - index[0] - 1, index[1]),
+					math.subset(matrix, math.index(index[0], index[1]))
+		);
+	});
+	
+	phase_interv2 = math.conj(phase_interv2);
+	
+	// beware: switchs row and columns
+	array1 = surrogate_freq1 = math.concat(
+					math.transpose(math.dotMultiply(math.subset(freq1, math.index(interv1, 0)),phase_interv1)),
+					math.transpose(math.dotMultiply(math.subset(freq1, math.index(interv2, 0)),phase_interv2))
+					);
+	surrogate_freq2 = math.concat(
+					math.transpose(math.dotMultiply(math.subset(freq2, math.index(interv1, 0)),phase_interv1)),
+					math.transpose(math.dotMultiply(math.subset(freq2, math.index(interv2, 0)),phase_interv2))
+					);
+	
+	var surrogate1 = new complex_array.ComplexArray(data.length);
+	var surrogate2 = new complex_array.ComplexArray(data.length);
+
+	for (i = 0; i < half_length * 2; i++) {
+		surrogate1.real[i] = surrogate_freq1._data[0][i].re;
+		surrogate1.imag[i] = surrogate_freq1._data[0][i].im;
+		surrogate2.real[i] = surrogate_freq2._data[0][i].re;
+		surrogate2.imag[i] = surrogate_freq2._data[0][i].im;
+	};
+
+	surrogate1.InvFFT();
+	surrogate2.InvFFT();
+
+	var newDataset = [];
+	for (i = 0; i < half_length * 2; i++) {
+		newDataset.push({
+			date: new Date('1/1/' + (1980 + i + 6)),
+			value1: surrogate1.real[i],
+			value2: surrogate2.real[i]
+		})
+	};
+
+	return newDataset;	
+}
+
+function makePairedSeries(maxTime, numSteps, drift, volat, initVal1, initVal2) {
+	// Browning motion
+
+	var approxRandN = function() {
+		return (Math.random() + Math.random() + Math.random() + 
+				Math.random() + Math.random() + Math.random() +
+				Math.random() + Math.random() + Math.random() +
+				Math.random() + Math.random() + Math.random()) - 6
+	}
+
+	var data = [];
+
+	var dTime = maxTime/numSteps;
+
+	data.push({
+			date: new Date('1/1/' + 1986),
+			value1: initVal1,
+			value2: initVal2
+		})
+
+	for (var i = 1; i < numSteps; i++) {
+		var Wt1 = Math.sqrt(dTime) * approxRandN();
+		var Wt2 = Math.sqrt(dTime) * approxRandN();
+
+		var Xt1 = initVal1 * Math.exp((drift - Math.pow(volat, 2) / 2) * dTime + volat * Wt1);
+		var Xt2 = initVal2 * Math.exp((drift - Math.pow(volat, 2) / 2) * dTime + volat * Wt2);
+
+		data.push({
+			date: new Date('1/1/' + (1980 + i + 6)),
+			value1: Xt1,
+			value2: Xt2
+		})
+
+		initVal1 = Xt1;
+		initVal2 = Xt2;
+	};
+	
+	return data;
+}
+
 function makeDataSets() {
 
 	var parallelSines = [];
@@ -74,7 +217,7 @@ function makeDataSets() {
 
 		p = {
 			date: d,
-			value1: Math.sin(i)+i/4,
+			value1: Math.sin(i+1)+(i+1)/4,
 			value2: Math.sin(i)+i/3
 		}
 		increasingSines.push(p);
@@ -101,10 +244,18 @@ function makeDataSets() {
 		d = new Date(d.getTime()+24*3600*1000);
 	}
 
+	// maxTime, numSteps, drift, volat, initVal1, initVal2
+	randomPaired = makePairedSeries(1,20,0,0.2,1,1);
+	// surrogate = surrogateTimeSeries(datasets[20]);
+
 	datasets.push({"name":"parallel", "display":"Parallel Sines", "data":parallelSines, "commonScales":true});
 	datasets.push({"name":"increasing", "display":"Increasing Sines", "data":increasingSines, "commonScales":true});
 	datasets.push({"name":"spiral", "display":"Spiral", "data":spiral, "commonScales":true});
 	datasets.push({"name":"frequency", "display":"Different Frequency", "data":freqSines, "commonScales":true});
+	datasets.push({"name":"random", "display":"Random", "data":randomPaired, "commonScales":false});
+	
+	surrogate = surrogateTimeSeries(datasets[19]);
+	datasets.push({"name":"surrogate", "display":"Surrogate", "data":surrogate, "commonScales":false});
 }
 
 function makeDALC(lineChartSelector, interactive, dataPoints) {
@@ -377,8 +528,8 @@ function scaleScales() {
 		xScale.domain(d3.extent(leftChart.points, function(d) { return d.value1; }));
 		yScale.domain(d3.extent(leftChart.points, function(d) { return d.value2; }));
 
-		xScale.domain([1, 2.4]);
-		yScale.domain([1, 2.4]);
+		// xScale.domain([1, 2.4]);
+		// yScale.domain([1, 2.4]);
 	}
 
 	copyLefttoRight();

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<script src="https://js.leapmotion.com/leap-0.6.4.js"></script>
+	<script type="text/javascript" src="jquery-2.1.4.min.js"></script>
+	<script type="text/javascript">
+function concatData(id, data) {
+	return id + ":" + data  + "<br>";
+}
+
+var output = $('#output');
+var frameString = "", handString = "", fingerString = "";
+var hand, finger;
+
+//  Leap.loop
+var options = {enableGestures: true};
+console.log(Leap)
+
+Leap.loop(options, function(frame){
+	console.log('s')
+	frameString = concatData("frame_id", frame.id);
+	frameString += concatData("num_hands", frame.hands.length);
+	frameString += concatData("num_fingers", frame.fingers.length);
+	frameString += "<br>";
+
+	output.html(frameString);
+});
+	</script>
+</head>
+<body>
+	<h1></h1>
+	<div id="output"></div>
+</body>
+</html>
