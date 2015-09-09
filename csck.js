@@ -1,7 +1,7 @@
 var width = 400,
     height = 400;
 
-var showArrows = true;
+var showArrows = false;
 var showDots = false;
 var showLabels = false;
 var showGrid = false;
@@ -821,9 +821,6 @@ function redrawDualAxes(dualAxes, recreate) {
 				.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 				.attr('cx', function(d) { return timeScale(d.date); })
 				.attr('cy', function(d) { return yScale(d.value2); });
-		} else {
-			dualAxes.blueCircles.remove();
-			dualAxes.greenCircles.remove();
 		}
 	} else {
 		dualAxes.foreground.select('path.line1').attr('d', dualAxes.lineDA1);
