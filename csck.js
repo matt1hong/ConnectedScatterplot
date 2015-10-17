@@ -2,10 +2,10 @@ var width = 400,
     height = 400;
 
 var showArrows = false;
-var showDots = false;
+var showDots = true;
 var showLabels = false;
 var showGrid = false;
-var smoothLines = true;
+var smoothLines = false;
 
 var disconnected = false;
 var cheatMode = true;
@@ -202,25 +202,41 @@ function makePairedSeries(maxTime, numSteps, drift, volat, initVal1, initVal2) {
 function makeDataSets() {
 
 	var parallelSines = [];
+	var parallelSines2 = [];
 	var increasingSines = [];
+	var increasingSines2 = [];
 	var freqSines = [];
 	var spiral = [];
 
 	var d = new Date();
-	for (var i = 0; i < Math.PI*6; i += Math.PI/10) {
+	for (var i = 0; i < Math.PI*4; i += Math.PI/4) {
 		var p = {
 			date: d,
-			value1: Math.sin(i)*2,
+			value1: Math.sin(i) * 2,
 			value2: Math.sin(i)
 		}
 		parallelSines.push(p);
 
+		var p = {
+			date: d,
+			value1: Math.sin(i),
+			value2: Math.sin(i+1)
+		}
+		parallelSines2.push(p);
+
 		p = {
 			date: d,
-			value1: Math.sin(i+1)+(i+1)/4,
-			value2: Math.sin(i)+i/3
+			value1: Math.sin(i)+(i)/4,
+			value2: Math.sin(i)+i/2
 		}
 		increasingSines.push(p);
+
+		p = {
+			date: d,
+			value1: Math.sin(i)+(i)/4,
+			value2: Math.sin(i)+i/3
+		}
+		increasingSines2.push(p);
 
 		p = {
 			date: d,
@@ -233,7 +249,7 @@ function makeDataSets() {
 	}
 
 	d = new Date();
-	for (var i = 0; i < Math.PI*15; i += Math.PI/10) {
+	for (var i = 0; i < Math.PI*15; i += Math.PI/2) {
 		var p = {
 			date: d,
 			value1: Math.sin(i)*i,
@@ -249,13 +265,100 @@ function makeDataSets() {
 	// surrogate = surrogateTimeSeries(datasets[20]);
 
 	datasets.push({"name":"parallel", "display":"Parallel Sines", "data":parallelSines, "commonScales":true});
+	datasets.push({"name":"parallel2", "display":"Parallel Sines 2", "data":parallelSines2, "commonScales":true});
 	datasets.push({"name":"increasing", "display":"Increasing Sines", "data":increasingSines, "commonScales":true});
+	datasets.push({"name":"increasing2", "display":"Increasing Sines 2", "data":increasingSines2, "commonScales":true});
 	datasets.push({"name":"spiral", "display":"Spiral", "data":spiral, "commonScales":true});
 	datasets.push({"name":"frequency", "display":"Different Frequency", "data":freqSines, "commonScales":true});
 	datasets.push({"name":"random", "display":"Random", "data":randomPaired, "commonScales":false});
 	
-	surrogate = surrogateTimeSeries(datasets[19]);
-	datasets.push({"name":"surrogate", "display":"Surrogate", "data":surrogate, "commonScales":false});
+	par_2_surrogate = surrogateTimeSeries(datasets[20]);
+	datasets.push({"name":"loops", "display":"Loops", "data":par_2_surrogate, "commonScales":true});
+	
+	surrogate = surrogateTimeSeries(datasets[21]);
+
+	// surrogate && vertical translation
+	vert_surrogate = [];
+	d = new Date();
+	for (var i = 0; i < surrogate.length-1; i++) {
+		vert_surrogate.push({
+			date: d,
+			value1: surrogate[i].value1,
+			value2: surrogate[i].value2 + 1
+		})
+		d = new Date(d.getTime()+24*3600*1000);
+	};
+	datasets.push({"name":"surrogate vert", "display":"Surrogate Vert", "data":vert_surrogate, "commonScales":true});
+
+
+	vert_trans = [];
+	vert_trans_inv = [];
+
+	horiz_trans = [];
+
+	d = new Date();
+	for (var i = 0; i < randomPaired.length-1; i++) {
+		horiz_trans.push({
+			date: d,
+			value1: randomPaired[i].value1,
+			value2: randomPaired[i+1].value1
+		})
+		d = new Date(d.getTime()+24*3600*1000);
+	};
+	datasets.push({"name":"time_shift", "display":"Time shift", "data":horiz_trans, "commonScales":true});
+
+	// Scaling
+	var values2Sum = 0, values2Avg = 0;
+	for (var i = 0; i < surrogate.length; i++) {
+		// console.log(surrogate[i].value2)
+		values2Sum += surrogate[i].value2;
+	};
+	values2Avg = values2Sum / surrogate.length;
+
+	var vert_scaled = [];
+	d = new Date();
+	for (var i = 0; i < surrogate.length-1; i++) {
+		vert_scaled.push({
+			date: d,
+			value1: surrogate[i].value1,
+			value2: ((surrogate[i].value2 - values2Avg) * 2) + values2Avg
+		})
+		d = new Date(d.getTime()+24*3600*1000);
+	};
+	datasets.push({"name":"vert_scaling", "display":"Scaling", "data":vert_scaled, "commonScales":true});
+	
+	var vert_scaled_eg = [{"date":"10/16/2015","value1":-0.23052801191806793,"value2":-2.7404365387878244},{"date":"10/17/2015","value1":0.1626681536436081,"value2":-0.13312757733677116},{"date":"10/18/2015","value1":-0.09764640778303146,"value2":0.3753742727317981},{"date":"10/19/2015","value1":-0.4547399878501892,"value2":-0.6822610345802137},{"date":"10/20/2015","value1":0.16949954628944397,"value2":0.2158168258943728},{"date":"10/21/2015","value1":0.719472348690033,"value2":1.4728056344070604},{"date":"10/22/2015","value1":0.30204683542251587,"value2":1.5032358321228196},{"date":"10/23/2015","value1":0.03770734369754791,"value2":2.5077140482940847},{"date":"10/24/2015","value1":-1.1764459609985352,"value2":-1.0028306690177748},{"date":"10/25/2015","value1":-0.8237906098365784,"value2":-1.3455397931060622},{"date":"10/26/2015","value1":-0.3442874550819397,"value2":-1.3747323599777053},{"date":"10/27/2015","value1":-0.0694962665438652,"value2":-0.44660358104322634},{"date":"10/28/2015","value1":0.1770358830690384,"value2":1.0358348044433763}];
+
+	// d = new Date();
+	// for (var i = 0; i < surrogate.length; i++) {
+	// 	vert_trans.push({
+	// 		date: d,
+	// 		value1: surrogate[i].value1,
+	// 		value2: surrogate[i].value2 + 1
+	// 	});
+	// 	vert_trans_inv.push({
+	// 		date: d,
+	// 		value1: surrogate[i].value1 * -1 - 6,
+	// 		value2: surrogate[i].value2
+	// 	});
+	// 	d = new Date(d.getTime()+24*3600*1000);
+	// };
+
+	// half_tall = [{"date":"1/1/1980","value1":0.47144531250000005,"value2":0.71109375},{"date":"5/2/1980","value1":0.5295703125,"value2":0.66609375},{"date":"9/1/1980","value1":0.49957031250000006,"value2":0.59859375},{"date":"1/1/1981","value1":0.45269531250000006,"value2":0.52359375},{"date":"5/2/1981","value1":0.4039453125,"value2":0.55109375},{"date":"9/1/1981","value1":0.4264453125,"value2":0.67109375},{"date":"1/1/1982","value1":0.5070703125,"value2":0.78609375},{"date":"5/2/1982","value1":0.5858203125,"value2":0.83609375},{"date":"9/1/1982","value1":0.6364453125,"value2":0.84859375},{"date":"1/1/1983","value1":0.6420703125,"value2":0.78609375},{"date":"5/2/1983","value1":0.5914453125,"value2":0.6960937500000001},{"date":"9/1/1983","value1":0.5183203125,"value2":0.59609375},{"date":"1/1/1984","value1":0.42457031250000005,"value2":0.43609375}];
+	// datasets.push({"name":"half_tall", "display":"Half tall", "data":half_tall, "commonScales":true});
+
+	// d = new Date();
+	// for (var i = 0; i < randomPaired.length-1; i++) {
+	// 	vert_trans.push({
+	// 		date: d,
+	// 		value1: randomPaired[i].value1,
+	// 		value2: randomPaired[i+1].value1 + 0.1 * (math.random() - 0.5)
+	// 	})
+	// 	d = new Date(d.getTime()+24*3600*1000);
+	// };
+	// datasets.push({"name":"vertical", "display":"Vertical Translation", "data":vert_trans, "commonScales":true});
+	// datasets.push({"name":"vertical_inv", "display":"Vertical Translation Inv", "data":vert_trans_inv, "commonScales":true});
+
 }
 
 function makeDALC(lineChartSelector, interactive, dataPoints) {
@@ -821,6 +924,9 @@ function redrawDualAxes(dualAxes, recreate) {
 				.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 				.attr('cx', function(d) { return timeScale(d.date); })
 				.attr('cy', function(d) { return yScale(d.value2); });
+		} else {
+			dualAxes.blueCircles.remove();
+			dualAxes.greenCircles.remove();
 		}
 	} else {
 		dualAxes.foreground.select('path.line1').attr('d', dualAxes.lineDA1);

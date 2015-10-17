@@ -16,5 +16,6 @@
 {"name":"fivepoints", "display":"Five Points", "label1":"", "label2":"", "study":false},
 {"name":"uv-curve", "display":"Excess Demand", "label1":"X1", "label2":"X2", "study":false},
 {"name":"uv-curve-cropped", "display":"Excess Demand (cropped)", "label1":"V", "label2":"U", "study":false},
-{"name":"uv-curve-cropped-2", "display":"Excess Demand (cropped 2)", "label1":"X1", "label2":"X2", "study":false}
+{"name":"uv-curve-cropped-2", "display":"Excess Demand (cropped 2)", "label1":"X1", "label2":"X2", "study":false},
+{"name":"value-figure", "display":"Value Figure", "label1":"X1", "label2":"X2", "study":false}
 ]
