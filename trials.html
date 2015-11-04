@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Compare Trends in Chart</title>
+	<link rel="stylesheet" type="text/css" href="bootstrap.min.css">
+	<link rel="stylesheet" href="csck.css">
+	<script src="d3.v3.min.js"></script>
+	<script type="text/javascript" src="moment.min.js"></script>
+	<script type="text/javascript" src="queue.min.js"></script>
+	<script type="text/javascript" src="common.js"></script>
+	<script type="text/javascript" src="csck.js"></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
+	<script src="//code.jquery.com/jquery-1.11.0.js"></script>
+	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+		<style type="text/css">
+div {
+	margin: 0 auto;
+	width: 480px;
+}
+@media screen and (max-height: 600px) {
+    body {
+        padding: 10px;
+        -moz-transform: scale(0.85,0.85);
+        -ms-transform: scale(0.85,0.85);
+        -o-transform: scale(0.85,0.85);
+        -webkit-transform: scale(0.85,0.85);
+        transform: scale(0.85,0.85);
+        -moz-transform-origin: left top;
+        -ms-transform-origin: left top;
+        -o-transform-origin: left top;
+        -webkit-transform-origin: left top;
+        transform-origin: left top;
+    }
+}
+#header {
+	margin-top: 40px;
+	font-size: 16px;
+	height: 100px;
+}
+#study{
+	display: none;
+	text-align: center;
+}
+.exp2 {
+	float: left;
+}
+#wrong, #timed-out{
+	display: none;
+	color: red;
+}
+#continue, #done{
+	display: none;
+}
+#highlighted{
+	stroke: yellow;
+}
+.date{
+	color: black;
+	font-weight: bold;
+}
+.tutorial{
+	display: none;
+}
+.tutorial img {
+	position: absolute;
+	top:140px;
+	width: 800px;
+	margin-left: -160px;
+}
+circle.line1 {
+	fill: blue;
+}
+circle.line2 {
+	fill: green;
+}
+circle.cs {
+	fill: purple;
+}
+	</style>
+</head>
+<body>
+	<div id="leftChart"></div>
+</body>
+<script type="text/javascript" src="trends-draw.js">
+	
+</script>
+	<script type="text/javascript">
+$(function(){
+	loadDataSets(true, function(){
+		console.log(datasets)
+	makeDataSets();
+	console.log(datasets)
+
+	currentDataSet = datasets[19];
+
+	globalCS = leftChart = makeConnected('#leftChart', true, currentDataSet.data);
+	globalDALC = rightChart = makeDALC('#rightChart', true, currentDataSet.data);
+
+	afterUpdatePoints();
+
+	// //Change if you wanna mess with the axis min/max
+	// xScale.domain([0, 10]);
+	// yScale.domain([0, 10]);
+
+	// redraw(true);
+
+
+});
+})
+	</script>
+</html>

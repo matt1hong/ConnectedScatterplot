@@ -2,7 +2,7 @@ var width = 400,
     height = 400;
 
 var showArrows = false;
-var showDots = true;
+var showDots = false;
 var showLabels = false;
 var showGrid = false;
 var smoothLines = false;
@@ -57,7 +57,9 @@ var draggedIndex = -1,
     selectedIndex = -1;
 
 function surrogateTimeSeries(dataset) {
-	data = dataset.data;
+	if(typeof(dataset.data) !== 'undefined'){
+		data = dataset.data;
+	} else { data = dataset; }
 	if (data.length % 2 == 0) {
 		data.pop();
 	}
@@ -209,7 +211,7 @@ function makeDataSets() {
 	var spiral = [];
 
 	var d = new Date();
-	for (var i = 0; i < Math.PI*4; i += Math.PI/4) {
+	for (var i = 0; i < Math.PI*4; i += Math.PI/12) {
 		var p = {
 			date: d,
 			value1: Math.sin(i) * 2,
@@ -261,9 +263,9 @@ function makeDataSets() {
 	}
 
 	// maxTime, numSteps, drift, volat, initVal1, initVal2
-	randomPaired = makePairedSeries(1,20,0,0.2,1,1);
+	randomPaired = makePairedSeries(1,75,0,0.2,1,1);
 	// surrogate = surrogateTimeSeries(datasets[20]);
-
+	console.log(datasets)
 	datasets.push({"name":"parallel", "display":"Parallel Sines", "data":parallelSines, "commonScales":true});
 	datasets.push({"name":"parallel2", "display":"Parallel Sines 2", "data":parallelSines2, "commonScales":true});
 	datasets.push({"name":"increasing", "display":"Increasing Sines", "data":increasingSines, "commonScales":true});
@@ -275,7 +277,8 @@ function makeDataSets() {
 	par_2_surrogate = surrogateTimeSeries(datasets[20]);
 	datasets.push({"name":"loops", "display":"Loops", "data":par_2_surrogate, "commonScales":true});
 	
-	surrogate = surrogateTimeSeries(datasets[21]);
+	surrogate = surrogateTimeSeries(datasets[22]);
+	datasets.push({"name":"surrogate", "display":"Surrogate", "data":surrogate, "commonScales":true});
 
 	// surrogate && vertical translation
 	vert_surrogate = [];
@@ -328,6 +331,15 @@ function makeDataSets() {
 	datasets.push({"name":"vert_scaling", "display":"Scaling", "data":vert_scaled, "commonScales":true});
 	
 	var vert_scaled_eg = [{"date":"10/16/2015","value1":-0.23052801191806793,"value2":-2.7404365387878244},{"date":"10/17/2015","value1":0.1626681536436081,"value2":-0.13312757733677116},{"date":"10/18/2015","value1":-0.09764640778303146,"value2":0.3753742727317981},{"date":"10/19/2015","value1":-0.4547399878501892,"value2":-0.6822610345802137},{"date":"10/20/2015","value1":0.16949954628944397,"value2":0.2158168258943728},{"date":"10/21/2015","value1":0.719472348690033,"value2":1.4728056344070604},{"date":"10/22/2015","value1":0.30204683542251587,"value2":1.5032358321228196},{"date":"10/23/2015","value1":0.03770734369754791,"value2":2.5077140482940847},{"date":"10/24/2015","value1":-1.1764459609985352,"value2":-1.0028306690177748},{"date":"10/25/2015","value1":-0.8237906098365784,"value2":-1.3455397931060622},{"date":"10/26/2015","value1":-0.3442874550819397,"value2":-1.3747323599777053},{"date":"10/27/2015","value1":-0.0694962665438652,"value2":-0.44660358104322634},{"date":"10/28/2015","value1":0.1770358830690384,"value2":1.0358348044433763}];
+
+
+	var periodic_corr = [{"date":"10/17/2015","value1":0,"value2":0},{"date":"10/18/2015","value1":2,"value2":0.7071067811865475},{"date":"10/19/2015","value1":1.424375,"value2":1.424375},{"date":"10/20/2015","value1":0.7243750000000002,"value2":2},{"date":"10/21/2015","value1":2.4492935982947064e-16,"value2":1.2246467991473532e-16},{"date":"10/22/2015","value1":-0.6956249999999999,"value2":-1.975625},{"date":"10/23/2015","value1":-1.3156249999999998,"value2":-1.305625},{"date":"10/24/2015","value1":-1.975625,"value2":-0.7071067811865477},{"date":"10/25/2015","value1":-4.898587196589413e-16,"value2":-2.4492935982947064e-16},{"date":"10/26/2015","value1":2,"value2":0.7071067811865474},{"date":"10/27/2015","value1":1.4543750000000002,"value2":1.424375},{"date":"10/28/2015","value1":0.7443750000000002,"value2":2},{"date":"10/29/2015","value1":7.347880794884119e-16,"value2":3.6739403974420594e-16},{"date":"10/30/2015","value1":-0.6956249999999999,"value2":-1.955625},{"date":"10/31/2015","value1":-1.305625,"value2":-1.305625},{"date":"11/1/2015","value1":-1.965625,"value2":-0.7071067811865459}];
+	datasets.push({"name":"periodic_corr", "display":"Periodic Correlated Orig", "data":periodic_corr, "commonScales":true});
+	var periodic_corr_2 = [{"date":"10/17/2015","value1":0,"value2":0},{"date":"10/18/2015","value1":2,"value2":0.7071067811865475},{"date":"10/19/2015","value1":2,"value2":2},{"date":"10/20/2015","value1":0.7243750000000002,"value2":2},{"date":"10/21/2015","value1":2.4492935982947064e-16,"value2":1.2246467991473532e-16},{"date":"10/22/2015","value1":-0.6956249999999999,"value2":-1.975625},{"date":"10/23/2015","value1":-1.98121572265625,"value2":-1.975625},{"date":"10/24/2015","value1":-1.975625,"value2":-0.7071067811865477},{"date":"10/25/2015","value1":-4.898587196589413e-16,"value2":-2.4492935982947064e-16},{"date":"10/26/2015","value1":2,"value2":0.7071067811865474},{"date":"10/27/2015","value1":2,"value2":2},{"date":"10/28/2015","value1":0.7443750000000002,"value2":2},{"date":"10/29/2015","value1":7.347880794884119e-16,"value2":3.6739403974420594e-16},{"date":"10/30/2015","value1":-0.6956249999999999,"value2":-1.955625},{"date":"10/31/2015","value1":-1.94145947265625,"value2":-1.95139853515625}];
+	datasets.push({"name":"periodic_corr_surr2", "display":"Periodic Correlated 2", "data":surrogateTimeSeries(periodic_corr_2), "commonScales":true});
+
+	var periodic_corr_surr = surrogateTimeSeries(periodic_corr);
+	datasets.push({"name":"periodic_corr_surr", "display":"Periodic Correlated", "data":periodic_corr_surr, "commonScales":true});
 
 	// d = new Date();
 	// for (var i = 0; i < surrogate.length; i++) {
@@ -1195,4 +1207,45 @@ function addSamples() {
 	leftChart.points = sortPointsByDate(leftChart.points);
 	copyLefttoRight();
 	afterUpdatePoints();
+}
+
+function pearsonCorrelation(prefs, p1, p2) {
+  var si = [];
+
+  for (var key in prefs[p1]) {
+    if (prefs[p2][key]) si.push(key);
+  }
+
+  var n = si.length;
+
+  if (n == 0) return 0;
+
+  var sum1 = 0;
+  for (var i = 0; i < si.length; i++) sum1 += prefs[p1][si[i]];
+
+  var sum2 = 0;
+  for (var i = 0; i < si.length; i++) sum2 += prefs[p2][si[i]];
+
+  var sum1Sq = 0;
+  for (var i = 0; i < si.length; i++) {
+    sum1Sq += Math.pow(prefs[p1][si[i]], 2);
+  }
+
+  var sum2Sq = 0;
+  for (var i = 0; i < si.length; i++) {
+    sum2Sq += Math.pow(prefs[p2][si[i]], 2);
+  }
+
+  var pSum = 0;
+  for (var i = 0; i < si.length; i++) {
+    pSum += prefs[p1][si[i]] * prefs[p2][si[i]];
+  }
+
+  var num = pSum - (sum1 * sum2 / n);
+  var den = Math.sqrt((sum1Sq - Math.pow(sum1, 2) / n) *
+      (sum2Sq - Math.pow(sum2, 2) / n));
+
+  if (den == 0) return 0;
+
+  return num / den;
 }

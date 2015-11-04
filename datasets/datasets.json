@@ -10,12 +10,12 @@
 {"name":"sofa", "display":"Sofa vs. Couch", "label1":"", "label2":"", "study":true},
 {"name":"sofa2", "display":"Sofa vs. Couch v.2", "label1":"", "label2":"", "study":true},
 {"name":"china", "display":"China vs. Japan", "label1":"", "label2":"", "study":true},
-{"name":"house", "display":"Congress - House", "label1":"Ideological gap between parties", "label2":"Bills passed into law", "study":false},
-{"name":"senate", "display":"Congress - Senate", "label1":"Ideological gap between parties", "label2":"Bills passed into law", "study":false},
-{"name":"threepoints", "display":"Three Points", "label1":"", "label2":"", "study":false},
-{"name":"fivepoints", "display":"Five Points", "label1":"", "label2":"", "study":false},
-{"name":"uv-curve", "display":"Excess Demand", "label1":"X1", "label2":"X2", "study":false},
-{"name":"uv-curve-cropped", "display":"Excess Demand (cropped)", "label1":"V", "label2":"U", "study":false},
-{"name":"uv-curve-cropped-2", "display":"Excess Demand (cropped 2)", "label1":"X1", "label2":"X2", "study":false},
-{"name":"value-figure", "display":"Value Figure", "label1":"X1", "label2":"X2", "study":false}
+{"name":"house", "display":"Congress - House", "label1":"Ideological gap between parties", "label2":"Bills passed into law", "study":true},
+{"name":"senate", "display":"Congress - Senate", "label1":"Ideological gap between parties", "label2":"Bills passed into law", "study":true},
+{"name":"threepoints", "display":"Three Points", "label1":"", "label2":"", "study":true},
+{"name":"fivepoints", "display":"Five Points", "label1":"", "label2":"", "study":true},
+{"name":"uv-curve", "display":"Excess Demand", "label1":"X1", "label2":"X2", "study":true},
+{"name":"uv-curve-cropped", "display":"Excess Demand (cropped)", "label1":"V", "label2":"U", "study":true},
+{"name":"uv-curve-cropped-2", "display":"Excess Demand (cropped 2)", "label1":"X1", "label2":"X2", "study":true},
+{"name":"value-figure", "display":"Value Figure", "label1":"X1", "label2":"X2", "study":true}
 ]
