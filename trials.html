@@ -10,13 +10,23 @@
 	<script type="text/javascript" src="queue.min.js"></script>
 	<script type="text/javascript" src="common.js"></script>
 	<script type="text/javascript" src="csck.js"></script>
+	<script type="text/javascript" src="complex_array.js"></script>
+	<script type="text/javascript" src="math.js"></script>
+	<script type="text/javascript" src="fft.js"></script>
 	<link rel="stylesheet" href="//code.jquery.com/ui/1.10.4/themes/smoothness/jquery-ui.css">
 	<script src="//code.jquery.com/jquery-1.11.0.js"></script>
 	<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
 		<style type="text/css">
 div {
 	margin: 0 auto;
-	width: 480px;
+	/*width: 480px;*/
+}
+#leftChart{
+	position:absolute;
+}
+#leftChart2 {
+	position: absolute;
+	left: 500px;
 }
 @media screen and (max-height: 600px) {
     body {
@@ -81,29 +91,185 @@ circle.cs {
 </head>
 <body>
 	<div id="leftChart"></div>
+	<div id="leftChart2" style="display:none;"></div>
 </body>
 <script type="text/javascript" src="trends-draw.js">
 	
 </script>
 	<script type="text/javascript">
+// http://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+var qs = (function(a) {
+    if (a == "") return {};
+    var b = {};
+    for (var i = 0; i < a.length; ++i)
+    {
+        var p=a[i].split('=', 2);
+        if (p.length == 1)
+            b[p[0]] = "";
+        else
+            b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+    }
+    return b;
+})(window.location.search.substr(1).split('&'));
+
 $(function(){
-	loadDataSets(true, function(){
-		console.log(datasets)
-	makeDataSets();
-	console.log(datasets)
 
-	currentDataSet = datasets[19];
+var sr = 50;
+var dist = 2;
+var i;
 
-	globalCS = leftChart = makeConnected('#leftChart', true, currentDataSet.data);
-	globalDALC = rightChart = makeDALC('#rightChart', true, currentDataSet.data);
+if (!isNaN(+qs['sr'])) { sr = +qs['sr']; }
 
-	afterUpdatePoints();
+loadDataSets(true, function(){
 
-	// //Change if you wanna mess with the axis min/max
-	// xScale.domain([0, 10]);
-	// yScale.domain([0, 10]);
+makeDataSets();
 
-	// redraw(true);
+switch (qs['exp']) {
+	case 'ts':
+		if (!isNaN(+qs['dist'])) { sr = +qs['dist']; }
+
+		horiz_trans = [];
+
+		randomPaired = makePairedSeries(1,sr,0,0.2,1,1);
+		console.log(randomPaired.length)
+		d = new Date();
+		for (var i = 0; i < randomPaired.length-dist; i++) {
+			horiz_trans.push({
+				date: d,
+				value1: randomPaired[i].value1,
+				value2: randomPaired[i+dist].value1
+			})
+			d = new Date(d.getTime()+24*3600*1000);
+		};
+		datasets.push({"name":"time_shift_trial", "display":"Time shift trial", "data":horiz_trans, "commonScales":true});
+
+		currentDataSet = datasets[34];
+
+		globalCS = leftChart = makeConnected('#leftChart', true, currentDataSet.data);
+
+		globalDALC = rightChart = makeDALC('#rightChart', true, currentDataSet.data);
+
+		afterUpdatePoints();
+		flipH();
+
+		break;
+	case 'sf1':
+		increasingSines2 = []
+
+		d = new Date();
+
+		for (var i = 0; i < Math.PI*4; i += Math.PI/(Math.floor(sr/4))) {
+			p = {
+				date: d,
+				value1: Math.sin(i)+(i)/4,
+				value2: Math.sin(i)+i/3
+			}
+			increasingSines2.push(p);
+
+			d = new Date(d.getTime()+24*3600*1000);
+		}
+		console.log(increasingSines2.length)
+
+		surrogate2 = surrogateTimeSeries(increasingSines2);
+		datasets.push({"name":"surrogate2", "display":"Surrogate2", "data":surrogate2, "commonScales":true});
+
+		currentDataSet = datasets[34];
+
+		globalCS = leftChart = makeConnected('#leftChart', true, currentDataSet.data);
+
+		globalDALC = rightChart = makeDALC('#rightChart', true, currentDataSet.data);
+
+		afterUpdatePoints();
+
+		increasingSines2 = []
+
+		d = new Date();
+
+		for (var i = 0; i < Math.PI*4; i += Math.PI/12) {
+			p = {
+				date: d,
+				value1: Math.sin(i)+(i)/4,
+				value2: Math.sin(i)+i/3
+			}
+			increasingSines2.push(p);
+
+			d = new Date(d.getTime()+24*3600*1000);
+		}
+
+		surrogate2 = surrogateTimeSeries(increasingSines2);
+		datasets.push({"name":"surrogate2", "display":"Surrogate2", "data":surrogate2, "commonScales":true});
+
+		currentDataSet = datasets[35];
+
+		globalCS = leftChart = makeConnected('#leftChart2', true, currentDataSet.data);
+
+		afterUpdatePoints();
+
+		$('#leftChart2').show();
+		break;
+	case 'sf2':
+		increasingSines2 = []
+
+		d = new Date();
+
+		for (var i = 0; i < Math.PI*4; i += Math.PI/12) {
+			p = {
+				date: d,
+				value1: Math.sin(i)+(i)/4,
+				value2: Math.sin(i)+i/3
+			}
+			increasingSines2.push(p);
+
+			d = new Date(d.getTime()+24*3600*1000);
+		}
+
+		surrogate2 = surrogateTimeSeries(increasingSines2);
+		datasets.push({"name":"surrogate2", "display":"Surrogate2", "data":surrogate2, "commonScales":true});
+
+		currentDataSet = datasets[34];
+
+		globalCS = leftChart = makeConnected('#leftChart', true, currentDataSet.data);
+
+		globalDALC = rightChart = makeDALC('#rightChart', true, currentDataSet.data);
+
+		afterUpdatePoints();
+
+		flipH();
+
+		increasingSines2 = []
+
+		d = new Date();
+
+		for (var i = 0; i < Math.PI*4; i += Math.PI/12) {
+			p = {
+				date: d,
+				value1: Math.sin(i)+(i)/4,
+				value2: Math.sin(i)+i/3
+			}
+			increasingSines2.push(p);
+
+			d = new Date(d.getTime()+24*3600*1000);
+		}
+
+		surrogate2 = surrogateTimeSeries(increasingSines2);
+		datasets.push({"name":"surrogate2", "display":"Surrogate2", "data":surrogate2, "commonScales":true});
+
+		currentDataSet = datasets[35];
+
+		globalCS = leftChart = makeConnected('#leftChart2', true, currentDataSet.data);
+
+		afterUpdatePoints();
+		flipH();
+		$('#leftChart2').show();
+
+		break;
+}
+
+// //Change if you wanna mess with the axis min/max
+// xScale.domain([0, 10]);
+// yScale.domain([0, 10]);
+
+// redraw(true);
 
 
 });

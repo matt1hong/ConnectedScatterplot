@@ -936,7 +936,7 @@ function redrawDualAxes(dualAxes, recreate) {
 				.classed('selected', function(d, i) { return i === selectedIndex && !study; })
 				.attr('cx', function(d) { return timeScale(d.date); })
 				.attr('cy', function(d) { return yScale(d.value2); });
-		} else {
+		} else if (showDots) {
 			dualAxes.blueCircles.remove();
 			dualAxes.greenCircles.remove();
 		}
