@@ -263,7 +263,7 @@ function makeDataSets() {
 	}
 
 	// maxTime, numSteps, drift, volat, initVal1, initVal2
-	randomPaired = makePairedSeries(1,75,0,0.2,1,1);
+	randomPaired = makePairedSeries(1,20,0,0.2,1,1);
 	// surrogate = surrogateTimeSeries(datasets[20]);
 	console.log(datasets)
 	datasets.push({"name":"parallel", "display":"Parallel Sines", "data":parallelSines, "commonScales":true});
@@ -277,7 +277,7 @@ function makeDataSets() {
 	par_2_surrogate = surrogateTimeSeries(datasets[20]);
 	datasets.push({"name":"loops", "display":"Loops", "data":par_2_surrogate, "commonScales":true});
 	
-	surrogate = surrogateTimeSeries(datasets[22]);
+	surrogate = surrogateTimeSeries(datasets[17]);
 	datasets.push({"name":"surrogate", "display":"Surrogate", "data":surrogate, "commonScales":true});
 
 	// surrogate && vertical translation
@@ -643,8 +643,8 @@ function scaleScales() {
 		xScale.domain(d3.extent(leftChart.points, function(d) { return d.value1; }));
 		yScale.domain(d3.extent(leftChart.points, function(d) { return d.value2; }));
 
-		// xScale.domain([1, 2.4]);
-		// yScale.domain([1, 2.4]);
+		// xScale.domain([0.3, 0.8]);
+		// yScale.domain([0.3, 0.8]);
 	}
 
 	copyLefttoRight();

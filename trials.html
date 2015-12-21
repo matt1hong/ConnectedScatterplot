@@ -126,6 +126,7 @@ makeDataSets();
 
 switch (qs['exp']) {
 	case 'ts':
+		showArrows = true;
 		if (!isNaN(+qs['dist'])) { dist = +qs['dist']; }
 
 		horiz_trans = [];

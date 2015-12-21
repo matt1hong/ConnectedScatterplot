@@ -17,5 +17,7 @@
 {"name":"uv-curve", "display":"Excess Demand", "label1":"X1", "label2":"X2", "study":true},
 {"name":"uv-curve-cropped", "display":"Excess Demand (cropped)", "label1":"V", "label2":"U", "study":true},
 {"name":"uv-curve-cropped-2", "display":"Excess Demand (cropped 2)", "label1":"X1", "label2":"X2", "study":true},
-{"name":"value-figure", "display":"Value Figure", "label1":"X1", "label2":"X2", "study":true}
+{"name":"value-figure", "display":"Value Figure", "label1":"X1", "label2":"X2", "study":true},
+{"name":"false-pos-timeshift", "display":"False time shift", "label1":"X1", "label2":"X2", "study":true},
+{"name":"not-false-pos", "display":"False time shift 2", "label1":"X1", "label2":"X2", "study":true}
 ]
