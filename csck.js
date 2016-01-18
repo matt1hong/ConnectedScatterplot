@@ -374,7 +374,7 @@ function makeDataSets() {
 	var charData = generateData(40,4,2);
 	datasets.push({"name":"charData", "display":"Test Data", "data":charData, "commonScales":true});
 	console.log(datasets[27])
-	datasets.push({"name":"charData2", "display":"Test Data2", "data":generateMoreData(40,4,0.2), "commonScales":false});
+	datasets.push({"name":"charData2", "display":"Test Data2", "data":generateMoreData(20,4,0.4), "commonScales":false});
 }
 
 function generateMoreData(n, dist, volat) {
@@ -383,40 +383,58 @@ function generateMoreData(n, dist, volat) {
 	n = numSteps * dist;
 
 	var dir1 = [1,-1,-1,1];
-	var dir2 = [1,-1,1,1];
+	var dir2 = [0.9,-0.8,0.2,1];
 	var maxTime = 1;
+	var start1 = 1, start2 = 1;
+	var end1 = 1, end2 = 1;
 	var initVal1 =1, initVal2=1;
 	var k=0;
 
+	var partial = [];
 	for (var j = 0; j < dist; j++) {
 		drift1 = dir1[j];
 		drift2 = dir2[j];
 
 		var dTime = maxTime/numSteps;
-
-		data.push({
-			date: new Date('1/1/' + (1980 + k)),
-			value1: initVal1,
-			value2: initVal2
-		})
+		// var partial = [], partial2 = [];
+		// partial.push(initVal1);
+		// partial.push({
+		// 	date: new Date('1/1/' + (1980 + k)),
+		// 	value1: end1,
+		// 	value2: end2
+		// })
 		k++;
 		for (var i = 1; i < numSteps; i++) {
 			var Wt1 = Math.sqrt(dTime) * approxRandN();
 			var Wt2 = Math.sqrt(dTime) * approxRandN();
 
 			var Xt1 = initVal1 * Math.exp((drift1 - Math.pow(volat, 2) / 2) * dTime + volat * Wt1);
-			var Xt2 = initVal2 * Math.exp((drift2 - Math.pow(volat, 2) / 2) * dTime + volat * Wt2);
+			// var Xt2 = initVal2 * Math.exp((drift2 - Math.pow(volat, 2) / 2) * dTime + volat * Wt2);
+			var Xt2 = end2 + dir2[j]*(Xt1 - start1);
 
-			data.push({
+			partial.push({
 				date: new Date('1/1/' + (1980+k)),
-				value1: Xt1,
+				value1: end1 + (Xt1 - start1),
 				value2: Xt2
 			})
 			k++;
 			initVal1 = Xt1;
-			initVal2 = Xt2;
 		};
+		end1 = end1 + (Xt1 - start1);
+		end2 = end2 + dir2[j]*(Xt1 - start1);
+		initVal1 = start1;
+		initVal2 = start2;
+		// start1 = initVal1;
+		// start2 = initVal2;
+		data = data.concat(partial);
+		partial = [];
+		// console.log(data)
+		// for (var i = 1; i<numSteps; i++) {
+		// 	partial2.push(initVal - (partial[i] - initVal1));
+		// }
+		// partial[0]
 	};
+	console.log(data.length)
 	return data;
 }
 
