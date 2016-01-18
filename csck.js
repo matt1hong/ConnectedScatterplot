@@ -263,7 +263,7 @@ function makeDataSets() {
 	}
 
 	// maxTime, numSteps, drift, volat, initVal1, initVal2
-	randomPaired = makePairedSeries(1,20,0,0.2,1,1);
+	randomPaired = makePairedSeries(1,20,-1,2,1,1);
 	// surrogate = surrogateTimeSeries(datasets[20]);
 	console.log(datasets)
 	datasets.push({"name":"parallel", "display":"Parallel Sines", "data":parallelSines, "commonScales":true});
@@ -371,9 +371,61 @@ function makeDataSets() {
 	// datasets.push({"name":"vertical", "display":"Vertical Translation", "data":vert_trans, "commonScales":true});
 	// datasets.push({"name":"vertical_inv", "display":"Vertical Translation Inv", "data":vert_trans_inv, "commonScales":true});
 
-	var charData = generateData(20,4,0.1);
+	var charData = generateData(40,4,2);
 	datasets.push({"name":"charData", "display":"Test Data", "data":charData, "commonScales":true});
+	console.log(datasets[27])
+	datasets.push({"name":"charData2", "display":"Test Data2", "data":generateMoreData(40,4,0.2), "commonScales":false});
 }
+
+function generateMoreData(n, dist, volat) {
+	var data = [];
+	var numSteps = Math.ceil(n/dist);
+	n = numSteps * dist;
+
+	var dir1 = [1,-1,-1,1];
+	var dir2 = [1,-1,1,1];
+	var maxTime = 1;
+	var initVal1 =1, initVal2=1;
+	var k=0;
+
+	for (var j = 0; j < dist; j++) {
+		drift1 = dir1[j];
+		drift2 = dir2[j];
+
+		var dTime = maxTime/numSteps;
+
+		data.push({
+			date: new Date('1/1/' + (1980 + k)),
+			value1: initVal1,
+			value2: initVal2
+		})
+		k++;
+		for (var i = 1; i < numSteps; i++) {
+			var Wt1 = Math.sqrt(dTime) * approxRandN();
+			var Wt2 = Math.sqrt(dTime) * approxRandN();
+
+			var Xt1 = initVal1 * Math.exp((drift1 - Math.pow(volat, 2) / 2) * dTime + volat * Wt1);
+			var Xt2 = initVal2 * Math.exp((drift2 - Math.pow(volat, 2) / 2) * dTime + volat * Wt2);
+
+			data.push({
+				date: new Date('1/1/' + (1980+k)),
+				value1: Xt1,
+				value2: Xt2
+			})
+			k++;
+			initVal1 = Xt1;
+			initVal2 = Xt2;
+		};
+	};
+	return data;
+}
+
+function approxRandN() {
+		return (Math.random() + Math.random() + Math.random() + 
+				Math.random() + Math.random() + Math.random() +
+				Math.random() + Math.random() + Math.random() +
+				Math.random() + Math.random() + Math.random()) - 6
+	}
 
 function generateData(n, dist, variance) {
 	// correct if indivisible
@@ -392,6 +444,7 @@ function generateData(n, dist, variance) {
 		var seg = Math.floor(i/numSteps);
 		if (i%numSteps === 0) { 
 			if (i !== 0) {
+				// dataset = dataset.concat(transform(partial));
 				dataset = dataset.concat(partial);
 				partial = [];
 			}
@@ -412,6 +465,7 @@ function generateData(n, dist, variance) {
 			value2: initPoints2[seg] + step2 * (i%numSteps) + nextPt2
 		});
 	}
+	// dataset = dataset.concat(transform(partial));
 	dataset = dataset.concat(partial);
 	return dataset;
 }
@@ -425,8 +479,10 @@ function transform(dataset) {
 	};
 	var corr = 1;
 	var i = 0;
-	while (corr > 0.91 || corr < 0.89) {
-		values2[i % dataset.length] += (Math.random()-0.5)/50;
+	while (corr > 0.91) {
+		// console.log(corr)
+		values1[i % dataset.length] += (Math.random()-0.5)/20;
+		values2[i % dataset.length] += (Math.random()-0.5)/20;
 		corr = Math.abs(ss.sampleCorrelation(values1, values2));
 		i++;
 	}
