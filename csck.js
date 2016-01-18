@@ -371,24 +371,23 @@ function makeDataSets() {
 	// datasets.push({"name":"vertical", "display":"Vertical Translation", "data":vert_trans, "commonScales":true});
 	// datasets.push({"name":"vertical_inv", "display":"Vertical Translation Inv", "data":vert_trans_inv, "commonScales":true});
 
-	var charData = generateData(50,4,0.1);
+	var charData = generateData(20,4,0.1);
 	datasets.push({"name":"charData", "display":"Test Data", "data":charData, "commonScales":true});
 }
 
 function generateData(n, dist, variance) {
 	// correct if indivisible
-	var numSteps = Math.floor(n/dist) + 1;
+	var numSteps = Math.ceil(n/dist);
 	n = numSteps * dist;
 	var initPoints1 = [];
 	var initPoints2 = [];
 	var dataset = [];
 	var partial = [];
-	var corr = 1;
+	var dir1, dir2, step1, step2, nextPt1, nextPt2
 	for (var i = 0; i <= dist; i++) {
 		initPoints1.push(Math.random());
 		initPoints2.push(Math.random());
 	};
-	console.log(initPoints)
 	for (var i=0; i<n; i++) {
 		var seg = Math.floor(i/numSteps);
 		if (i%numSteps === 0) { 
@@ -401,19 +400,19 @@ function generateData(n, dist, variance) {
 				value1: initPoints1[seg],
 				value2: initPoints2[seg]
 			}); 
-			corr = (initPoints2[seg+1] - initPoints2[seg])/(initPoints1[seg+1] - initPoints1[seg]);
-			corr = corr / Math.abs(corr);
+			step1 = (initPoints1[seg+1] - initPoints1[seg]) / numSteps;
+			step2 = (initPoints2[seg+1] - initPoints2[seg]) / numSteps;
 			continue;
 		}
-		var step1 = (initPoints1[seg + 1] - initPoints1[seg]) * i / numSteps;
-		var step2 = (initPoints2[seg + 1] - initPoints2[seg]) * i / numSteps;
-		var nextPt = step + (Math.random() - 0.5) / (0.5/variance);
+		nextPt1 = (Math.random() - 0.5) / (0.5/variance);
+		nextPt2 = nextPt1 * step2 / step1
 		partial.push({
 			date: new Date('1/1/' + (1980 + i)),
-			value1: step + (Math.random() - 0.5) / (0.5/variance),
-			value2: step + Math.pow(-1, seg) * (Math.random() - 0.5) / (0.5/variance)
+			value1: initPoints1[seg] + step1 * (i%numSteps) + nextPt1,
+			value2: initPoints2[seg] + step2 * (i%numSteps) + nextPt2
 		});
 	}
+	dataset = dataset.concat(partial);
 	return dataset;
 }
 
