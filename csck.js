@@ -371,6 +371,75 @@ function makeDataSets() {
 	// datasets.push({"name":"vertical", "display":"Vertical Translation", "data":vert_trans, "commonScales":true});
 	// datasets.push({"name":"vertical_inv", "display":"Vertical Translation Inv", "data":vert_trans_inv, "commonScales":true});
 
+	var charData = generateData(50,4,0.1);
+	datasets.push({"name":"charData", "display":"Test Data", "data":charData, "commonScales":true});
+}
+
+function generateData(n, dist, variance) {
+	// correct if indivisible
+	var numSteps = Math.floor(n/dist) + 1;
+	n = numSteps * dist;
+	var initPoints1 = [];
+	var initPoints2 = [];
+	var dataset = [];
+	var partial = [];
+	var corr = 1;
+	for (var i = 0; i <= dist; i++) {
+		initPoints1.push(Math.random());
+		initPoints2.push(Math.random());
+	};
+	console.log(initPoints)
+	for (var i=0; i<n; i++) {
+		var seg = Math.floor(i/numSteps);
+		if (i%numSteps === 0) { 
+			if (i !== 0) {
+				dataset = dataset.concat(partial);
+				partial = [];
+			}
+			partial.push({
+				date: new Date('1/1/' + (1980 + i)),
+				value1: initPoints1[seg],
+				value2: initPoints2[seg]
+			}); 
+			corr = (initPoints2[seg+1] - initPoints2[seg])/(initPoints1[seg+1] - initPoints1[seg]);
+			corr = corr / Math.abs(corr);
+			continue;
+		}
+		var step1 = (initPoints1[seg + 1] - initPoints1[seg]) * i / numSteps;
+		var step2 = (initPoints2[seg + 1] - initPoints2[seg]) * i / numSteps;
+		var nextPt = step + (Math.random() - 0.5) / (0.5/variance);
+		partial.push({
+			date: new Date('1/1/' + (1980 + i)),
+			value1: step + (Math.random() - 0.5) / (0.5/variance),
+			value2: step + Math.pow(-1, seg) * (Math.random() - 0.5) / (0.5/variance)
+		});
+	}
+	return dataset;
+}
+
+function transform(dataset) {
+	var values1 = [], values2 = [], dates = [];
+	for (var i = 0; i < dataset.length; i++) {
+		values1.push(dataset[i].value1);
+		values2.push(dataset[i].value2);
+		dates.push(dataset[i].date);
+	};
+	var corr = 1;
+	var i = 0;
+	while (corr > 0.91 || corr < 0.89) {
+		values2[i % dataset.length] += (Math.random()-0.5)/50;
+		corr = Math.abs(ss.sampleCorrelation(values1, values2));
+		i++;
+	}
+	var newData = [];
+	for (var i = 0; i < dataset.length; i++) {
+		newData.push({
+			date: dates[i],
+			value1: values1[i],
+			value2: values2[i]
+		});
+	};
+	return newData;
 }
 
 function makeDALC(lineChartSelector, interactive, dataPoints) {
